@@ -1,77 +1,100 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
-interface BusinessData {
+interface SignUpData {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
   companyName: string;
-  businessType: string;
-  address: string;
-  subscribeToNewsletter: boolean;
 }
 
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
   const { signUp } = useAuth();
-  const [businessData, setBusinessData] = useState<BusinessData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    companyName: '',
-    businessType: '',
-    address: '',
-    subscribeToNewsletter: false
+  const [signUpData, setSignUpData] = useState<SignUpData>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    companyName: "",
   });
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleInputChange = (field: string, value: any) => {
-    setBusinessData(prev => ({
+    setSignUpData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
+    setSuccess("");
 
     // Validation
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       return;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+
+    if (
+      !signUpData.firstName.trim() ||
+      !signUpData.lastName.trim() ||
+      !signUpData.email.trim() ||
+      !signUpData.companyName.trim()
+    ) {
+      setError("Please fill in all required fields");
       return;
     }
 
     try {
       setLoading(true);
-      
-      // Call mock signup function
-      const { error: signUpError } = await signUp(businessData.email, password, businessData);
-      
+
+      // Use AuthContext signUp function which now uses real Supabase
+      const { error: signUpError } = await signUp(
+        signUpData.email,
+        password,
+        signUpData
+      );
+
       if (signUpError) {
-        setError('Signup failed. Please try again.');
+        setError(`Signup failed: ${signUpError}`);
         return;
       }
 
-      // Save business data to localStorage for demo purposes
-      localStorage.setItem('cargo_business_data', JSON.stringify(businessData));
-      
-      // Redirect to dashboard
-      navigate('/dashboard');
-      
+      setSuccess(
+        "Account created successfully! Please check your email to verify your account."
+      );
+
+      // Clear form
+      setSignUpData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        companyName: "",
+      });
+      setPassword("");
+      setConfirmPassword("");
+
+      // Redirect to login after 3 seconds
+      setTimeout(() => {
+        navigate("/login");
+      }, 3000);
     } catch (error: any) {
-      setError(error.message || 'An error occurred during signup');
+      setError(error?.message || "An error occurred during signup");
     } finally {
       setLoading(false);
     }
@@ -99,6 +122,12 @@ const SignUpPage: React.FC = () => {
             </div>
           )}
 
+          {success && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+              {success}
+            </div>
+          )}
+
           <div className="space-y-4">
             {/* Personal Information */}
             <div className="grid grid-cols-2 gap-4">
@@ -109,9 +138,12 @@ const SignUpPage: React.FC = () => {
                 <input
                   type="text"
                   required
-                  value={businessData.firstName}
-                  onChange={(e) => handleInputChange('firstName', e.target.value)}
+                  value={signUpData.firstName}
+                  onChange={(e) =>
+                    handleInputChange("firstName", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter first name"
                 />
               </div>
               <div>
@@ -121,9 +153,12 @@ const SignUpPage: React.FC = () => {
                 <input
                   type="text"
                   required
-                  value={businessData.lastName}
-                  onChange={(e) => handleInputChange('lastName', e.target.value)}
+                  value={signUpData.lastName}
+                  onChange={(e) =>
+                    handleInputChange("lastName", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter last name"
                 />
               </div>
             </div>
@@ -135,9 +170,10 @@ const SignUpPage: React.FC = () => {
               <input
                 type="email"
                 required
-                value={businessData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
+                value={signUpData.email}
+                onChange={(e) => handleInputChange("email", e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter your email"
               />
             </div>
 
@@ -147,9 +183,10 @@ const SignUpPage: React.FC = () => {
               </label>
               <input
                 type="tel"
-                value={businessData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
+                value={signUpData.phone}
+                onChange={(e) => handleInputChange("phone", e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter phone number (optional)"
               />
             </div>
 
@@ -161,43 +198,12 @@ const SignUpPage: React.FC = () => {
               <input
                 type="text"
                 required
-                value={businessData.companyName}
-                onChange={(e) => handleInputChange('companyName', e.target.value)}
+                value={signUpData.companyName}
+                onChange={(e) =>
+                  handleInputChange("companyName", e.target.value)
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Business Type *
-              </label>
-              <select
-                required
-                value={businessData.businessType}
-                onChange={(e) => handleInputChange('businessType', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Select Business Type</option>
-                <option value="importer">Importer</option>
-                <option value="exporter">Exporter</option>
-                <option value="both">Both</option>
-                <option value="logistics">Logistics Provider</option>
-                <option value="manufacturer">Manufacturer</option>
-                <option value="distributor">Distributor</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Business Address
-              </label>
-              <textarea
-                value={businessData.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter your business address"
+                placeholder="Enter company name"
               />
             </div>
 
@@ -226,21 +232,8 @@ const SignUpPage: React.FC = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Confirm your password"
               />
-            </div>
-
-            {/* Newsletter Subscription */}
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="newsletter"
-                checked={businessData.subscribeToNewsletter}
-                onChange={(e) => handleInputChange('subscribeToNewsletter', e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="newsletter" className="ml-2 block text-sm text-gray-700">
-                Subscribe to our newsletter for updates and industry insights
-              </label>
             </div>
           </div>
 
@@ -256,15 +249,18 @@ const SignUpPage: React.FC = () => {
                   Creating Account...
                 </div>
               ) : (
-                'Create Account'
+                "Create Account"
               )}
             </button>
           </div>
 
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
                 Sign in here
               </Link>
             </p>
