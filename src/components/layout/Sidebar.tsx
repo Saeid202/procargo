@@ -140,7 +140,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       </nav>
 
       {/* Sidebar Footer - User Profile & Logout (directly under nav) */}
-      <div className="px-4 pt-0 pb-4 border-t border-gray-200 bg-white">
+      <div className="px-4 pt-4 pb-4 border-t border-gray-200 bg-white">
         <div
           className={`flex ${
             sidebarCollapsed
@@ -156,7 +156,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <UserCircleIcon className="h-10 w-10 text-cargo-600" />
           </button>
           {sidebarCollapsed && (
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center mt-2">
               <button
                 onClick={handleLogout}
                 className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors border border-red-200 hover:border-red-300"
@@ -177,7 +177,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             </p>
           </div>
           {!sidebarCollapsed && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 my-2">
               <button
                 className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
                 title="Profile Settings"
