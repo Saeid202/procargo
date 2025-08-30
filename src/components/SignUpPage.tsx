@@ -1,81 +1,81 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { EyeIcon, EyeSlashIcon, CheckIcon } from '@heroicons/react/24/outline';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { EyeIcon, EyeSlashIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { useAuth } from "../contexts/AuthContext";
 
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
   const { signUp } = useAuth();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    company: '',
-    password: '',
-    confirmPassword: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    company: "",
+    password: "",
+    confirmPassword: "",
     agreeToTerms: false,
-    subscribeToNewsletter: false
+    subscribeToNewsletter: false,
   });
 
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
   const validateForm = () => {
-    const newErrors: {[key: string]: string} = {};
+    const newErrors: { [key: string]: string } = {};
 
     if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
+      newErrors.firstName = "First name is required";
     }
 
     if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
+      newErrors.lastName = "Last name is required";
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = "Please enter a valid email address";
     }
 
     if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
+      newErrors.phone = "Phone number is required";
     }
 
     if (!formData.company.trim()) {
-      newErrors.company = 'Company name is required';
+      newErrors.company = "Company name is required";
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters long';
+      newErrors.password = "Password must be at least 8 characters long";
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+      newErrors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     if (!formData.agreeToTerms) {
-      newErrors.agreeToTerms = 'You must agree to the terms and conditions';
+      newErrors.agreeToTerms = "You must agree to the terms and conditions";
     }
 
     setErrors(newErrors);
@@ -84,64 +84,81 @@ const SignUpPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
     setErrors({});
-    setSuccessMessage('');
-    
+    setSuccessMessage("");
+
     try {
       // Prepare business data for the database
       const businessData = {
         companyName: formData.company,
-        businessType: 'Import/Export', // Default value
-        taxId: '', // Will be filled later in profile
-        address: '', // Will be filled later in profile
-        importLicense: '',
-        exportLicense: '',
+        businessType: "Import/Export", // Default value
+        taxId: "", // Will be filled later in profile
+        address: "", // Will be filled later in profile
+        importLicense: "",
+        exportLicense: "",
         firstName: formData.firstName,
         lastName: formData.lastName,
         phone: formData.phone,
-        subscribeToNewsletter: formData.subscribeToNewsletter
+        subscribeToNewsletter: formData.subscribeToNewsletter,
       };
 
       // Call the signUp function from AuthContext
-      const { error } = await signUp(formData.email, formData.password, businessData);
+      const { error } = await signUp(
+        formData.email,
+        formData.password,
+        businessData
+      );
 
       if (error) {
-        if (error.message.includes('already registered')) {
-          setErrors({ submit: 'An account with this email already exists. Please try logging in instead.' });
+        if (
+          error.includes("already registered") ||
+          error.includes("already exists")
+        ) {
+          setErrors({
+            submit:
+              "An account with this email already exists. Please sign in instead.",
+          });
         } else {
-          setErrors({ submit: error.message || 'An error occurred during signup. Please try again.' });
+          setErrors({
+            submit:
+              error || "An error occurred during signup. Please try again.",
+          });
         }
       } else {
         // Success! Show confirmation message
-        setSuccessMessage('Account created successfully! Please check your email for confirmation before logging in.');
-        
+        setSuccessMessage(
+          "Account created successfully! Please check your email for confirmation."
+        );
+
         // Clear form data
         setFormData({
-          firstName: '',
-          lastName: '',
-          email: '',
-          phone: '',
-          company: '',
-          password: '',
-          confirmPassword: '',
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          company: "",
+          password: "",
+          confirmPassword: "",
           agreeToTerms: false,
-          subscribeToNewsletter: false
+          subscribeToNewsletter: false,
         });
-        
+
         // Redirect to login page after 3 seconds
         setTimeout(() => {
-          navigate('/login');
+          navigate("/login");
         }, 3000);
       }
     } catch (error: any) {
-      console.error('Signup error:', error);
-      setErrors({ submit: 'An unexpected error occurred. Please try again.' });
+      console.error("Signup error:", error);
+      setErrors({
+        submit: "An unexpected error occurred. Please try again.",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -156,9 +173,13 @@ const SignUpPage: React.FC = () => {
             <div className="w-10 h-10 bg-cargo-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-xl">C</span>
             </div>
-            <span className="ml-2 text-2xl font-bold text-gray-900">CargoBridge</span>
+            <span className="ml-2 text-2xl font-bold text-gray-900">
+              CargoBridge
+            </span>
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Your Account</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Create Your Account
+          </h1>
           <p className="text-gray-600">
             Join thousands of businesses shipping between China and Canada
           </p>
@@ -170,7 +191,10 @@ const SignUpPage: React.FC = () => {
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="firstName"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   First Name *
                 </label>
                 <input
@@ -180,17 +204,22 @@ const SignUpPage: React.FC = () => {
                   value={formData.firstName}
                   onChange={handleInputChange}
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-transparent transition-colors ${
-                    errors.firstName ? 'border-red-300' : 'border-gray-300'
+                    errors.firstName ? "border-red-300" : "border-gray-300"
                   }`}
                   placeholder="John"
                 />
                 {errors.firstName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.firstName}
+                  </p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Last Name *
                 </label>
                 <input
@@ -200,7 +229,7 @@ const SignUpPage: React.FC = () => {
                   value={formData.lastName}
                   onChange={handleInputChange}
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-transparent transition-colors ${
-                    errors.lastName ? 'border-red-300' : 'border-gray-300'
+                    errors.lastName ? "border-red-300" : "border-gray-300"
                   }`}
                   placeholder="Doe"
                 />
@@ -212,7 +241,10 @@ const SignUpPage: React.FC = () => {
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Email Address *
               </label>
               <input
@@ -222,7 +254,7 @@ const SignUpPage: React.FC = () => {
                 value={formData.email}
                 onChange={handleInputChange}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-transparent transition-colors ${
-                  errors.email ? 'border-red-300' : 'border-gray-300'
+                  errors.email ? "border-red-300" : "border-gray-300"
                 }`}
                 placeholder="john@company.com"
               />
@@ -233,7 +265,10 @@ const SignUpPage: React.FC = () => {
 
             {/* Phone */}
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Phone Number *
               </label>
               <input
@@ -243,7 +278,7 @@ const SignUpPage: React.FC = () => {
                 value={formData.phone}
                 onChange={handleInputChange}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-transparent transition-colors ${
-                  errors.phone ? 'border-red-300' : 'border-gray-300'
+                  errors.phone ? "border-red-300" : "border-gray-300"
                 }`}
                 placeholder="+1 (555) 123-4567"
               />
@@ -254,7 +289,10 @@ const SignUpPage: React.FC = () => {
 
             {/* Company */}
             <div>
-              <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="company"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Company Name *
               </label>
               <input
@@ -264,7 +302,7 @@ const SignUpPage: React.FC = () => {
                 value={formData.company}
                 onChange={handleInputChange}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-transparent transition-colors ${
-                  errors.company ? 'border-red-300' : 'border-gray-300'
+                  errors.company ? "border-red-300" : "border-gray-300"
                 }`}
                 placeholder="Your Company Ltd."
               />
@@ -275,18 +313,21 @@ const SignUpPage: React.FC = () => {
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Password *
               </label>
               <div className="relative">
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
                   className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-transparent transition-colors ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
+                    errors.password ? "border-red-300" : "border-gray-300"
                   }`}
                   placeholder="Create a strong password"
                 />
@@ -305,23 +346,30 @@ const SignUpPage: React.FC = () => {
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">{errors.password}</p>
               )}
-              <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters long</p>
+              <p className="mt-1 text-xs text-gray-500">
+                Must be at least 8 characters long
+              </p>
             </div>
 
             {/* Confirm Password */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Confirm Password *
               </label>
               <div className="relative">
                 <input
-                  type={showConfirmPassword ? 'text' : 'password'}
+                  type={showConfirmPassword ? "text" : "password"}
                   id="confirmPassword"
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-transparent transition-colors ${
-                    errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                    errors.confirmPassword
+                      ? "border-red-300"
+                      : "border-gray-300"
                   }`}
                   placeholder="Confirm your password"
                 />
@@ -338,7 +386,9 @@ const SignUpPage: React.FC = () => {
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.confirmPassword}
+                </p>
               )}
             </div>
 
@@ -357,20 +407,22 @@ const SignUpPage: React.FC = () => {
                 </div>
                 <div className="ml-3 text-sm">
                   <label htmlFor="agreeToTerms" className="text-gray-700">
-                    I agree to the{' '}
+                    I agree to the{" "}
                     <a href="#" className="text-cargo-600 hover:text-cargo-500">
                       Terms of Service
-                    </a>{' '}
-                    and{' '}
+                    </a>{" "}
+                    and{" "}
                     <a href="#" className="text-cargo-600 hover:text-cargo-500">
                       Privacy Policy
-                    </a>{' '}
+                    </a>{" "}
                     *
                   </label>
                 </div>
               </div>
               {errors.agreeToTerms && (
-                <p className="ml-7 text-sm text-red-600">{errors.agreeToTerms}</p>
+                <p className="ml-7 text-sm text-red-600">
+                  {errors.agreeToTerms}
+                </p>
               )}
 
               <div className="flex items-start">
@@ -385,8 +437,12 @@ const SignUpPage: React.FC = () => {
                   />
                 </div>
                 <div className="ml-3 text-sm">
-                  <label htmlFor="subscribeToNewsletter" className="text-gray-700">
-                    Subscribe to our newsletter for shipping updates and industry insights
+                  <label
+                    htmlFor="subscribeToNewsletter"
+                    className="text-gray-700"
+                  >
+                    Subscribe to our newsletter for shipping updates and
+                    industry insights
                   </label>
                 </div>
               </div>
@@ -418,7 +474,7 @@ const SignUpPage: React.FC = () => {
                   Creating Account...
                 </>
               ) : (
-                'Create Account'
+                "Create Account"
               )}
             </button>
           </form>
@@ -426,8 +482,11 @@ const SignUpPage: React.FC = () => {
           {/* Login Link */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link to="/login" className="text-cargo-600 hover:text-cargo-500 font-medium">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="text-cargo-600 hover:text-cargo-500 font-medium"
+              >
                 Sign in here
               </Link>
             </p>
@@ -436,7 +495,9 @@ const SignUpPage: React.FC = () => {
 
         {/* Benefits */}
         <div className="mt-8 text-center">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Why Sign Up?</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Why Sign Up?
+          </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-600">
             <div className="flex items-center justify-center">
               <CheckIcon className="h-5 w-5 text-green-500 mr-2" />

@@ -181,11 +181,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (signInError) {
         console.error("Supabase signin error:", signInError);
+        
+        // Handle specific error cases
+        if (signInError.includes("Email not confirmed")) {
+          return { 
+            error: "Please confirm your email first. A confirmation email has been sent.",
+            requiresEmailConfirmation: true 
+          };
+        }
+        
+        if (signInError.includes("Invalid login credentials")) {
+          return { error: "Invalid email or password." };
+        }
+        
         return { error: signInError };
       }
 
       if (!user) {
-        return { error: "Signin failed" };
+        return { error: "Sign in failed" };
       }
 
       // Get user profile
