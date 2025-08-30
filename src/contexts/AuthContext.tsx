@@ -68,9 +68,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               lastName: profile.last_name || "",
               companyName: profile.company_name || "",
             };
-
             setUser(userData);
             setSession({ user: userData });
+          } else {
+            // Fall back to auth metadata so the app can proceed
+            const meta: any = currentSession.user.user_metadata || {};
+            const userData: User = {
+              id: currentSession.user.id,
+              email: currentSession.user.email || "",
+              firstName: meta.first_name || "",
+              lastName: meta.last_name || "",
+              companyName: meta.company_name || "",
+            };
+            setUser(userData);
+            setSession({ user: userData });
+            // Best-effort create profile in background (ignore errors)
+            try {
+              await SupabaseService.createProfile(currentSession.user.id, {
+                first_name: meta.first_name || "",
+                last_name: meta.last_name || "",
+                phone: meta.phone || null,
+                company_name: meta.company_name || "",
+                email: currentSession.user.email || null,
+              });
+            } catch {}
           }
         }
       } catch (error) {
@@ -101,9 +122,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               lastName: profile.last_name || "",
               companyName: profile.company_name || "",
             };
-
             setUser(userData);
             setSession({ user: userData });
+          } else {
+            // Fall back to auth metadata so the app can proceed
+            const meta: any = session.user.user_metadata || {};
+            const userData: User = {
+              id: session.user.id,
+              email: session.user.email || "",
+              firstName: meta.first_name || "",
+              lastName: meta.last_name || "",
+              companyName: meta.company_name || "",
+            };
+            setUser(userData);
+            setSession({ user: userData });
+            // Best-effort create profile in background (ignore errors)
+            try {
+              await SupabaseService.createProfile(session.user.id, {
+                first_name: meta.first_name || "",
+                last_name: meta.last_name || "",
+                phone: meta.phone || null,
+                company_name: meta.company_name || "",
+                email: session.user.email || null,
+              });
+            } catch {}
           }
         } else if (event === "SIGNED_OUT") {
           setUser(null);

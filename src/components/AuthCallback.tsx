@@ -88,6 +88,12 @@ const AuthCallback: React.FC = () => {
     handleCallback();
   }, [navigate]);
 
+  useEffect(() => {
+    setTimeout(() => {
+      window.location.href = "/login";
+    }, 3000);
+  }, []);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="max-w-md w-full bg-white shadow rounded-lg p-6 text-center">
