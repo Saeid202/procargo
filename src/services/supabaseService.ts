@@ -15,12 +15,20 @@ export interface AuthResponse {
 }
 
 export class SupabaseService {
-  // Sign up with email and password
-  static async signUp(email: string, password: string): Promise<AuthResponse> {
+  // Sign up with email and password, send verification link with redirect
+  static async signUp(
+    email: string,
+    password: string,
+    metadata?: Record<string, any>
+  ): Promise<AuthResponse> {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: metadata || {},
+        },
       })
 
       if (error) {
@@ -109,7 +117,7 @@ export class SupabaseService {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single()
+        .maybeSingle()
 
       if (error) {
         return { profile: null, error: error.message }

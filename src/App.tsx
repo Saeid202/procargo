@@ -4,6 +4,7 @@ import LandingPage from "./components/LandingPage";
 import SignUpPage from "./components/SignUpPage";
 import LoginPage from "./components/LoginPage";
 import Dashboard from "./components/Dashboard";
+import AuthCallback from "./components/AuthCallback";
 import Navigation from "./components/Navigation";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -18,6 +19,7 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/signup" element={<SignUpPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route
               path="/dashboard"
               element={

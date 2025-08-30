@@ -119,10 +119,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       console.log("Starting real Supabase signup process...");
 
-      // Step 1: Create user account with Supabase Auth
+      // Create user with Supabase Auth and send email confirmation link
       const { user, error: signUpError } = await SupabaseService.signUp(
         email,
-        password
+        password,
+        {
+          first_name: userData.firstName,
+          last_name: userData.lastName,
+          phone: userData.phone || null,
+          company_name: userData.companyName,
+        }
       );
 
       if (signUpError) {
@@ -130,38 +136,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return { error: signUpError };
       }
 
-      if (!user) {
-        return { error: "User creation failed" };
-      }
-
-      // Step 2: Create profile in profiles table
-      const { profile, error: profileError } =
-        await SupabaseService.createProfile(user.id, {
-          first_name: userData.firstName,
-          last_name: userData.lastName,
-          phone: userData.phone || null,
-          company_name: userData.companyName,
-          email: email,
-        });
-
-      if (profileError) {
-        console.error("Profile creation error:", profileError);
-        return { error: profileError };
-      }
-
-      // Set user and session
-      const userDataObj: User = {
-        id: user.id,
-        email: user.email || "",
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        companyName: userData.companyName,
-      };
-
-      setUser(userDataObj);
-      setSession({ user: userDataObj });
-
-      console.log("Real Supabase user created successfully:", user.id);
+      // Do NOT create profile or sign the user in yet. They must confirm email first.
+      console.log(
+        "Signup initiated. Confirmation email sent if email is valid."
+      );
       return { error: null };
     } catch (error: any) {
       console.error("Supabase signup exception:", error);
@@ -181,19 +159,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (signInError) {
         console.error("Supabase signin error:", signInError);
-        
+
         // Handle specific error cases
         if (signInError.includes("Email not confirmed")) {
-          return { 
-            error: "Please confirm your email first. A confirmation email has been sent.",
-            requiresEmailConfirmation: true 
+          return {
+            error:
+              "Please confirm your email first. A confirmation email has been sent.",
+            requiresEmailConfirmation: true,
           };
         }
-        
+
         if (signInError.includes("Invalid login credentials")) {
           return { error: "Invalid email or password." };
         }
-        
+
         return { error: signInError };
       }
 
