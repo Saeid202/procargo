@@ -20,13 +20,17 @@ const Header: React.FC<HeaderProps> = ({ activeTab }) => {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+    <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4 m-4 rounded-lg">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 capitalize">{activeTab}</h1>
-          <p className="text-gray-600">{getTabDescription()}</p>
+
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-cargo-600 via-cargo-500 to-cargo-300 bg-clip-text text-transparent [-webkit-background-clip:text] capitalize">
+            {activeTab}
+          </h1>
+
+          <p className="text-gray-900 text-sm font-medium">{getTabDescription()}</p>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           <button className="p-2 text-gray-400 hover:text-gray-500 relative">
             <BellIcon className="h-6 w-6" />
