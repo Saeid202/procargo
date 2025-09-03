@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import Logo from './Logo';
 
 const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,9 +22,7 @@ const Navigation: React.FC = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
-              <div className="w-8 h-8 bg-cargo-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">C</span>
-              </div>
+              <Logo />
               <span className="ml-2 text-xl font-bold text-gray-900">CargoBridge</span>
             </Link>
           </div>

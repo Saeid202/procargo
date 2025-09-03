@@ -13,7 +13,7 @@ const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-cargo-50 to-blue-50 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-cargo-50 to-cargo-100 overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
           <div className="text-center">
@@ -44,8 +44,8 @@ const LandingPage: React.FC = () => {
         
         {/* Floating Elements */}
         <div className="absolute top-20 left-10 w-20 h-20 bg-cargo-200 rounded-full opacity-20 animate-bounce"></div>
-        <div className="absolute top-40 right-20 w-16 h-16 bg-blue-200 rounded-full opacity-20 animate-pulse"></div>
-        <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-cargo-300 rounded-full opacity-20 animate-bounce"></div>
+        <div className="absolute top-40 right-20 w-16 h-16 bg-cargo-300 rounded-full opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-cargo-400 rounded-full opacity-20 animate-bounce"></div>
       </section>
 
       {/* Stats Section */}
@@ -185,7 +185,7 @@ const LandingPage: React.FC = () => {
             </div>
 
             <div className="relative">
-              <div className="bg-gradient-to-br from-cargo-100 to-blue-100 rounded-2xl p-8">
+              <div className="bg-gradient-to-br from-cargo-100 to-cargo-200 rounded-2xl p-8">
                 <div className="text-center">
                   <h3 className="text-2xl font-bold text-gray-900 mb-4">Get a Free Quote</h3>
                   <p className="text-gray-600 mb-6">
