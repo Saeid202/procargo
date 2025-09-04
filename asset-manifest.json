@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/procargo/static/css/main.6321c55d.css",
+    "main.js": "/procargo/static/js/main.8288fdc9.js",
+    "static/js/453.8d6a2c6b.chunk.js": "/procargo/static/js/453.8d6a2c6b.chunk.js",
+    "index.html": "/procargo/index.html",
+    "main.6321c55d.css.map": "/procargo/static/css/main.6321c55d.css.map",
+    "main.8288fdc9.js.map": "/procargo/static/js/main.8288fdc9.js.map",
+    "453.8d6a2c6b.chunk.js.map": "/procargo/static/js/453.8d6a2c6b.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.6321c55d.css",
+    "static/js/main.8288fdc9.js"
+  ]
+}
