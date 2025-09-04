@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
 import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { SupabaseService } from '../../services/supabaseService';
 
-interface Order {
+export interface Order {
   id: string;
   order_number: string;
   status: string;
@@ -14,14 +15,15 @@ interface Order {
   currency: string;
   created_at: string;
   estimated_delivery?: string;
+  suppliers?: Supplier[];
 }
-interface SupplierLink {
+export interface SupplierLink {
   url: string;
   description: string;
   quantity: number;
 }
 
-interface Supplier {
+export interface Supplier {
   id: string;
   product_name: string;
   supplier_links: SupplierLink[];
@@ -34,7 +36,7 @@ interface Supplier {
   files: File[];
 }
 
-interface OrderFormData {
+export interface OrderFormData {
   origin_country: string;
   origin_city: string;
   destination_country: string;
@@ -229,27 +231,32 @@ const OrdersPage: React.FC = () => {
 
     try {
       setLoading(true);
-      console.log('Submitting order for user:', user.id);
 
       const orderNumber = generateOrderNumber();
+      // 1. Create order
+      const { order, error: orderError } = await SupabaseService.createOrder(user.id, formData, orderNumber);
+      if (orderError || !order) throw new Error(orderError);
 
-      // Mock order creation
-      const newOrder: Order = {
-        id: Date.now().toString(),
-        order_number: orderNumber,
-        status: 'Pending',
-        priority: formData.priority,
-        origin_country: formData.origin_country,
-        destination_country: formData.destination_country,
-        total_value: formData.total_value,
-        currency: formData.currency,
-        created_at: new Date().toISOString(),
-        estimated_delivery: formData.estimated_delivery || undefined
-      };
+      // 2. Create suppliers + links + files
+      for (const supplier of formData.suppliers) {
+        const { supplier: savedSupplier, error: supplierError } =
+          await SupabaseService.createSupplier(order.id, supplier);
+        if (supplierError || !savedSupplier) throw new Error(supplierError);
 
-      console.log('Mock order created successfully:', newOrder);
+        if (supplier.supplier_links?.length) {
+          const { error: linksError } = await SupabaseService.createSupplierLinks(savedSupplier.id, supplier.supplier_links);
+          if (linksError) throw new Error(linksError);
+        }
 
-      // Reset form
+        console.log(supplier.files,'log_01')
+
+        if (supplier.files?.length > 0) {
+          const { error: fileError } = await SupabaseService.uploadSupplierFiles(order.id, savedSupplier.id, supplier.files);
+          if (fileError) throw new Error(fileError);
+        }
+      }
+
+      // 3. Reset form
       setFormData({
         origin_country: 'China',
         origin_city: '',
@@ -274,16 +281,17 @@ const OrdersPage: React.FC = () => {
           files: []
         }]
       });
-      setShowForm(false);
 
-      alert('Mock order created successfully!');
+      setShowForm(false);
+      alert('Order created successfully!');
     } catch (error) {
-      console.error('Exception creating order:', error);
+      console.error('Error creating order:', error);
       alert('Error creating order. Please try again.');
     } finally {
       setLoading(false);
     }
   };
+
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
