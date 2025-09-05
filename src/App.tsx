@@ -8,6 +8,7 @@ import AuthCallback from "./components/AuthCallback";
 import Navigation from "./components/Navigation";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AgentDashboard from "./components/AgentDashboard";
 
 function App() {
   return (
@@ -25,6 +26,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/agent"
+              element={
+                <ProtectedRoute>
+                  <AgentDashboard />
                 </ProtectedRoute>
               }
             />

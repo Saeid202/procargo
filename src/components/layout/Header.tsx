@@ -15,6 +15,9 @@ const Header: React.FC<HeaderProps> = ({ activeTab }) => {
       case 'legal': return "Access legal assistance and regulatory guidance for international shipping.";
       case 'support': return "Get help and submit support tickets.";
       case 'settings': return "Manage your account settings and preferences.";
+      case 'agent-orders': return "Manage buyer submissions and coordinate sourcing from suppliers.";
+      case 'agent-logistics': return "Communicate with logistics partners, request quotes, and manage shipping operations.";
+      case 'agent-settings': return "Configure your dashboard preferences and account settings.";
       default: return "Welcome to CargoBridge dashboard.";
     }
   };
@@ -25,7 +28,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab }) => {
         <div>
 
           <h1 className="text-2xl font-bold bg-gradient-to-r from-cargo-600 via-cargo-500 to-cargo-300 bg-clip-text text-transparent [-webkit-background-clip:text] capitalize">
-            {activeTab}
+            {activeTab?.replaceAll('agent-','')}
           </h1>
 
           <p className="text-gray-900 text-sm font-medium">{getTabDescription()}</p>

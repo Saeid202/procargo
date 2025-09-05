@@ -2,12 +2,6 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import {
-  HomeIcon,
-  CalculatorIcon,
-  TruckIcon,
-  ClipboardDocumentListIcon,
-  CreditCardIcon,
-  QuestionMarkCircleIcon,
   CogIcon,
   UserCircleIcon,
   ArrowLeftOnRectangleIcon,
@@ -19,6 +13,16 @@ interface SidebarProps {
   sidebarCollapsed: boolean;
   onTabChange: (tab: string) => void;
   onToggleCollapse: () => void;
+  sidebarItems: {
+    id: string;
+    name: string;
+    icon: React.ForwardRefExoticComponent<Omit<React.SVGProps<SVGSVGElement>, "ref"> & {
+      title?: string;
+      titleId?: string;
+    } & React.RefAttributes<SVGSVGElement>>;
+    color: string;
+  }[];
+  showUserProfile: boolean;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -26,6 +30,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   sidebarCollapsed,
   onTabChange,
   onToggleCollapse,
+  sidebarItems,
+  showUserProfile
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -43,52 +49,11 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  const sidebarItems = [
-    {
-      id: "overview",
-      name: "Overview",
-      icon: HomeIcon,
-      color: "text-cargo-600",
-    },
-    {
-      id: "orders",
-      name: "Orders",
-      icon: CalculatorIcon,
-      color: "text-green-600",
-    },
-    {
-      id: "shipments",
-      name: "Shipments",
-      icon: TruckIcon,
-      color: "text-blue-600",
-    },
-    {
-      id: "compliance",
-      name: "Compliance",
-      icon: ClipboardDocumentListIcon,
-      color: "text-orange-600",
-    },
-    {
-      id: "legal",
-      name: "Legal Assistance",
-      icon: CreditCardIcon,
-      color: "text-red-600",
-    },
-    {
-      id: "support",
-      name: "Support",
-      icon: QuestionMarkCircleIcon,
-      color: "text-indigo-600",
-    },
-  ];
-
   return (
     <div
-      className={`bg-white shadow-lg transition-all duration-300 ${
-        sidebarCollapsed ? "w-16" : "w-64"
-      }`}
+      className={`bg-white shadow-lg transition-all duration-300 ${sidebarCollapsed ? "w-16" : "w-64"
+        }`}
     >
-      {/* Sidebar Header */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           {!sidebarCollapsed && (
@@ -110,7 +75,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      {/* Sidebar Navigation */}
       <nav className="p-4 space-y-2">
         {sidebarItems.map((item) => {
           const Icon = item.icon;
@@ -118,18 +82,15 @@ const Sidebar: React.FC<SidebarProps> = ({
             <button
               key={item.id}
               onClick={() => onTabChange(item.id)}
-              className={`w-full h-10 flex items-center ${
-                sidebarCollapsed ? "justify-center p-1" : "px-3"
-              } rounded-lg transition-all duration-200 ${
-                activeTab === item.id
+              className={`w-full h-10 flex items-center ${sidebarCollapsed ? "justify-center p-1" : "px-3"
+                } rounded-lg transition-all duration-200 ${activeTab === item.id
                   ? "bg-cargo-50 text-cargo-700 border-r-2 border-cargo-600"
                   : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              }`}
+                }`}
             >
               <Icon
-                className={`h-5 w-5 ${
-                  activeTab === item.id ? item.color : "text-gray-400"
-                }`}
+                className={`h-5 w-5 ${activeTab === item.id ? item.color : "text-gray-400"
+                  }`}
               />
               {!sidebarCollapsed && (
                 <span className="ml-3 font-medium">{item.name}</span>
@@ -139,63 +100,66 @@ const Sidebar: React.FC<SidebarProps> = ({
         })}
       </nav>
 
-      {/* Sidebar Footer - User Profile & Logout (directly under nav) */}
-      <div className="px-4 pt-4 pb-4 border-t border-gray-200 bg-white">
-        <div
-          className={`flex ${
-            sidebarCollapsed
-              ? "flex-col items-center"
-              : "items-center space-x-3"
-          }`}
-        >
-          <button
-            onClick={() => onTabChange("settings")}
-            className="relative flex-shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-cargo-600"
-            title="Profile Settings"
-          >
-            <UserCircleIcon className="h-10 w-10 text-cargo-600" />
-          </button>
-          {sidebarCollapsed && (
-            <div className="flex flex-col items-center mt-2">
+      {
+        showUserProfile && (
+          <div className="px-4 pt-4 pb-4 border-t border-gray-200 bg-white">
+            <div
+              className={`flex ${sidebarCollapsed
+                ? "flex-col items-center"
+                : "items-center space-x-3"
+                }`}
+            >
               <button
-                onClick={handleLogout}
-                className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors border border-red-200 hover:border-red-300"
-                title="Logout"
-              >
-                <ArrowLeftOnRectangleIcon className="h-5 w-5" />
-              </button>
-            </div>
-          )}
-          <div className={`${sidebarCollapsed ? "hidden" : ""} flex-1 min-w-0`}>
-            <p className="text-sm font-semibold text-gray-900 truncate">
-              {user?.firstName && user?.lastName
-                ? `${user.firstName} ${user.lastName}`
-                : user?.email?.split("@")[0] || "User"}
-            </p>
-            <p className="text-xs text-gray-500 truncate">
-              {user?.email || "No email"}
-            </p>
-          </div>
-          {!sidebarCollapsed && (
-            <div className="flex items-center space-x-2 my-2">
-              <button
-                className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-                title="Profile Settings"
                 onClick={() => onTabChange("settings")}
+                className="relative flex-shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-cargo-600"
+                title="Profile Settings"
               >
-                <CogIcon className="h-5 w-5" />
+                <UserCircleIcon className="h-10 w-10 text-cargo-600" />
               </button>
-              <button
-                onClick={handleLogout}
-                className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors border border-red-200 hover:border-red-300"
-                title="Logout"
-              >
-                <ArrowLeftOnRectangleIcon className="h-5 w-5" />
-              </button>
+              {sidebarCollapsed && (
+                <div className="flex flex-col items-center mt-2">
+                  <button
+                    onClick={handleLogout}
+                    className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors border border-red-200 hover:border-red-300"
+                    title="Logout"
+                  >
+                    <ArrowLeftOnRectangleIcon className="h-5 w-5" />
+                  </button>
+                </div>
+              )}
+              <div className={`${sidebarCollapsed ? "hidden" : ""} flex-1 min-w-0`}>
+                <p className="text-sm font-semibold text-gray-900 truncate">
+                  {user?.firstName && user?.lastName
+                    ? `${user.firstName} ${user.lastName}`
+                    : user?.email?.split("@")[0] || "User"}
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {user?.email || "No email"}
+                </p>
+              </div>
+              {!sidebarCollapsed && (
+                <div className="flex items-center space-x-2 my-2">
+                  <button
+                    className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                    title="Profile Settings"
+                    onClick={() => onTabChange("settings")}
+                  >
+                    <CogIcon className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors border border-red-200 hover:border-red-300"
+                    title="Logout"
+                  >
+                    <ArrowLeftOnRectangleIcon className="h-5 w-5" />
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+        )
+      }
+
     </div>
   );
 };

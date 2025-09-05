@@ -8,6 +8,16 @@ interface DashboardLayoutProps {
   sidebarCollapsed: boolean;
   onTabChange: (tab: string) => void;
   onToggleCollapse: () => void;
+  sidebarItems: {
+    id: string;
+    name: string;
+    icon: React.ForwardRefExoticComponent<Omit<React.SVGProps<SVGSVGElement>, "ref"> & {
+      title?: string;
+      titleId?: string;
+    } & React.RefAttributes<SVGSVGElement>>;
+    color: string;
+  }[];
+  showUserProfile: boolean;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({
@@ -15,12 +25,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   activeTab,
   sidebarCollapsed,
   onTabChange,
-  onToggleCollapse
+  onToggleCollapse,
+  sidebarItems,
+  showUserProfile
 }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Left Sidebar */}
       <Sidebar
+        showUserProfile={showUserProfile}
+        sidebarItems={sidebarItems}
         activeTab={activeTab}
         sidebarCollapsed={sidebarCollapsed}
         onTabChange={onTabChange}
@@ -31,7 +45,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       <div className="flex-1 flex flex-col">
         {/* Top Header */}
         <Header activeTab={activeTab} />
-        
         {/* Page Content */}
         <main className="flex-1 p-6 overflow-auto">
           {children}

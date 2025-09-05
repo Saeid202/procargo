@@ -1,5 +1,5 @@
 import React from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 interface ProtectedRouteProps {
@@ -7,11 +7,12 @@ interface ProtectedRouteProps {
   redirectTo?: string
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children, 
-  redirectTo = '/login' 
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  redirectTo = '/login'
 }) => {
-  const { user, loading } = useAuth()
+  const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -23,6 +24,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   if (!user) {
     return <Navigate to={redirectTo} replace />
+  }
+
+  if (user.role === 'AGENT' && !location.pathname?.includes('agent')) {
+    return <Navigate to={'/dashboard/agent'} replace />
   }
 
   return <>{children}</>

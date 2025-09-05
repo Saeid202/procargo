@@ -9,6 +9,7 @@ interface User {
   firstName: string;
   lastName: string;
   companyName: string;
+  role: 'USER' | 'AGENT';
 }
 
 interface AppSession {
@@ -67,6 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               firstName: profile.first_name || "",
               lastName: profile.last_name || "",
               companyName: profile.company_name || "",
+              role: profile.role || 'USER',
             };
             setUser(userData);
             setSession({ user: userData });
@@ -79,6 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               firstName: meta.first_name || "",
               lastName: meta.last_name || "",
               companyName: meta.company_name || "",
+              role: meta.role || 'USER',
             };
             setUser(userData);
             setSession({ user: userData });
@@ -238,6 +241,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         firstName: profile?.first_name || "",
         lastName: profile?.last_name || "",
         companyName: profile?.company_name || "",
+        role: profile?.role || 'USER',
       };
 
       setUser(userData);

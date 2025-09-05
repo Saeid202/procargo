@@ -13,6 +13,7 @@ export interface Profile {
   created_at: string | null
   updated_at: string | null
   email: string | null
+  role: 'USER' | 'AGENT'
 }
 
 export interface AuthUser {

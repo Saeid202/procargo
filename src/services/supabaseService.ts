@@ -52,7 +52,7 @@ export class SupabaseService {
   // Create profile in profiles table
   static async createProfile(
     userId: string,
-    profileData: Omit<Profile, "id" | "created_at" | "updated_at">
+    profileData: Omit<Profile, "id" | "created_at" | "updated_at" | 'role'>
   ): Promise<{ profile: Profile | null; error: string | null }> {
     try {
       const { data, error } = await supabase
@@ -65,6 +65,8 @@ export class SupabaseService {
             phone: profileData.phone,
             company_name: profileData.company_name,
             email: profileData.email,
+            //TODO: We should create this email account and confirm it for real agent.
+            role: profileData.email == 'agent@procargo.com' ? 'AGENT' : 'USER',
           },
         ])
         .select()

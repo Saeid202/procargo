@@ -4,20 +4,19 @@ import OverviewPage from '../pages/dashboard/OverviewPage';
 import OrdersPage from '../pages/dashboard/OrdersPage';
 import ShipmentsPage from '../pages/dashboard/ShipmentsPage';
 import CompliancePage from '../pages/dashboard/CompliancePage';
-import LegalAssistancePage from '../pages/dashboard/LegalAssistancePage';
-import SupportPage from '../pages/dashboard/SupportPage';
-import SettingsPage from '../pages/account/SettingsPage';
 import {
-  HomeIcon,
   CalculatorIcon,
-  TruckIcon,
   ClipboardDocumentListIcon,
-  CreditCardIcon,
-  QuestionMarkCircleIcon,
+  HomeIcon,
+  TruckIcon,
 } from "@heroicons/react/24/outline";
+import AgentOverviewPage from '../pages/agent-dashboard/AgentOverviewPage';
+import AgentOrdersPage from '../pages/agent-dashboard/AgentOrdersPage';
+import AgentLogisticsPage from '../pages/agent-dashboard/AgentLogisticsPage';
+import AgentSettingPage from '../pages/agent-dashboard/AgentSettingPage';
 
-const Dashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+const AgentDashboard: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('agent-overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Tab change handler
@@ -33,67 +32,49 @@ const Dashboard: React.FC = () => {
   // Render the appropriate page content based on active tab
   const renderPageContent = () => {
     switch (activeTab) {
-      case 'overview':
-        return <OverviewPage />;
-      case 'orders':
-        return <OrdersPage />;
-      case 'shipments':
-        return <ShipmentsPage />;
-      case 'compliance':
-        return <CompliancePage />;
-      case 'legal':
-        return <LegalAssistancePage />;
-      case 'support':
-        return <SupportPage />;
-      case 'settings':
-        return <SettingsPage />;
+      case 'agent-overview':
+        return <AgentOverviewPage />;
+      case 'agent-orders':
+        return <AgentOrdersPage />;
+      case 'agent-logistics':
+        return <AgentLogisticsPage />;
+      case 'agent-settings':
+        return <AgentSettingPage />;
       default:
-        return <OverviewPage />;
+        return <AgentOverviewPage />;
     }
   };
 
   const sidebarItems = [
     {
-      id: "overview",
+      id: "agent-overview",
       name: "Overview",
       icon: HomeIcon,
       color: "text-cargo-600",
     },
     {
-      id: "orders",
+      id: "agent-orders",
       name: "Orders",
       icon: CalculatorIcon,
       color: "text-green-600",
     },
     {
-      id: "shipments",
-      name: "Shipments",
+      id: "agent-logistics",
+      name: "Logistics",
       icon: TruckIcon,
       color: "text-blue-600",
     },
     {
-      id: "compliance",
-      name: "Compliance",
+      id: "agent-settings",
+      name: "Settings",
       icon: ClipboardDocumentListIcon,
       color: "text-orange-600",
-    },
-    {
-      id: "legal",
-      name: "Legal Assistance",
-      icon: CreditCardIcon,
-      color: "text-red-600",
-    },
-    {
-      id: "support",
-      name: "Support",
-      icon: QuestionMarkCircleIcon,
-      color: "text-indigo-600",
     },
   ];
 
   return (
     <DashboardLayout
-      showUserProfile
+      showUserProfile={false}
       sidebarItems={sidebarItems}
       activeTab={activeTab}
       sidebarCollapsed={sidebarCollapsed}
@@ -105,4 +86,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard;
+export default AgentDashboard;
