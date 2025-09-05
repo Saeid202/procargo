@@ -91,7 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 company_name: meta.company_name || "",
                 email: currentSession.user.email || null,
               });
-            } catch {}
+            } catch { }
           }
         }
       } catch (error) {
@@ -104,57 +104,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     checkUser();
 
     // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, session: Session | null) => {
-        if (event === "SIGNED_IN" && session?.user) {
-          // Get user profile
-          const { profile, error } = await SupabaseService.getProfile(
-            session.user.id
-          );
+    // const {
+    //   data: { subscription },
+    // } = supabase.auth.onAuthStateChange(
+    //   async (event: AuthChangeEvent, session: Session | null) => {
+    //     if (event === "SIGNED_IN" && session?.user) {
+    //       // Get user profile
+    //       const { profile, error } = await SupabaseService.getProfile(
+    //         session.user.id
+    //       );
 
-          if (profile && !error) {
-            const userData: User = {
-              id: profile.id,
-              email: profile.email || session.user.email || "",
-              firstName: profile.first_name || "",
-              lastName: profile.last_name || "",
-              companyName: profile.company_name || "",
-            };
-            setUser(userData);
-            setSession({ user: userData });
-          } else {
-            // Fall back to auth metadata so the app can proceed
-            const meta: any = session.user.user_metadata || {};
-            const userData: User = {
-              id: session.user.id,
-              email: session.user.email || "",
-              firstName: meta.first_name || "",
-              lastName: meta.last_name || "",
-              companyName: meta.company_name || "",
-            };
-            setUser(userData);
-            setSession({ user: userData });
-            // Best-effort create profile in background (ignore errors)
-            try {
-              await SupabaseService.createProfile(session.user.id, {
-                first_name: meta.first_name || "",
-                last_name: meta.last_name || "",
-                phone: meta.phone || null,
-                company_name: meta.company_name || "",
-                email: session.user.email || null,
-              });
-            } catch {}
-          }
-        } else if (event === "SIGNED_OUT") {
-          setUser(null);
-          setSession(null);
-        }
-      }
-    );
+    //       if (profile && !error) {
+    //         const userData: User = {
+    //           id: profile.id,
+    //           email: profile.email || session.user.email || "",
+    //           firstName: profile.first_name || "",
+    //           lastName: profile.last_name || "",
+    //           companyName: profile.company_name || "",
+    //         };
+    //         setUser(userData);
+    //         setSession({ user: userData });
+    //       } else {
+    //         // Fall back to auth metadata so the app can proceed
+    //         const meta: any = session.user.user_metadata || {};
+    //         const userData: User = {
+    //           id: session.user.id,
+    //           email: session.user.email || "",
+    //           firstName: meta.first_name || "",
+    //           lastName: meta.last_name || "",
+    //           companyName: meta.company_name || "",
+    //         };
+    //         setUser(userData);
+    //         setSession({ user: userData });
+    //         // Best-effort create profile in background (ignore errors)
+    //         try {
+    //           await SupabaseService.createProfile(session.user.id, {
+    //             first_name: meta.first_name || "",
+    //             last_name: meta.last_name || "",
+    //             phone: meta.phone || null,
+    //             company_name: meta.company_name || "",
+    //             email: session.user.email || null,
+    //           });
+    //         } catch { }
+    //       }
+    //     } else if (event === "SIGNED_OUT") {
+    //       setUser(null);
+    //       setSession(null);
+    //     }
+    //   }
+    // );
 
-    return () => subscription.unsubscribe();
+    // return () => subscription.unsubscribe();
   }, []);
 
   const signUp = async (email: string, password: string, userData: any) => {

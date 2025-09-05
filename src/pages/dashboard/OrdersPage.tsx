@@ -79,6 +79,7 @@ const OrdersPage: React.FC = () => {
       files: []
     }]
   });
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     if (user) {
@@ -229,6 +230,11 @@ const OrdersPage: React.FC = () => {
       return;
     }
 
+    if (!validateForm()) {
+      alert("Please fix the errors before submitting.");
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -247,8 +253,6 @@ const OrdersPage: React.FC = () => {
           const { error: linksError } = await SupabaseService.createSupplierLinks(savedSupplier.id, supplier.supplier_links);
           if (linksError) throw new Error(linksError);
         }
-
-        console.log(supplier.files,'log_01')
 
         if (supplier.files?.length > 0) {
           const { error: fileError } = await SupabaseService.uploadSupplierFiles(order.id, savedSupplier.id, supplier.files);
@@ -292,60 +296,29 @@ const OrdersPage: React.FC = () => {
     }
   };
 
+  const validateForm = (): boolean => {
+    const newErrors: { [key: string]: string } = {};
 
-  const updateOrderStatus = async (orderId: string, newStatus: string) => {
-    try {
-      // Mock order status update
-      setOrders(prevOrders =>
-        prevOrders.map(order =>
-          order.id === orderId
-            ? { ...order, status: newStatus }
-            : order
-        )
-      );
+    formData.suppliers.forEach((supplier, i) => {
+      if (!supplier.product_name.trim()) newErrors[`supplier-${i}-product_name`] = "Product name is required";
+      if (supplier.quantity <= 0) newErrors[`supplier-${i}-quantity`] = "Quantity must be greater than 0";
 
-      console.log('Mock order status updated:', orderId, 'to', newStatus);
-    } catch (error) {
-      console.error('Exception updating mock order status:', error);
-    }
-  };
+      if (!supplier.supplier_links.length) {
+        newErrors[`supplier-${i}-link`] = "At least one supplier link is required";
+      } else {
+        supplier.supplier_links.forEach((link, j) => {
+          if (!link.url.trim()) {
+            newErrors[`supplier-${i}-link-${j}-url`] = "Supplier link URL is required";
+          }
+          if (link.quantity <= 0) {
+            newErrors[`supplier-${i}-link-${j}-quantity`] = "Link quantity must be greater than 0";
+          }
+        });
+      }
+    });
 
-  const deleteOrder = async (orderId: string) => {
-    if (!window.confirm('Are you sure you want to delete this order?')) {
-      return;
-    }
-
-    try {
-      // Mock order deletion
-      setOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
-
-      console.log('Mock order deleted:', orderId);
-    } catch (error) {
-      console.error('Exception deleting mock order:', error);
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'draft': return 'bg-gray-100 text-gray-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'confirmed': return 'bg-blue-100 text-blue-800';
-      case 'processing': return 'bg-purple-100 text-purple-800';
-      case 'shipped': return 'bg-indigo-100 text-indigo-800';
-      case 'delivered': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'low': return 'bg-green-100 text-green-800';
-      case 'normal': return 'bg-blue-100 text-blue-800';
-      case 'high': return 'bg-orange-100 text-orange-800';
-      case 'urgent': return 'bg-red-100 text-red-800';
-      default: return 'bg-blue-100 text-blue-800';
-    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   if (!user) {
@@ -450,7 +423,7 @@ const OrdersPage: React.FC = () => {
 
                       <div className="mb-4">
                         <label className="block text-sm font-semibold text-gray-700 mb-1">
-                          Product Name & Description
+                          Product Name & Description <span className="text-red-500">*</span>
                         </label>
                         <textarea
                           value={supplier.product_name}
@@ -461,6 +434,9 @@ const OrdersPage: React.FC = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
                           placeholder="Describe the product..."
                         />
+                        {errors[`supplier-${index}-product_name`] && (
+                          <p className="text-red-500 text-xs mt-1">{errors[`supplier-${index}-product_name`]}</p>
+                        )}
                       </div>
 
                       <div className="mb-4">
@@ -480,6 +456,11 @@ const OrdersPage: React.FC = () => {
                                   className="flex-1 px-3 py-2 border border-gray-300 rounded-xl w-full focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
                                   placeholder="Alibaba / 1688 link"
                                 />
+                                {errors[`supplier-${index}-link-${linkIndex}-url`] && (
+                                  <p className="text-red-500 text-xs mt-1">
+                                    {errors[`supplier-${index}-link-${linkIndex}-url`]}
+                                  </p>
+                                )}
                                 <div className='w-full flex items-center justify-between gap-2' >
                                   <input
                                     type="text"
@@ -499,6 +480,11 @@ const OrdersPage: React.FC = () => {
                                     className="w-full md:w-1/4 px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
                                     placeholder="Qty"
                                   />
+                                  {errors[`supplier-${index}-link-${linkIndex}-quantity`] && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                      {errors[`supplier-${index}-link-${linkIndex}-quantity`]}
+                                    </p>
+                                  )}
                                 </div>
                               </div>
                               {supplier.supplier_links.length > 1 && (
@@ -544,7 +530,7 @@ const OrdersPage: React.FC = () => {
                         </div>
                         <div>
                           <label className="block text-sm font-semibold text-gray-700 mb-1">
-                            Logistics Type
+                            Logistics Type <span className="text-red-500">*</span>
                           </label>
                           <select
                             value={supplier.logistics_type}
