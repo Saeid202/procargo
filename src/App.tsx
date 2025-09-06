@@ -9,6 +9,7 @@ import Navigation from "./components/Navigation";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AgentDashboard from "./components/AgentDashboard";
+import "./lib/i18n"; 
 
 function App() {
   return (
