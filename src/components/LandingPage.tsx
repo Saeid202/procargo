@@ -21,8 +21,8 @@ const LandingPage: React.FC = () => {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              {t("hero_title")}
-              <span className="text-cargo-600 block">China to Canada</span>
+             <span className='mb-2 block' >{t("hero_title")}</span>
+              <span className="text-cargo-600 block">{t("hero_sub_title")}</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               {t("hero_subtitle")}
