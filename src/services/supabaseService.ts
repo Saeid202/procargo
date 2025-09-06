@@ -52,7 +52,7 @@ export class SupabaseService {
   // Create profile in profiles table
   static async createProfile(
     userId: string,
-    profileData: Omit<Profile, "id" | "created_at" | "updated_at" | 'role'>
+    profileData: Omit<Profile, "id" | "created_at" | "updated_at" | "role">
   ): Promise<{ profile: Profile | null; error: string | null }> {
     try {
       const { data, error } = await supabase
@@ -66,7 +66,7 @@ export class SupabaseService {
             company_name: profileData.company_name,
             email: profileData.email,
             //TODO: We should create this email account and confirm it for real agent.
-            role: profileData.email == 'agent@procargo.com' ? 'AGENT' : 'USER',
+            role: profileData.email == "agent@procargo.com" ? "AGENT" : "USER",
           },
         ])
         .select()
@@ -189,6 +189,33 @@ export class SupabaseService {
       return { order: data, error: null };
     } catch (err: any) {
       return { order: null, error: err.message || "Failed to create order" };
+    }
+  }
+
+  static async getOrders(userId: string) {
+    try {
+      const { data, error } = await supabase
+        .from("orders")
+        .select(
+          `
+        *,
+        suppliers (
+          *,
+          supplier_links (*),
+          supplier_files (*)
+        )
+      `
+        )
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        return { orders: null, error: error.message };
+      }
+
+      return { orders: data, error: null };
+    } catch (err: any) {
+      return { orders: null, error: err.message || "Failed to fetch orders" };
     }
   }
 
