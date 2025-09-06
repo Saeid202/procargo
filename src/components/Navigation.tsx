@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import Logo from './Logo';
+import LanguageDropdown from '../lib/i18n/LanguageDropdown';
 
 const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,7 +24,7 @@ const Navigation: React.FC = () => {
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
               <Logo />
-              <span className="ml-2 text-xl font-bold text-gray-900">CargoBridge</span>
+              <span className="ms-2 text-xl font-bold text-gray-900">CargoBridge</span>
             </Link>
           </div>
 
@@ -52,6 +53,7 @@ const Navigation: React.FC = () => {
             >
               Sign Up
             </Link>
+            <LanguageDropdown />
           </div>
 
           {/* Mobile menu button */}

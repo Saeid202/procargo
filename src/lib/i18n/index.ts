@@ -11,7 +11,7 @@ i18n
   .init({
     resources: {
       en: { translation: en },
-      fr: { translation: fa },
+      fa: { translation: fa },
     },
     fallbackLng: "en",
     interpolation: {

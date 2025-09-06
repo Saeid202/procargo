@@ -17,10 +17,10 @@ const LanguageSwitcher: React.FC = () => {
         English
       </button>
       <button
-        onClick={() => changeLanguage("fr")}
+        onClick={() => changeLanguage("fa")}
         className="px-3 py-1 rounded bg-green-500 text-white hover:bg-green-600"
       >
-        Français
+        Persian
       </button>
     </div>
   );
