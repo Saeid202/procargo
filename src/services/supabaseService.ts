@@ -192,7 +192,7 @@ export class SupabaseService {
     }
   }
 
-  static async getOrders(userId: string) {
+  static async getAgentOrders() {
     try {
       const { data, error } = await supabase
         .from("orders")

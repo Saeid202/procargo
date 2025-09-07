@@ -15,11 +15,10 @@ const AgentOverviewPage: React.FC = () => {
   }, []);
 
   const loadOverview = async () => {
-    const { orders, error } = await SupabaseService.getOrders(user?.id || '');
+    const { orders, error } = await SupabaseService.getAgentOrders();
     if (error) {
       console.error('Exception loading overview:', error);
     } else {
-      console.log(orders, 'log_00')
       setTotalOrders(orders?.length || 0);
       setPendingOrders(orders?.filter(order => order.status === 'Pending').length || 0);
       setCompletedOrders(orders?.filter(order => order.status === 'Completed').length || 0);
