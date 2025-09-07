@@ -34,6 +34,16 @@ export interface Supplier {
   special_instructions: string;
   notes: string;
   files: File[];
+  supplier_files?: SupplierFile[];
+}
+
+export interface SupplierFile {
+  created_at: string;
+  file_name: string;
+  file_type: string;
+  file_url: string;
+  id: string;
+  supplier_id: string;
 }
 
 export interface OrderFormData {

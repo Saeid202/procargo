@@ -48,7 +48,7 @@ const AgentOrdersPage: React.FC = () => {
     }
   };
 
-  console.log(orders,'log_01')
+  console.log(orders, 'log_01')
 
   return (
     <div id="orders" className="tab-content">
@@ -152,7 +152,7 @@ const AgentOrdersPage: React.FC = () => {
                                     <span className="text-blue-600">{supplier.supplier_links?.[0].url} (Primary)</span>
                                     <span className="text-xs text-gray-500">{supplier.supplier_links?.[0].description}</span>
                                   </div>
-                                 
+
                                 </div>
                               ))
                             }
@@ -165,24 +165,29 @@ const AgentOrdersPage: React.FC = () => {
                               </svg>
                               Attachments
                             </h4>
-                            <div className="flex gap-3">
-                              <button
-                                // onclick="downloadFile('spec_sheet.pdf')"
-                                className="flex items-center gap-2 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 text-sm">
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
-                                </svg>
-                                spec_sheet.pdf
-                              </button>
-                              <button
-                                // onclick="downloadFile('photo.jpg')"
-                                className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm">
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
-                                </svg>
-                                photo.jpg
-                              </button>
-                            </div>
+                            {
+                              order.suppliers?.map((supplier) => (
+                                <>
+                                  {
+                                    supplier?.supplier_files?.map((file) => (
+                                      <>
+                                        <div className="flex gap-3">
+                                          <a
+                                            href={file.file_url}
+                                            target='_blank'
+                                            className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm">
+                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                              <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+                                            </svg>
+                                            {file.file_name}
+                                          </a>
+                                        </div>
+                                      </>
+                                    ))
+                                  }
+                                </>
+                              ))
+                            }
                           </div>
                         </div>
 
