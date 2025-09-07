@@ -1,6 +1,33 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { SupabaseService } from '../../services/supabaseService';
+import { useAuth } from '../../contexts/AuthContext';
 
 const AgentOverviewPage: React.FC = () => {
+
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [pendingOrders, setPendingOrders] = useState(0);
+  const [completedOrders, setCompletedOrders] = useState(0);
+  const [revenue, setRevenue] = useState(0);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    loadOverview();
+  }, []);
+
+  const loadOverview = async () => {
+    const { orders, error } = await SupabaseService.getOrders(user?.id || '');
+    if (error) {
+      console.error('Exception loading overview:', error);
+    } else {
+      console.log(orders, 'log_00')
+      setTotalOrders(orders?.length || 0);
+      setPendingOrders(orders?.filter(order => order.status === 'Pending').length || 0);
+      setCompletedOrders(orders?.filter(order => order.status === 'Completed').length || 0);
+      setRevenue(orders?.reduce((acc, order) => acc + order.total_value, 0) || 0);
+    }
+  };
+
+
   return (
     <div id="overview" className="tab-content active">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -13,7 +40,7 @@ const AgentOverviewPage: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Orders</p>
-              <p className="text-2xl font-semibold text-gray-900">24</p>
+              <p className="text-2xl font-semibold text-gray-900">{totalOrders}</p>
             </div>
           </div>
         </div>
@@ -27,7 +54,7 @@ const AgentOverviewPage: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-2xl font-semibold text-gray-900">8</p>
+              <p className="text-2xl font-semibold text-gray-900">{pendingOrders}</p>
             </div>
           </div>
         </div>
@@ -41,7 +68,7 @@ const AgentOverviewPage: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Completed</p>
-              <p className="text-2xl font-semibold text-gray-900">12</p>
+              <p className="text-2xl font-semibold text-gray-900">{completedOrders}</p>
             </div>
           </div>
         </div>
@@ -55,13 +82,14 @@ const AgentOverviewPage: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Revenue</p>
-              <p className="text-2xl font-semibold text-gray-900">$45.2K</p>
+              <p className="text-2xl font-semibold text-gray-900">${revenue}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
+      {/* //TODO: Implement realtime order activity */}
+      {/* <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
         <div className="space-y-4">
           <div className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
@@ -80,7 +108,7 @@ const AgentOverviewPage: React.FC = () => {
             <span className="text-xs text-gray-400 ml-auto">3 hours ago</span>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
