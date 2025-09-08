@@ -6,6 +6,7 @@ import { MinusIcon } from "@heroicons/react/24/outline";
 import Loading from "../../components/ui/Loading";
 import { SupabaseService } from "../../services/supabaseService";
 import { useAuth } from "../../contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 
 export interface DocumentFiles {
     contract: File[],
@@ -44,6 +45,7 @@ const LegalIssuePage = () => {
     });
 
     const { user } = useAuth();
+    const { t } = useTranslation();
 
     const handlePlusDocument = (type: keyof DocumentFiles) => {
         setDocumnetFiles(prev => ({ ...prev, [type]: [...prev[type], new File([], '')] }));
@@ -164,9 +166,9 @@ const LegalIssuePage = () => {
             >
                 {/* Header */}
                 <div className="p-6 border-b border-white/10">
-                    <h1 className="text-xl font-bold">Submit Your Legal Issue</h1>
+                    <h1 className="text-xl font-bold">{t("submit_your_legal_issue")}</h1>
                     <p className="text-gray-400 text-sm mt-1">
-                        Fill in the details and attach any supporting documents. Our lawyer agent will review your case.
+                        {t("fill_in_the_details_and_attach_any_supporting_documents_our_lawyer_agent_will_review_your_case")}
                     </p>
                 </div>
 
@@ -189,7 +191,7 @@ const LegalIssuePage = () => {
                         aria-selected="true"
                         type="button"
                     >
-                        Case Details
+                        {t("case_details")}
                     </button>
                     <button
                         onClick={() => handleToggleTab('documents-upload')}
@@ -203,7 +205,7 @@ const LegalIssuePage = () => {
                         aria-selected="false"
                         type="button"
                     >
-                        Documents Upload
+                        {t("documents_upload")}
                     </button>
                 </div>
 
@@ -213,11 +215,11 @@ const LegalIssuePage = () => {
                             {/* Plaintiff Info */}
                             <fieldset className="grid md:grid-cols-2 gap-6 border border-gray-300 p-4">
                                 <legend className="text-gray-400 text-sm mb-2 font-semibold">
-                                    Plaintiff Information
+                                    {t("plaintiff_information")}
                                 </legend>
 
                                 <div>
-                                    <label className="font-semibold block mb-2">Are you a company or an individual?</label>
+                                    <label className="font-semibold block mb-2">{t("are_you_a_company_or_an_individual")}</label>
                                     <div className="flex gap-4 flex-wrap">
                                         <label className="flex items-center gap-2 px-3 py-2 rounded-full border border-gray-300  cursor-pointer">
                                             <input type="radio" name="plaintiff_type" value="company" required className="accent-[#7d27c8]" checked={caseDetails.plaintiff_type === 'company'} onChange={() => setCaseDetails({ ...caseDetails, plaintiff_type: 'company' })} /> Company
@@ -226,12 +228,12 @@ const LegalIssuePage = () => {
                                             <input type="radio" name="plaintiff_type" value="individual" required className="accent-[#7d27c8]" checked={caseDetails.plaintiff_type === 'individual'} onChange={() => setCaseDetails({ ...caseDetails, plaintiff_type: 'individual' })} /> Individual
                                         </label>
                                     </div>
-                                    <p className="text-gray-400 text-xs mt-1">Required</p>
+                                    <p className="text-gray-400 text-xs mt-1">{t("required")}</p>
                                 </div>
 
                                 <div>
                                     <label htmlFor="headquarter" className="font-semibold block mb-2">
-                                        Where is your headquarter?
+                                        {t("where_is_your_headquarter")}
                                     </label>
                                     <input
                                         value={caseDetails.headquarter}
@@ -239,22 +241,22 @@ const LegalIssuePage = () => {
                                         type="text"
                                         id="headquarter"
                                         name="headquarter"
-                                        placeholder="City, Country"
+                                        placeholder={t("city_country")}
                                         required
                                         className="w-full px-4 py-2 rounded-lg border border-white/10  focus:border-purple-600 focus:ring-2 focus:ring-purple-500/40 outline-none"
                                     />
-                                    <p className="text-gray-400 text-xs mt-1">Example: Toronto, Canada</p>
+                                    <p className="text-gray-400 text-xs mt-1">{t("example_city_country")}</p>
                                 </div>
                             </fieldset>
 
                             {/* Defendant Info */}
                             <fieldset className="grid gap-4 mt-8 border border-gray-300 p-4">
                                 <legend className="text-gray-400 text-sm mb-2 font-semibold">
-                                    Defendant Information
+                                    {t("defendant_information")}
                                 </legend>
                                 <div>
                                     <label htmlFor="defendant-name" className="font-semibold block mb-2">
-                                        Name of the company
+                                        {t("name_of_the_company")}
                                     </label>
                                     <input
                                         value={caseDetails.defendant_name}
@@ -262,7 +264,7 @@ const LegalIssuePage = () => {
                                         type="text"
                                         id="defendant-name"
                                         name="defendant_name"
-                                        placeholder="Defendant company name"
+                                        placeholder={t("defendant_company_name")}
                                         required
                                         className="w-full px-4 py-2 rounded-lg border border-white/10  focus:border-purple-600 focus:ring-2 focus:ring-purple-500/40 outline-none"
                                     />
@@ -271,10 +273,10 @@ const LegalIssuePage = () => {
 
                             {/* Case Summary */}
                             <fieldset className="grid gap-4 mt-8 border border-gray-300 p-4">
-                                <legend className="text-gray-400 text-sm mb-2 font-semibold">Case Summary</legend>
+                                <legend className="text-gray-400 text-sm mb-2 font-semibold">{t("case_summary")}</legend>
                                 <div>
                                     <label htmlFor="subject" className="font-semibold block mb-2">
-                                        Subject of your issue
+                                        {t("subject_of_your_issue")}
                                     </label>
                                     <input
                                         value={caseDetails.subject}
@@ -282,7 +284,7 @@ const LegalIssuePage = () => {
                                         type="text"
                                         id="subject"
                                         name="subject"
-                                        placeholder="e.g., Non-payment dispute, Breach of contract"
+                                        placeholder={t("example_subject_of_your_issue")}
                                         required
                                         className="w-full px-4 py-2 rounded-lg border border-white/10  focus:border-purple-600 focus:ring-2 focus:ring-purple-500/40 outline-none"
                                     />
@@ -290,19 +292,19 @@ const LegalIssuePage = () => {
 
                                 <div>
                                     <label htmlFor="description" className="font-semibold block mb-2">
-                                        Explain your legal issue
+                                        {t("explain_your_legal_issue")}
                                     </label>
                                     <textarea
                                         value={caseDetails.description}
                                         onChange={(e) => setCaseDetails({ ...caseDetails, description: e.target.value })}
                                         id="description"
                                         name="description"
-                                        placeholder="Please describe the facts, dates, and what outcome you want"
+                                        placeholder={t("please_describe_the_facts_dates_and_what_outcome_you_want")}
                                         minLength={20}
                                         required
                                         className="w-full px-4 py-2 rounded-lg border border-white/10  focus:border-purple-600 focus:ring-2 focus:ring-purple-500/40 outline-none min-h-[160px] resize-y"
                                     ></textarea>
-                                    <p className="text-gray-400 text-xs mt-1">Minimum 20 characters</p>
+                                    <p className="text-gray-400 text-xs mt-1">{t("minimum_20_characters")}</p>
                                 </div>
                             </fieldset>
                         </section>
@@ -310,11 +312,11 @@ const LegalIssuePage = () => {
                         <section className="p-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {[
-                                    { id: "contract", label: "Contract", hint: "Click + to add more. Allowed: PDF, DOC, DOCX, JPG, PNG." },
-                                    { id: "proforma", label: "Proforma Invoice", hint: "Add all relevant invoices." },
-                                    { id: "receipt", label: "Payment Receipt", hint: "Bank transfers, receipts, confirmations, etc." },
-                                    { id: "shipping", label: "Shipping Document", hint: "B/L, airway bill, tracking, customs docs, etc." },
-                                    { id: "other", label: "Other Document", hint: "Screenshots, emails, photos, etc." }
+                                    { id: "contract", label: t("contract"), hint: t("click_to_add_more_allowed_pdf_doc_docx_jpg_png") },
+                                    { id: "proforma", label: t("proforma_invoice"), hint: t("add_all_relevant_invoices") },
+                                    { id: "receipt", label: t("payment_receipt"), hint: t("bank_transfers_receipts_confirmations_etc") },
+                                    { id: "shipping", label: t("shipping_document"), hint: t("b_l_airway_bill_tracking_customs_docs_etc") },
+                                    { id: "other", label: t("other_document"), hint: t("screenshots_emails_photos_etc") }
                                 ].map((item, idx) => (
                                     <div key={item.id} className="grid grid-cols-[auto_1fr] gap-3 items-start p-4 border border-dashed border-gray-300 rounded-xl bg-white/5">
                                         <button
@@ -365,18 +367,18 @@ const LegalIssuePage = () => {
                 {/* Footer */}
                 <div className="flex justify-between items-center gap-4 px-6 py-4 border-t border-white/10 bg-white/5">
                     <button onClick={handleBack} type="button" className="px-4 py-2 rounded-lg font-bold text-gray-400 border border-white/10">
-                        Back
+                        {t("back")}
                     </button>
                     <div className="flex gap-3">
                         <button onClick={handleNext} type="button" className="px-4 py-2 rounded-lg font-bold text-gray-400 border border-white/10">
-                            Next
+                            {t("next")}
                         </button>
                         <button
                             onClick={handleSubmit}
                             type="button"
                             className="px-4 py-2 rounded-lg font-bold text-white bg-gradient-to-b from-purple-600 to-purple-800 shadow-lg"
                         >
-                            Submit Case
+                            {t("submit_case")}
                         </button>
                     </div>
                 </div>
