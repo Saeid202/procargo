@@ -1,35 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
-import { SupabaseService } from '../../services/supabaseService';
+import { CaseData, SupabaseService } from '../../services/supabaseService';
 import { Order } from '../dashboard/OrdersPage';
 import { cn } from '../../utils/cn';
 
 
-const LawyerOrdersPage: React.FC = () => {
+const LawyerCasesPage: React.FC = () => {
   const { user } = useAuth();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [cases, setCases] = useState<CaseData[]>([]);
 
   useEffect(() => {
     if (user) {
-      loadOrders();
+      loadCases();
     }
   }, [user]);
 
-  const loadOrders = async () => {
-    const { orders, error } = await SupabaseService.getAgentOrders();
+  const loadCases = async () => {
+    const { cases, error } = await SupabaseService.getCases();
 
     if (error) {
-      console.error('Exception loading orders:', error);
+      console.error('Exception loading cases:', error);
     } else {
-      setOrders(orders || []);
+      setCases(cases || []);
     }
+
+    console.log(cases, 'log_00')
   };
 
-  const toggleOrderDetails = (orderId: string) => {
-    const orderDetails = document.getElementById(`${orderId}-details`);
-    if (orderDetails) {
-      orderDetails.classList.toggle('hidden');
+  const toggleCaseDetails = (caseId: string) => {
+    const caseDetails = document.getElementById(`${caseId}-details`);
+    if (caseDetails) {
+      caseDetails.classList.toggle('hidden');
     }
   };
 
@@ -60,33 +62,31 @@ const LawyerOrdersPage: React.FC = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Buyer</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plaintiff</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Defendant</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200" id="orderTableBody">
             {
-              orders.map((order, index) => (
+              cases.map((caseData, index) => (
                 <>
                   <tr className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.order_number}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.destination_country}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{order.suppliers?.map((supplier) => supplier.product_name).join(', ')}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.suppliers?.reduce((acc, supplier) => acc + supplier.quantity, 0)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{caseData.subject}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{caseData.plaintiff_type}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500">{caseData.defendant_name}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={cn("capitalize inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium", order.status === 'pending' ? 'bg-red-100 text-red-800' : order.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800')}>
-                        {order.status?.replace('-', ' ')}
+                      <span className={cn("capitalize inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium", caseData.status === 'SUBMITTED' ? 'bg-red-100 text-red-800' : caseData.status === 'IN_REVIEW' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800')}>
+                        {caseData.status?.replace('-', ' ')}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{caseData.created_at ? new Date(caseData.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
-                        onClick={() => toggleOrderDetails(`order${index}`)}
+                        onClick={() => toggleCaseDetails(`caseData${index}`)}
                         className="text-blue-600 hover:text-blue-900 mr-3">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -101,7 +101,7 @@ const LawyerOrdersPage: React.FC = () => {
                       </button>
                     </td>
                   </tr>
-                  <tr id={`order${index}-details`} className={cn("hidden", order.status === 'pending' ? 'bg-blue-50' : order.status === 'in-progress' ? 'bg-yellow-50' : 'bg-green-50')}>
+                  <tr id={`caseData${index}-details`} className={cn("hidden", caseData.status === 'SUBMITTED' ? 'bg-blue-50' : caseData.status === 'IN_REVIEW' ? 'bg-yellow-50' : 'bg-green-50')}>
                     <td className="px-6 py-4" colSpan={7}>
                       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="lg:col-span-2 space-y-4">
@@ -110,36 +110,35 @@ const LawyerOrdersPage: React.FC = () => {
                               <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                               </svg>
-                              Product Information
+                              Case Information
                             </h4>
                             <div className="grid grid-cols-2 gap-4 text-sm">
-                              <div><span className="font-medium">Name:</span> {order.suppliers?.map((supplier) => supplier.product_name).join(', ')}</div>
-                              <div><span className="font-medium">Quantity:</span> {order.suppliers?.reduce((acc, supplier) => acc + supplier.quantity, 0)} units</div>
-                              {/* //TODO-Question: What is the category? */}
-                              <div><span className="font-medium">Category:</span> Commercial Equipment</div>
-                              <div><span className="font-medium">Priority:</span> <span className="text-red-600 font-medium capitalize">{order.priority}</span></div>
+                              <div><span className="font-medium">Plaintiff Type:</span> {caseData.plaintiff_type}</div>
+                              <div><span className="font-medium">Defendant Name:</span> {caseData.defendant_name}</div>
+                              <div><span className="font-medium">Subject:</span> {caseData.subject}</div>
+                              <div><span className="font-medium">Description:</span> {caseData.description}</div>
                             </div>
                           </div>
 
-                          <div className="bg-white rounded-lg p-4 border border-gray-200">
+                          {/* <div className="bg-white rounded-lg p-4 border border-gray-200">
                             <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
                               <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                               </svg>
-                              Supplier Links
+                              Case Documents
                             </h4>
                             {
-                              order.suppliers?.map((supplier) => (
+                              caseData?.case_documents?.map((caseDocument) => (
                                 <div className="space-y-2 text-sm">
                                   <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                                    <span className="text-blue-600">{supplier.supplier_links?.[0].url} (Primary)</span>
-                                    <span className="text-xs text-gray-500">{supplier.supplier_links?.[0].description}</span>
+                                    <span className="text-blue-600">{caseDocument.file_name}</span>
+                                    <span className="text-xs text-gray-500">{caseDocument.doc_type}</span>
                                   </div>
 
                                 </div>
                               ))
                             }
-                          </div>
+                          </div> */}
 
                           <div className="bg-white rounded-lg p-4 border border-gray-200">
                             <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
@@ -149,38 +148,32 @@ const LawyerOrdersPage: React.FC = () => {
                               Attachments
                             </h4>
                             {
-                              order.suppliers?.map((supplier) => (
+                              caseData?.case_documents?.map((caseDocument) => (
                                 <>
-                                  {
-                                    supplier?.supplier_files?.map((file) => (
-                                      <>
-                                        <div className="flex gap-3">
-                                          <a
-                                            href={file.file_url}
-                                            target='_blank'
-                                            className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm">
-                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                              <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
-                                            </svg>
-                                            {file.file_name}
-                                          </a>
-                                        </div>
-                                      </>
-                                    ))
-                                  }
+                                  <div className="flex gap-3">
+                                    <a
+                                      href={caseDocument.file_url}
+                                      target='_blank'
+                                      className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm">
+                                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+                                      </svg>
+                                      {caseDocument.file_name}
+                                    </a>
+                                  </div>
                                 </>
                               ))
                             }
                           </div>
 
-                          {
-                            order.status === 'completed' && (
+                          {/* {
+                            caseData.status === 'COMPLETED' && (
                               <div className="bg-white rounded-lg p-4 border border-gray-200">
                                 <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
                                   <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                   </svg>
-                                  Order Summary
+                                  Case Summary
                                 </h4>
                                 <div className="grid grid-cols-3 gap-4 text-center">
                                   <div className="p-3 bg-green-50 rounded-lg">
@@ -188,12 +181,10 @@ const LawyerOrdersPage: React.FC = () => {
                                     <p className="text-lg font-bold text-green-600">${order.total_value}</p>
                                   </div>
                                   <div className="p-3 bg-blue-50 rounded-lg">
-                                    {/* //TODO-Question: Delivery Date */}
                                     <p className="text-xs text-gray-600">Delivery Date</p>
                                     <p className="text-sm font-semibold text-blue-600">May 15, 2025</p>
                                   </div>
                                   <div className="p-3 bg-purple-50 rounded-lg">
-                                    {/* //TODO-Question: Status */}
                                     <p className="text-xs text-gray-600">Status</p>
                                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                       Delivered
@@ -202,7 +193,7 @@ const LawyerOrdersPage: React.FC = () => {
                                 </div>
                               </div>
                             )
-                          }
+                          } */}
                         </div>
 
                         <div className="space-y-4">
@@ -214,24 +205,24 @@ const LawyerOrdersPage: React.FC = () => {
                               Current Status
                             </h4>
                             <div className="text-center">
-                              <span className={cn("capitalize inline-flex items-center px-3 py-1 rounded-full text-sm font-medium", order.status === 'pending' ? 'bg-red-100 text-red-800' : order.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800')}>
-                                {order.status?.replace('-', ' ')}
+                              <span className={cn("capitalize inline-flex items-center px-3 py-1 rounded-full text-sm font-medium", caseData.status === 'SUBMITTED' ? 'bg-red-100 text-red-800' : caseData.status === 'IN_REVIEW' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800')}>
+                                {caseData.status?.replace('-', ' ')}
                               </span>
                               <p className="text-xs text-gray-600 mt-1">Waiting for response</p>
                             </div>
                           </div>
 
                           {
-                            order.status === 'completed' ? (
+                            caseData.status === 'COMPLETED' ? (
                               <div className="bg-white rounded-lg p-4 border border-gray-200">
                                 <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
                                   <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                   </svg>
-                                  Agent Notes
+                                  Lawyer Notes
                                 </h4>
                                 <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                                  Order successfully completed. Buyer satisfied with delivery. All requirements met and product quality exceeded expectations.
+                                  Case successfully completed. Buyer satisfied with delivery. All requirements met and product quality exceeded expectations.
                                 </div>
                               </div>
                             ) : (
@@ -273,8 +264,6 @@ const LawyerOrdersPage: React.FC = () => {
                               </div>
                             )
                           }
-
-
                         </div>
                       </div>
                     </td>
@@ -289,5 +278,5 @@ const LawyerOrdersPage: React.FC = () => {
   );
 };
 
-export default LawyerOrdersPage;
+export default LawyerCasesPage;
 

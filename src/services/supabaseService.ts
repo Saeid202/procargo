@@ -28,12 +28,17 @@ export interface CaseData {
   defendant_name: string;
   subject: string;
   description: string;
+  status?: 'SUBMITTED' | 'IN_REVIEW' | 'NEED_MORE_INFO' | 'RESOlVED' | 'CLOSED' | 'REJECTED' | 'COMPLETED';
+  created_at?: string;
+  case_documents?: CaseDocument[];
 }
 
 export interface CaseDocument {
   case_id: string;
   doc_type: string;
   file_url?: string;
+  file_name?: string;
+  file_type?: string;
 }
 export class SupabaseService {
   // Sign up with email and password, send verification link with redirect
@@ -82,7 +87,10 @@ export class SupabaseService {
             company_name: profileData.company_name,
             email: profileData.email,
             //TODO: We should create this email account and confirm it for real agent.
-            role: profileData.email == "agent@procargo.com" ? RolesEnum.AGENT : RolesEnum.USER,
+            role:
+              profileData.email == "agent@procargo.com"
+                ? RolesEnum.AGENT
+                : RolesEnum.USER,
           },
         ])
         .select()
@@ -329,27 +337,6 @@ export class SupabaseService {
     }
   }
 
-  // create table cases (
-  //   id uuid primary key default gen_random_uuid(),
-  //   user_id uuid references auth.users(id) not null,   -- the user who created the case
-  //   assigned_to uuid references auth.users(id),        -- lawyer id (nullable initially)
-  //   plaintiff_type text check (plaintiff_type in ('company', 'individual')) not null,
-  //   headquarter text,
-  //   defendant_name text not null,
-  //   subject text not null,
-  //   description text not null,
-  //   created_at timestamp with time zone default now(),
-  //   updated_at timestamp with time zone default now()
-  // );
-
-  // create table case_documents (
-  //   id uuid primary key default gen_random_uuid(),
-  //   case_id uuid references cases(id) on delete cascade not null,
-  //   doc_type text check (doc_type in ('contract', 'proforma', 'receipt', 'shipping', 'other')) not null,
-  //   file_url text not null,   -- Supabase Storage URL for the file
-  //   created_at timestamp with time zone default now()
-  // );
-
   static async createCase(caseData: CaseData) {
     try {
       const { data, error } = await supabase
@@ -387,31 +374,43 @@ export class SupabaseService {
   ) {
     try {
       const filePath = `${caseId}/${doc_type}/${document.name}`;
-  
+
       // Upload file to storage (no overwrite by default unless upsert:true)
       const { error: uploadError } = await supabase.storage
         .from("case_documents")
         .upload(filePath, document, { upsert: true, cacheControl: "3600" });
-  
+
       if (uploadError) throw uploadError;
-  
+
       // Get public URL
       const {
         data: { publicUrl },
       } = supabase.storage.from("case_documents").getPublicUrl(filePath);
-  
+
       // Update ONLY the file_url for existing row
       const { data: caseDocument, error: caseDocumentError } = await supabase
         .from("case_documents")
-        .update({ file_url: publicUrl })
+        .update({ file_url: publicUrl, file_name: document.name, file_type: document.type })
         .match({ case_id: caseId, doc_type: doc_type });
-  
+
       if (caseDocumentError) throw caseDocumentError;
-  
+
       return { caseDocument, error: null };
     } catch (error: any) {
       return { error: error.message || "Failed to upload case documents" };
     }
   }
-  
+
+  static async getCases() {
+    try {
+      const { data, error } = await supabase
+        .from("cases")
+        .select("*, case_documents(*)")
+        .order("created_at", { ascending: false });
+      if (error) return { cases: null, error: error.message };
+      return { cases: data, error: null };
+    } catch (error: any) {
+      return { cases: null, error: error.message || "Failed to get cases" };
+    }
+  }
 }

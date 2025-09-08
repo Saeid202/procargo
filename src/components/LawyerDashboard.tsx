@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import LawyerOverviewPage from '../pages/lawyer-dashboard/LawyerOverviewPage';
 import LawyerSettingPage from '../pages/lawyer-dashboard/LawyerSettingPage';
-import LawyerOrdersPage from '../pages/lawyer-dashboard/LawyerOrdersPage';
+import LawyerCasesPage from '../pages/lawyer-dashboard/LawyerCasesPage';
 
 const LawyerDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('agent-overview');
@@ -28,8 +28,8 @@ const LawyerDashboard: React.FC = () => {
     switch (activeTab) {
       case 'lawyer-overview':
         return <LawyerOverviewPage />;
-      case 'lawyer-orders':
-        return <LawyerOrdersPage />;
+      case 'lawyer-cases':
+        return <LawyerCasesPage />;
       case 'lawyer-settings':
         return <LawyerSettingPage />;
       default:
@@ -45,8 +45,8 @@ const LawyerDashboard: React.FC = () => {
       color: "text-cargo-600",
     },
     {
-      id: "lawyer-orders",
-      name: "Orders",
+      id: "lawyer-cases",
+      name: "Cases",
       icon: CalculatorIcon,
       color: "text-green-600",
     },

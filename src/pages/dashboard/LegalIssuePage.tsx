@@ -81,6 +81,7 @@ const LegalIssuePage = () => {
                 defendant_name: caseDetails.defendant_name,
                 subject: caseDetails.subject,
                 description: caseDetails.description,
+                status: 'SUBMITTED',
             });
             if (caseError) throw new Error(caseError);
 
@@ -91,15 +92,59 @@ const LegalIssuePage = () => {
                 });
                 if (documentsError) throw new Error(documentsError);
                 const { error: uploadedDocumentsError } = await SupabaseService.uploadCaseDocuments((savedCase as any).id, contractFile, 'contract');
-                if (uploadedDocumentsError) throw new Error(uploadedDocumentsError);
+                if (uploadedDocumentsError) {
+                    alert("Failed to upload contract file");
+                }
             }
 
-            // const { documents: savedDocuments, error: documentsError } = await SupabaseService.createCaseDocuments((savedCase as any)?.id, documnetFiles);
+            for (const performaFile of documnetFiles.proforma) {
+                const { error: documentsError } = await SupabaseService.createCaseDocuments((savedCase as any)?.id, {
+                    case_id: (savedCase as any)?.id,
+                    doc_type: 'proforma',
+                });
+                if (documentsError) throw new Error(documentsError);
+                const { error: uploadedDocumentsError } = await SupabaseService.uploadCaseDocuments((savedCase as any).id, performaFile, 'proforma');
+                if (uploadedDocumentsError) {
+                    alert("Failed to upload proforma file");
+                }
+            }
 
-            // if (documentsError || !savedDocuments) throw new Error(documentsError);
-            // const { documents: uploadedDocuments, error: uploadedDocumentsError } = await SupabaseService.uploadCaseDocuments((savedCase as any).id, documnetFiles);
+            for (const receiptFile of documnetFiles.receipt) {
+                const { error: documentsError } = await SupabaseService.createCaseDocuments((savedCase as any)?.id, {
+                    case_id: (savedCase as any)?.id,
+                    doc_type: 'receipt',
+                });
+                if (documentsError) throw new Error(documentsError);
+                const { error: uploadedDocumentsError } = await SupabaseService.uploadCaseDocuments((savedCase as any).id, receiptFile, 'receipt');
+                if (uploadedDocumentsError) {
+                    alert("Failed to upload receipt file");
+                }
+            }
 
-            // if (uploadedDocumentsError || !uploadedDocuments) throw new Error(uploadedDocumentsError);
+            for (const shippingFile of documnetFiles.shipping) {
+                const { error: documentsError } = await SupabaseService.createCaseDocuments((savedCase as any)?.id, {
+                    case_id: (savedCase as any)?.id,
+                    doc_type: 'shipping',
+                });
+                if (documentsError) throw new Error(documentsError);
+                const { error: uploadedDocumentsError } = await SupabaseService.uploadCaseDocuments((savedCase as any).id, shippingFile, 'shipping');
+                if (uploadedDocumentsError) {
+                    alert("Failed to upload shipping file");
+                }
+            }
+
+            for (const otherFile of documnetFiles.other) {
+                const { error: documentsError } = await SupabaseService.createCaseDocuments((savedCase as any)?.id, {
+                    case_id: (savedCase as any)?.id,
+                    doc_type: 'other',
+                });
+                if (documentsError) throw new Error(documentsError);
+                const { error: uploadedDocumentsError } = await SupabaseService.uploadCaseDocuments((savedCase as any).id, otherFile, 'other');
+                if (uploadedDocumentsError) {
+                    alert("Failed to upload other file");
+                }
+            }
+
         } catch (error) {
             console.log(error)
             alert('Error submitting case. Please try again.');
