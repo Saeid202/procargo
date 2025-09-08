@@ -131,5 +131,11 @@
   "new_analysis": "تحلیل جدید",
   "click_to_upload_or_drag_and_drop": "برای بارگذاری کلیک کنید یا بکشید و رها کنید",
   "product_category": "دسته‌بندی محصول",
-  "country_of_origin": "کشور مبدأ"
+  "country_of_origin": "کشور مبدأ",
+  "legal_ai_assistant": "کمک در قانون AI",
+  "ai_legal_assistant_notice":"اطلاعات کمک در قانون AI",
+  "get_instant_answers_to_your_legal_questions_about_international_trade": "دریافت جواب فوری به سوالات قانونی خود در مورد تجارت بین‌المللی",
+  "ask_about_export_requirements_customs_procedures_or_legal_compliance": "بپرسید در مورد الزامات صادرات، روش‌های گمرکی یا مقررات قانونی...",
+  "this_ai_provides_general_information_and_guidance_only_it_is_not_a_substitute_for_professional_legal_advice_for_specific_legal_matters_please_consult_with_qualified_legal_professionals_or_schedule_a_consultation": "این هوش مصنوعی فقط اطلاعات و راهنمای عمومی ارائه می‌کند. این هوش مصنوعی یک جایگزین برای راهنمای قانونی متخصص نیست. برای موارد قانونی خاص، لطفاً با مشاوران قانونی متخصص یا زمان سخت‌کاری مشاوره دریافت کنید.",
+  "for_specific_legal_matters_please_consult_with_qualified_legal_professionals_or_schedule_a_consultation": "برای موارد قانونی خاص، لطفاً با مشاوران قانونی متخصص یا زمان سخت‌کاری مشاوره دریافت کنید."
 }

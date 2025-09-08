@@ -4,6 +4,7 @@ import {
   PaperAirplaneIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 
 const LegalAssistancePage: React.FC = () => {
   const [chatMessages, setChatMessages] = useState([
@@ -15,6 +16,8 @@ const LegalAssistancePage: React.FC = () => {
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
+
+  const { t } = useTranslation();
 
   const handleSendMessage = () => {
     if (inputMessage.trim() === '') return;
@@ -69,13 +72,13 @@ const LegalAssistancePage: React.FC = () => {
       {/* Legal AI Chatbot */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="px-6 py-4 border-b border-gray-100">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-cargo-100 rounded-lg">
+          <div className="flex items-center">
+            <div className="p-2 bg-cargo-100 rounded-lg ml-4">
               <ChatBubbleLeftRightIcon className="h-6 w-6 text-cargo-600" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Legal AI Assistant</h3>
-              <p className="text-sm text-gray-600">Get instant answers to your legal questions about international trade</p>
+              <h3 className="text-lg font-semibold text-gray-900">{t("legal_ai_assistant")}</h3>
+              <p className="text-sm text-gray-600">{t("get_instant_answers_to_your_legal_questions_about_international_trade")}</p>
             </div>
           </div>
         </div>
@@ -109,34 +112,34 @@ const LegalAssistancePage: React.FC = () => {
             </div>
 
             {/* Chat Input */}
-            <div className="flex space-x-2">
+            <div className="flex">
               <input
                 type="text"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ask about export requirements, customs procedures, or legal compliance..."
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
+                placeholder={t("ask_about_export_requirements_customs_procedures_or_legal_compliance")}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500 me-2"
               />
               <button
                 onClick={handleSendMessage}
                 disabled={!inputMessage.trim()}
                 className="bg-cargo-600 hover:bg-cargo-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
               >
-                <PaperAirplaneIcon className="h-4 w-4" />
+                <PaperAirplaneIcon className="h-4 w-4 rtl:rotate-180" />
               </button>
             </div>
           </div>
 
           {/* Chatbot Disclaimer */}
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex items-start space-x-2">
-              <ExclamationTriangleIcon className="h-4 w-4 text-yellow-600 mt-0.5" />
+            <div className="flex items-start">
+              <ExclamationTriangleIcon className="h-4 w-4 text-yellow-600 mt-0.5 ml-2" />
               <div className="text-xs text-yellow-800">
-                <p className="font-medium mb-1">AI Legal Assistant Notice</p>
+                <p className="font-medium mb-1">{t("ai_legal_assistant_notice")}</p>
                 <p>
-                  This AI provides general information and guidance only. It is not a substitute for professional legal advice. 
-                  For specific legal matters, please consult with qualified legal professionals or schedule a consultation.
+                  {t("this_ai_provides_general_information_and_guidance_only_it_is_not_a_substitute_for_professional_legal_advice_for_specific_legal_matters_please_consult_with_qualified_legal_professionals_or_schedule_a_consultation")}
+                  {t("for_specific_legal_matters_please_consult_with_qualified_legal_professionals_or_schedule_a_consultation")}
                 </p>
               </div>
             </div>

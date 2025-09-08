@@ -131,5 +131,11 @@
   "new_analysis": "New Analysis",
   "click_to_upload_or_drag_and_drop": "Click to upload or drag and drop",
   "product_category": "Product Category",
-  "country_of_origin": "Country of Origin"
+  "country_of_origin": "Country of Origin",
+  "legal_ai_assistant": "Legal AI Assistant",
+  "ai_legal_assistant_notice":"Ai legal assistant notice",
+  "get_instant_answers_to_your_legal_questions_about_international_trade": "Get instant answers to your legal questions about international trade",
+  "ask_about_export_requirements_customs_procedures_or_legal_compliance": "Ask about export requirements, customs procedures, or legal compliance...",
+  "this_ai_provides_general_information_and_guidance_only_it_is_not_a_substitute_for_professional_legal_advice_for_specific_legal_matters_please_consult_with_qualified_legal_professionals_or_schedule_a_consultation": "This AI provides general information and guidance only. It is not a substitute for professional legal advice. For specific legal matters, please consult with qualified legal professionals or schedule a consultation.",
+  "for_specific_legal_matters_please_consult_with_qualified_legal_professionals_or_schedule_a_consultation": "For specific legal matters, please consult with qualified legal professionals or schedule a consultation."
 }
