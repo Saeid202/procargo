@@ -8,22 +8,22 @@ import {
 import LawyerOverviewPage from '../pages/lawyer-dashboard/LawyerOverviewPage';
 import LawyerSettingPage from '../pages/lawyer-dashboard/LawyerSettingPage';
 import LawyerCasesPage from '../pages/lawyer-dashboard/LawyerCasesPage';
+import { useTranslation } from 'react-i18next';
 
 const LawyerDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('agent-overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // Tab change handler
+  const { t } = useTranslation();
+
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
   };
 
-  // Sidebar collapse handler
   const handleToggleCollapse = () => {
     setSidebarCollapsed(!sidebarCollapsed);
   };
 
-  // Render the appropriate page content based on active tab
   const renderPageContent = () => {
     switch (activeTab) {
       case 'lawyer-overview':
@@ -40,19 +40,19 @@ const LawyerDashboard: React.FC = () => {
   const sidebarItems = [
     {
       id: "lawyer-overview",
-      name: "Overview",
+      name: t("overview"),
       icon: HomeIcon,
       color: "text-cargo-600",
     },
     {
       id: "lawyer-cases",
-      name: "Cases",
+      name: t("cases"),
       icon: CalculatorIcon,
       color: "text-green-600",
     },
     {
       id: "lawyer-settings",
-      name: "Settings",
+      name: t("settings"),
       icon: ClipboardDocumentListIcon,
       color: "text-orange-600",
     },
