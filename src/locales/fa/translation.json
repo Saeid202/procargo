@@ -45,5 +45,22 @@
   "footer_about_us": "درباره ما",
   "footer_careers": "فرصت‌های شغلی",
   "footer_news": "اخبار",
-  "footer_contact_page": "تماس"
+  "footer_contact_page": "تماس",
+
+  "login_title": "خوش آمدید",
+  "login_subtitle": "ورود به حساب کاربری خود",
+  "login_email": "آدرس ایمیل",
+  "login_password": "رمز عبور",
+  "login_signing_in": "ورود...",
+  "login_remember_me": "مرا به خاطر بسپار",
+  "login_forgot_password": "رمز عبور را فراموش کرده اید؟",
+  "login_sign_in": "ورود",
+  "login_sign_up": "ثبت نام",
+  "login_or_continue_with": "یا ادامه دهید",
+  "login_dont_have_account": "حساب کاربری ندارید؟",
+  "login_sign_up_here": "ثبت نام",
+  "login_why_choose_cargo_bridge": "چرا CargoBridge را انتخاب کنیم؟",
+  "login_secure_platform": "پلتفرم امن",
+  "login_fast_processing": "پردازش سریع",
+  "login_global_support": "پشتیبانی جهانی"
 }

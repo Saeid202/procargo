@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
 import DashboardLayout from './layout/DashboardLayout';
-import OverviewPage from '../pages/dashboard/OverviewPage';
-import OrdersPage from '../pages/dashboard/OrdersPage';
-import ShipmentsPage from '../pages/dashboard/ShipmentsPage';
-import CompliancePage from '../pages/dashboard/CompliancePage';
 import {
   CalculatorIcon,
   ClipboardDocumentListIcon,

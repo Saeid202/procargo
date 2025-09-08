@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "../contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -15,6 +16,8 @@ const LoginPage: React.FC = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { t } = useTranslation();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -105,9 +108,9 @@ const LoginPage: React.FC = () => {
             </span>
           </Link>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome Back
+            {t("login_title")}
           </h1>
-          <p className="text-gray-600">Sign in to your account to continue</p>
+          <p className="text-gray-600">{t("login_subtitle")}</p>
         </div>
 
         {/* Form */}
@@ -119,7 +122,7 @@ const LoginPage: React.FC = () => {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Email Address
+                {t("login_email")}
               </label>
               <input
                 type="email"
@@ -130,7 +133,7 @@ const LoginPage: React.FC = () => {
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-transparent transition-colors ${
                   errors.email ? "border-red-300" : "border-gray-300"
                 }`}
-                placeholder="Enter your email"
+                placeholder={t("login_email")}
                 autoComplete="email"
               />
               {errors.email && (
@@ -144,7 +147,7 @@ const LoginPage: React.FC = () => {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Password
+                {t("login_password")}
               </label>
               <div className="relative">
                 <input
@@ -156,7 +159,7 @@ const LoginPage: React.FC = () => {
                   className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-transparent transition-colors ${
                     errors.password ? "border-red-300" : "border-gray-300"
                   }`}
-                  placeholder="Enter your password"
+                  placeholder={t("login_password")}
                   autoComplete="current-password"
                 />
                 <button
@@ -191,7 +194,7 @@ const LoginPage: React.FC = () => {
                   htmlFor="rememberMe"
                   className="ml-2 block text-sm text-gray-700"
                 >
-                  Remember me
+                  {t("login_remember_me")}
                 </label>
               </div>
               <div className="text-sm">
@@ -199,7 +202,7 @@ const LoginPage: React.FC = () => {
                   href="#"
                   className="text-cargo-600 hover:text-cargo-500 font-medium"
                 >
-                  Forgot password?
+                  {t("login_forgot_password")}
                 </a>
               </div>
             </div>
@@ -220,10 +223,10 @@ const LoginPage: React.FC = () => {
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Signing In...
+                  {t("login_signing_in")}
                 </>
               ) : (
-                "Sign In"
+                t("login_sign_in")
               )}
             </button>
           </form>
@@ -236,7 +239,7 @@ const LoginPage: React.FC = () => {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white text-gray-500">
-                  Or continue with
+                  {t("login_or_continue_with")}
                 </span>
               </div>
             </div>
@@ -283,12 +286,12 @@ const LoginPage: React.FC = () => {
           {/* Sign Up Link */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Don't have an account?{" "}
+              {t("login_dont_have_account")}
               <Link
                 to="/signup"
                 className="text-cargo-600 hover:text-cargo-500 font-medium"
               >
-                Sign up here
+                {t("login_sign_up_here")}
               </Link>
             </p>
           </div>
@@ -297,20 +300,20 @@ const LoginPage: React.FC = () => {
         {/* Benefits */}
         <div className="mt-8 text-center">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Why Choose CargoBridge?
+            {t("login_why_choose_cargo_bridge")}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-600">
             <div className="flex items-center justify-center">
               <CheckIcon className="h-5 w-5 text-green-500 mr-2" />
-              Secure Platform
+              {t("login_secure_platform")}
             </div>
             <div className="flex items-center justify-center">
               <CheckIcon className="h-5 w-5 text-green-500 mr-2" />
-              Fast Processing
+              {t("login_fast_processing")}
             </div>
             <div className="flex items-center justify-center">
               <CheckIcon className="h-5 w-5 text-green-500 mr-2" />
-              Global Support
+              {t("login_global_support")}
             </div>
           </div>
         </div>
