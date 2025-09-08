@@ -1,3 +1,4 @@
+import { RolesEnum } from "../abstractions/enums/roles.enum";
 import { supabase, Profile } from "../lib/supabase";
 import {
   OrderFormData,
@@ -81,7 +82,7 @@ export class SupabaseService {
             company_name: profileData.company_name,
             email: profileData.email,
             //TODO: We should create this email account and confirm it for real agent.
-            role: profileData.email == "agent@procargo.com" ? "AGENT" : "USER",
+            role: profileData.email == "agent@procargo.com" ? RolesEnum.AGENT : RolesEnum.USER,
           },
         ])
         .select()

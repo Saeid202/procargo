@@ -1,6 +1,7 @@
 import React from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { RolesEnum } from '../abstractions/enums/roles.enum'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -26,7 +27,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to={redirectTo} replace />
   }
 
-  if (user.role === 'AGENT' && !location.pathname?.includes('agent')) {
+  if (user.role === RolesEnum.AGENT && !location.pathname?.includes('agent')) {
     return <Navigate to={'/dashboard/agent'} replace />
   }
 

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { SUPABASE_CONFIG } from '../config/supabase'
+import { RolesEnum } from '../abstractions/enums/roles.enum'
 
 export const supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey)
 
@@ -13,7 +14,7 @@ export interface Profile {
   created_at: string | null
   updated_at: string | null
   email: string | null
-  role: 'USER' | 'AGENT'
+  role: RolesEnum
 }
 
 export interface AuthUser {

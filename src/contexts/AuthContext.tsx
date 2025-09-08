@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { SupabaseService } from "../services/supabaseService";
 import { supabase } from "../lib/supabase";
-import { AuthChangeEvent, Session } from "@supabase/supabase-js";
+import { RolesEnum } from "../abstractions/enums/roles.enum";
 
 interface User {
   id: string;
@@ -9,7 +9,7 @@ interface User {
   firstName: string;
   lastName: string;
   companyName: string;
-  role: 'USER' | 'AGENT';
+  role: RolesEnum;
 }
 
 interface AppSession {
@@ -68,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               firstName: profile.first_name || "",
               lastName: profile.last_name || "",
               companyName: profile.company_name || "",
-              role: profile.role || 'USER',
+              role: profile.role || RolesEnum.USER,
             };
             setUser(userData);
             setSession({ user: userData });
@@ -241,7 +241,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         firstName: profile?.first_name || "",
         lastName: profile?.last_name || "",
         companyName: profile?.company_name || "",
-        role: profile?.role || 'USER',
+        role: profile?.role || RolesEnum.USER,
       };
 
       setUser(userData);
