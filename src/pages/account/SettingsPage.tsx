@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-
+import { useTranslation } from 'react-i18next';
 interface ProfileData {
   firstName: string;
   lastName: string;
@@ -48,6 +48,8 @@ const SettingsPage: React.FC = () => {
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+
+  const { t } = useTranslation();
 
   // Load profile data from localStorage on component mount
   useEffect(() => {
@@ -140,8 +142,8 @@ const SettingsPage: React.FC = () => {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-        <p className="text-gray-600">Manage your account settings and preferences</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('settings')}</h1>
+        <p className="text-gray-600">{t('manage_your_account_settings_and_preferences')}</p>
       </div>
 
       {/* Success/Error Message */}
@@ -157,14 +159,14 @@ const SettingsPage: React.FC = () => {
 
       {/* Profile Section */}
       <div className="bg-white rounded-lg shadow p-6 mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Information</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('profile_information')}</h2>
         
         <form onSubmit={handleProfileUpdate} className="space-y-6">
           {/* Personal Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                First Name *
+                {t('first_name')} *
               </label>
               <input
                 type="text"
@@ -177,7 +179,7 @@ const SettingsPage: React.FC = () => {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Last Name *
+                {t('last_name')} *
               </label>
               <input
                 type="text"
@@ -190,7 +192,7 @@ const SettingsPage: React.FC = () => {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email *
+                {t('email')} *
               </label>
               <input
                 type="email"
@@ -203,7 +205,7 @@ const SettingsPage: React.FC = () => {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Phone
+                {t('phone')}
               </label>
               <input
                 type="tel"
@@ -216,11 +218,11 @@ const SettingsPage: React.FC = () => {
 
           {/* Business Information */}
           <div className="border-t pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Business Information</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('business_information')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Company Name *
+                  {t('company_name')} *
                 </label>
                 <input
                   type="text"
@@ -233,21 +235,21 @@ const SettingsPage: React.FC = () => {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Business Type
+                  {t('business_type')}
                 </label>
                 <select
                   value={profileData.businessType}
                   onChange={(e) => handleInputChange('businessType', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">Select Business Type</option>
-                  <option value="importer">Importer</option>
-                  <option value="exporter">Exporter</option>
-                  <option value="both">Both</option>
-                  <option value="logistics">Logistics Provider</option>
-                  <option value="manufacturer">Manufacturer</option>
-                  <option value="distributor">Distributor</option>
-                  <option value="other">Other</option>
+                  <option value="">{t('select_business_type')}</option>
+                  <option value="importer">{t('importer')}</option>
+                  <option value="exporter">{t('exporter')}</option>
+                  <option value="both">{t('both')}</option>
+                  <option value="logistics">{t('logistics_provider')}</option>
+                  <option value="manufacturer">{t('manufacturer')}</option>
+                  <option value="distributor">{t('distributor')}</option>
+                  <option value="other">{t('other')}</option>
                 </select>
               </div>
             </div>
@@ -255,11 +257,11 @@ const SettingsPage: React.FC = () => {
 
           {/* Address Information */}
           <div className="border-t pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Address Information</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('address_information')}</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Street Address
+                  {t('street_address')}
                 </label>
                 <input
                   type="text"
@@ -272,7 +274,7 @@ const SettingsPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    City
+                    {t('city')}
                   </label>
                   <input
                     type="text"
@@ -284,7 +286,7 @@ const SettingsPage: React.FC = () => {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    State/Province
+                    {t('state/province')}
                   </label>
                   <input
                     type="text"
@@ -296,7 +298,7 @@ const SettingsPage: React.FC = () => {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    ZIP/Postal Code
+                    {t('zip/postal_code')}
                   </label>
                   <input
                     type="text"
@@ -309,7 +311,7 @@ const SettingsPage: React.FC = () => {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Country
+                  {t('country')}
                 </label>
                 <input
                   type="text"
@@ -323,11 +325,11 @@ const SettingsPage: React.FC = () => {
 
           {/* Social Media */}
           <div className="border-t pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Social Media & Website</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('social_media_and_website')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Website
+                  {t('website')}
                 </label>
                 <input
                   type="url"
@@ -340,7 +342,7 @@ const SettingsPage: React.FC = () => {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  LinkedIn
+                  {t('linkedin')}
                 </label>
                 <input
                   type="url"
@@ -355,7 +357,7 @@ const SettingsPage: React.FC = () => {
 
           {/* Notifications */}
           <div className="border-t pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Notification Preferences</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('notification_preferences')}</h3>
             <div className="space-y-3">
               <label className="flex items-center">
                 <input
@@ -364,7 +366,7 @@ const SettingsPage: React.FC = () => {
                   onChange={(e) => handleInputChange('notifications.email', e.target.checked)}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <span className="ml-2 text-sm text-gray-700">Email notifications</span>
+                <span className="ml-2 text-sm text-gray-700">{t('email_notifications')}</span>
               </label>
               
               <label className="flex items-center">
@@ -374,7 +376,7 @@ const SettingsPage: React.FC = () => {
                   onChange={(e) => handleInputChange('notifications.sms', e.target.checked)}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <span className="ml-2 text-sm text-gray-700">SMS notifications</span>
+                <span className="ml-2 text-sm text-gray-700">{t('sms_notifications')}</span>
               </label>
               
               <label className="flex items-center">
@@ -384,7 +386,7 @@ const SettingsPage: React.FC = () => {
                   onChange={(e) => handleInputChange('notifications.push', e.target.checked)}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <span className="ml-2 text-sm text-gray-700">Push notifications</span>
+                <span className="ml-2 text-sm text-gray-700">{t('push_notifications')}</span>
               </label>
             </div>
           </div>
@@ -396,7 +398,7 @@ const SettingsPage: React.FC = () => {
               disabled={saving}
               className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
-              {saving ? 'Saving...' : 'Save Changes'}
+              {saving ? t('saving') : t('save_changes')}
             </button>
             
             <button
@@ -404,7 +406,7 @@ const SettingsPage: React.FC = () => {
               onClick={handleSignOut}
               className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors"
             >
-              Sign Out
+              {t('sign_out')}
             </button>
           </div>
         </form>
