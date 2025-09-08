@@ -17,10 +17,13 @@ import {
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import LegalIssuePage from '../pages/dashboard/LegalIssuePage';
+import { useTranslation } from 'react-i18next';
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const { t } = useTranslation();
 
   // Tab change handler
   const handleTabChange = (tab: string) => {
@@ -59,37 +62,37 @@ const Dashboard: React.FC = () => {
   const sidebarItems = [
     {
       id: "overview",
-      name: "Overview",
+      name: t("overview"),
       icon: HomeIcon,
       color: "text-cargo-600",
     },
     {
       id: "orders",
-      name: "Orders",
+      name: t("orders"),
       icon: CalculatorIcon,
       color: "text-green-600",
     },
     {
       id: "shipments",
-      name: "Shipments",
+      name: t("shipments"),
       icon: TruckIcon,
       color: "text-blue-600",
     },
     {
       id: "compliance",
-      name: "Compliance",
+      name: t("compliance"),
       icon: ClipboardDocumentListIcon,
       color: "text-orange-600",
     },
     {
       id: "legal",
-      name: "Legal Assistance",
+      name: t("legal_assistance"),
       icon: CreditCardIcon,
       color: "text-red-600",
     },
     {
       id: "legal-issue",
-      name: "Legal Issue",
+      name: t("legal_issue"),
       icon: ExclamationTriangleIcon,
       color: "text-purple-600",
     },

@@ -7,6 +7,7 @@ import {
   ArrowLeftOnRectangleIcon,
   Bars3Icon,
 } from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
 
 interface SidebarProps {
   activeTab: string;
@@ -33,6 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   sidebarItems,
   showUserProfile
 }) => {
+  const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -62,7 +64,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <span className="text-white font-bold text-lg">C</span>
               </div> */}
               <span className="ml-2 text-xl font-bold text-gray-900">
-                Dashboard
+                {t("dashboard")}
               </span>
             </Link>
           )}
@@ -93,7 +95,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   }`}
               />
               {!sidebarCollapsed && (
-                <span className="ml-3 font-medium">{item.name}</span>
+                <span className="ms-3 font-medium">{item.name}</span>
               )}
             </button>
           );

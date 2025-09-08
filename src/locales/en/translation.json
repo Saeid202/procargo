@@ -62,5 +62,33 @@
   "login_why_choose_cargo_bridge": "Why Choose CargoBridge?",
   "login_secure_platform": "Secure Platform",
   "login_fast_processing": "Fast Processing",
-  "login_global_support": "Global Support"
+  "login_global_support": "Global Support",
+
+  "overview": "Overview",
+  "orders": "Orders",
+  "shipments": "Shipments",
+  "compliance": "Compliance",
+  "legal_assistance": "Legal Assistance",
+  "legal_issue": "Legal Issue",
+  "support": "Support",
+  "dashboard": "Dashboard",
+
+  "overview_description": "Welcome back! Here's what's happening with your shipments.",
+  "shipments_description": "Manage and track all your cargo shipments.",
+  "orders_description": "Track order history, manage status updates, and monitor cargo shipments from China to Canada.",
+  "compliance_description": "Manage regulatory compliance, customs documentation, and shipping requirements.",
+  "legal_description": "Access legal assistance and regulatory guidance for international shipping.",
+  "support_description": "Get help and submit support tickets.",
+  "settings_description": "Manage your account settings and preferences.",
+  "agent_orders_description": "Manage buyer submissions and coordinate sourcing from suppliers.",
+  "agent_logistics_description": "Communicate with logistics partners, request quotes, and manage shipping operations.",
+  "agent_settings_description": "Configure your dashboard preferences and account settings.",
+
+  "agent_orders": "Agent Orders",
+  "agent_logistics": "Agent Logistics",
+  "agent_settings": "Agent Settings",
+  "lawyer_cases": "Lawyer Cases",
+  "lawyer_settings": "Lawyer Settings",
+  "legal": "Legal",
+  "settings": "Settings"
 }

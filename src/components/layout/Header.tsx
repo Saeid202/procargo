@@ -1,26 +1,46 @@
 import React from 'react';
 import { BellIcon, CogIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 
 interface HeaderProps {
   activeTab: string;
 }
 
 const Header: React.FC<HeaderProps> = ({ activeTab }) => {
+  const { t } = useTranslation();
+
   const getTabDescription = () => {
     switch (activeTab) {
-      case 'overview': return "Welcome back! Here's what's happening with your shipments.";
-      case 'shipments': return "Manage and track all your cargo shipments.";
-      case 'orders': return "Track order history, manage status updates, and monitor cargo shipments from China to Canada.";
-      case 'compliance': return "Manage regulatory compliance, customs documentation, and shipping requirements.";
-      case 'legal': return "Access legal assistance and regulatory guidance for international shipping.";
-      case 'support': return "Get help and submit support tickets.";
-      case 'settings': return "Manage your account settings and preferences.";
-      case 'agent-orders': return "Manage buyer submissions and coordinate sourcing from suppliers.";
-      case 'agent-logistics': return "Communicate with logistics partners, request quotes, and manage shipping operations.";
-      case 'agent-settings': return "Configure your dashboard preferences and account settings.";
-      default: return "Welcome to CargoBridge dashboard.";
+      case 'overview': return t("overview_description");
+      case 'shipments': return t("shipments_description");
+      case 'orders': return t("orders_description");
+      case 'compliance': return t("compliance_description");
+      case 'legal': return t("legal_description");
+      case 'support': return t("support_description");
+      case 'settings': return t("settings_description");
+      case 'agent-orders': return t("agent_orders_description");
+      case 'agent-logistics': return t("agent_logistics_description");
+      case 'agent-settings': return t("agent_settings_description");
+      default: return t("overview_description");
     }
   };
+
+  const getTabTitle = () => {
+    switch (activeTab) {
+      case 'overview': return t("overview");
+      case 'shipments': return t("shipments");
+      case 'orders': return t("orders");
+      case 'compliance': return t("compliance");
+      case 'legal': return t("legal");
+      case 'support': return t("support");
+      case 'settings': return t("settings");
+      case 'agent-orders': return t("agent_orders");
+      case 'agent-logistics': return t("agent_logistics");
+      case 'agent-settings': return t("agent_settings");
+      default: return t("overview");
+    }
+  };
+  
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4 m-4 rounded-lg">
@@ -28,7 +48,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab }) => {
         <div>
 
           <h1 className="text-2xl font-bold bg-gradient-to-r from-cargo-600 via-cargo-500 to-cargo-300 bg-clip-text text-transparent [-webkit-background-clip:text] capitalize">
-            {activeTab?.replaceAll('agent-','')?.replaceAll('-',' ')}
+            {getTabTitle()}
           </h1>
 
           <p className="text-gray-900 text-sm font-medium">{getTabDescription()}</p>

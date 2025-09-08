@@ -62,5 +62,33 @@
   "login_why_choose_cargo_bridge": "چرا CargoBridge را انتخاب کنیم؟",
   "login_secure_platform": "پلتفرم امن",
   "login_fast_processing": "پردازش سریع",
-  "login_global_support": "پشتیبانی جهانی"
+  "login_global_support": "پشتیبانی جهانی",
+
+  "overview": "خلاصه",
+  "orders": "سفارشات",
+  "shipments": "ارسال‌ها",
+  "compliance": "منطبق با قوانین",
+  "legal_assistance": "کمک در قانون",
+  "legal_issue": "مشکلات قانونی",
+  "support": "پشتیبانی",
+  "dashboard": "داشبورد",
+
+  "overview_description": "خوش آمدید! این چیزهایی که با ارسال‌های شما اتفاق می‌افتد.",
+  "shipments_description": "مدیریت و ردیابی همه ارسال‌های شما.",
+  "orders_description": "ردیابی تاریخچه سفارشات، مدیریت به روز رسانی وضعیت و ردیابی ارسال‌های بار بین‌المللی از چین به کانادا.",
+  "compliance_description": "مدیریت منطبق با قوانین، مدارک گمرک و مقررات حمل و نقل.",
+  "legal_description": "دسترسی به کمک در قانون و راهنمای مقررات حمل و نقل بین‌المللی.",
+  "support_description": "دریافت کمک با ارسال تیکت پشتیبانی.",
+  "settings_description": "مدیریت تنظیمات حساب کاربری و ترجیحات.",
+  "agent_orders_description": "مدیریت ثبت سفارشات و تنظیمات ارسال از تامین کنندگان.",
+  "agent_logistics_description": "تماس با شرکا لجستیک، درخواست پیش‌فاکتور و مدیریت حمل و نقل.",
+  "agent_settings_description": "تنظیمات داشبورد و تنظیمات حساب کاربری.",
+
+  "agent_orders": "سفارشات صندوق",
+  "agent_logistics": "لجستیک صندوق",
+  "agent_settings": "تنظیمات صندوق",
+  "lawyer_cases": "موارد قانونی",
+  "lawyer_settings": "تنظیمات قانونی",
+  "legal": "قانونی",
+  "settings": "تنظیمات"
 }
