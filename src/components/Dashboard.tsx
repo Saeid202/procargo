@@ -14,7 +14,9 @@ import {
   ClipboardDocumentListIcon,
   CreditCardIcon,
   QuestionMarkCircleIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
+import LegalIssuePage from '../pages/dashboard/LegalIssuePage';
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -43,6 +45,8 @@ const Dashboard: React.FC = () => {
         return <CompliancePage />;
       case 'legal':
         return <LegalAssistancePage />;
+      case 'legal-issue':
+        return <LegalIssuePage />;
       case 'support':
         return <SupportPage />;
       case 'settings':
@@ -82,6 +86,12 @@ const Dashboard: React.FC = () => {
       name: "Legal Assistance",
       icon: CreditCardIcon,
       color: "text-red-600",
+    },
+    {
+      id: "legal-issue",
+      name: "Legal Issue",
+      icon: ExclamationTriangleIcon,
+      color: "text-purple-600",
     },
     {
       id: "support",

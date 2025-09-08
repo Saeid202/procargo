@@ -28,7 +28,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab }) => {
         <div>
 
           <h1 className="text-2xl font-bold bg-gradient-to-r from-cargo-600 via-cargo-500 to-cargo-300 bg-clip-text text-transparent [-webkit-background-clip:text] capitalize">
-            {activeTab?.replaceAll('agent-','')}
+            {activeTab?.replaceAll('agent-','')?.replaceAll('-',' ')}
           </h1>
 
           <p className="text-gray-900 text-sm font-medium">{getTabDescription()}</p>
