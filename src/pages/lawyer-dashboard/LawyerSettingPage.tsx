@@ -1,77 +1,52 @@
-import React, { useState } from 'react';
-import { 
-  ShieldCheckIcon,
-  DocumentTextIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  PlusIcon,
-  InformationCircleIcon,
-  PhotoIcon,
-  GlobeAltIcon,
-  FlagIcon
-} from '@heroicons/react/24/outline';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import Loading from '../../components/ui/Loading';
+import { SupabaseService } from '../../services/supabaseService';
+import { toast } from 'react-hot-toast';
 
 const LawyerSettingPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('new-analysis');
-  const [formData, setFormData] = useState({
-    productName: '',
-    productCategory: '',
-    productDescription: '',
-    originCountry: '',
-    destinationCountry: '',
-    productImage: null as File | null
+  const [profileData, setProfileData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
   });
+  const [loading, setLoading] = useState(false);
 
-  const productCategories = [
-    'Electronics',
-    'Textiles & Apparel',
-    'Machinery & Equipment',
-    'Chemicals',
-    'Food & Beverages',
-    'Automotive',
-    'Pharmaceuticals',
-    'Construction Materials',
-    'Agricultural Products',
-    'Other'
-  ];
+  const { user } = useAuth();
 
-  const countries = [
-    'China',
-    'Canada',
-    'United States',
-    'Germany',
-    'Japan',
-    'United Kingdom',
-    'France',
-    'Australia',
-    'Brazil',
-    'India'
-  ];
+  useEffect(() => {
+    setProfileData({
+      firstName: user?.firstName || '',
+      lastName: user?.lastName || '',
+      email: user?.email || '',
+    });
+  }, [user]);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setFormData(prev => ({ ...prev, productImage: file }));
+  const handleSubmit = async(e: React.FormEvent) => {
+    try {
+      setLoading(true);
+      const { error } = await SupabaseService.updateProfile(user?.id || '', {
+        first_name: profileData.firstName,
+        last_name: profileData.lastName,
+      });
+      if(error){
+        throw error;
+      }
+      toast.success('Profile updated successfully');
+    } catch (error) {
+      console.log(error)
+    } finally{
+      setLoading(false);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle form submission for compliance analysis
-    console.log('Submitting compliance analysis:', formData);
-  };
+  if(loading){
+    return <Loading />
+  }
+
 
   return (
     <div id="settings" className="tab-content">
-          {/* <div className="mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Settings</h2>
-            <p className="text-gray-600 mt-1">Configure your dashboard preferences and account settings.</p>
-          </div> */}
           
           <div className="bg-white rounded-lg shadow p-6">
             <div className="space-y-6">
@@ -79,12 +54,16 @@ const LawyerSettingPage: React.FC = () => {
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Profile Settings</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                    <input type="text" value="Agent User" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                    <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                    <input type="text" value={`${profileData.firstName}`} onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                    <input type="text" value={`${profileData.lastName}`} onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <input type="email" value="agent@cargobridge.com" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                    <input type="email" value={user?.email} disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
                   </div>
                 </div>
               </div>
@@ -108,10 +87,11 @@ const LawyerSettingPage: React.FC = () => {
               </div>
               
               <div className="pt-4 border-t">
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                <button type='button' onClick={handleSubmit} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
                   Save Changes
                 </button>
               </div>
+
             </div>
           </div>
         </div>

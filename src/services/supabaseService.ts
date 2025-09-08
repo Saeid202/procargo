@@ -109,6 +109,15 @@ export class SupabaseService {
     }
   }
 
+  static async updateProfile(userId: string, profileData: Partial<Profile>) {
+    try {
+      const { data, error } = await supabase.from("profiles").update(profileData).eq("id", userId).select().single();
+      return { profile: data, error: error };
+    } catch (error: any) {
+      return { profile: null, error: error.message || "An error occurred while updating profile" };
+    }
+  }
+
   // Sign in with email and password
   static async signIn(email: string, password: string): Promise<AuthResponse> {
     try {
