@@ -1,18 +1,16 @@
 {
   "welcome": "Welcome",
   "hero_title": "Bridge Your Cargo",
-  "hero_sub_title":"China to Canada",
+  "hero_sub_title": "China to Canada",
   "hero_subtitle": "Reliable, fast, and secure cargo services connecting the world's largest manufacturing hub with North America's fastest-growing market. Experience seamless logistics with CargoBridge.",
   "get_started": "Get Started Today",
   "learn_more": "Learn More",
-  
   "stats": {
     "shipments": "Successful Shipments",
     "delivery": "On-Time Delivery",
     "support": "Customer Support",
     "experience": "Years Experience"
   },
-  
   "services_title": "Our Cargo Services",
   "services_subtitle": "Comprehensive logistics solutions tailored for China-Canada trade routes",
   "sea_freight": "Sea Freight",
@@ -21,7 +19,6 @@
   "sea_freight_desc": "Cost-effective ocean shipping with FCL and LCL options, perfect for large shipments.",
   "air_freight_desc": "Express air freight services for time-sensitive shipments and urgent deliveries.",
   "customs_compliance_desc": "Expert customs clearance and compliance services for smooth border crossings.",
-  
   "features_title": "Why Choose CargoBridge?",
   "features_subtitle": "We make international shipping simple, reliable, and cost-effective",
   "fast_transit": "Fast Transit Times",
@@ -33,12 +30,10 @@
   "get_quote": "Get a Free Quote",
   "calculate_cost": "Calculate shipping costs and transit times for your cargo",
   "request_quote": "Request Quote",
-  
   "cta_title": "Ready to Ship Your Cargo?",
   "cta_subtitle": "Join thousands of satisfied customers who trust CargoBridge for their international shipping needs.",
   "start_shipping": "Start Shipping Today",
   "contact_sales": "Contact Sales",
-  
   "footer_services": "Services",
   "footer_company": "Company",
   "footer_contact": "Contact",
@@ -46,7 +41,6 @@
   "footer_careers": "Careers",
   "footer_news": "News",
   "footer_contact_page": "Contact",
-
   "login_title": "Welcome Back",
   "login_subtitle": "Sign in to your account to continue",
   "login_email": "Email Address",
@@ -63,7 +57,6 @@
   "login_secure_platform": "Secure Platform",
   "login_fast_processing": "Fast Processing",
   "login_global_support": "Global Support",
-
   "overview": "Overview",
   "orders": "Orders",
   "shipments": "Shipments",
@@ -72,7 +65,6 @@
   "legal_issue": "Legal Issue",
   "support": "Support",
   "dashboard": "Dashboard",
-
   "overview_description": "Welcome back! Here's what's happening with your shipments.",
   "shipments_description": "Manage and track all your cargo shipments.",
   "orders_description": "Track order history, manage status updates, and monitor cargo shipments from China to Canada.",
@@ -83,7 +75,6 @@
   "agent_orders_description": "Manage buyer submissions and coordinate sourcing from suppliers.",
   "agent_logistics_description": "Communicate with logistics partners, request quotes, and manage shipping operations.",
   "agent_settings_description": "Configure your dashboard preferences and account settings.",
-
   "agent_orders": "Agent Orders",
   "agent_logistics": "Agent Logistics",
   "agent_settings": "Agent Settings",
@@ -91,7 +82,6 @@
   "lawyer_settings": "Lawyer Settings",
   "legal": "Legal",
   "settings": "Settings",
-
   "new_order": "New Order",
   "submit_new_order": "Submit New Order",
   "add_supplier": "Add Supplier",
@@ -110,13 +100,36 @@
   "sea_fcl": "Sea FCL",
   "express": "Express",
   "consolidation": "Consolidation",
-  "special_instructions": "Special Instructions", 
+  "special_instructions": "Special Instructions",
   "special_instructions_optional": "Special Instructions (optional)",
   "notes": "Notes",
   "notes_optional": "Notes (optional)",
   "upload_files": "Upload Files",
-  "add_another_file": "Add Another File", 
+  "add_another_file": "Add Another File",
   "submit_order": "Submit Order",
   "cancel": "Cancel",
-  "attach_invoices_specs_or_photos_for_this_supplier_product": "Attach invoices, specs, or photos for this supplier/product."
+  "attach_invoices_specs_or_photos_for_this_supplier_product": "Attach invoices, specs, or photos for this supplier/product.",
+  "ai_analysis_information": "AI Analysis Information",
+  "ai_analysis_information_description": "Our AI will analyze your product for international trade compliance, identifying required certificates, legal requirements, and estimated timelines.",
+  "product_compliance_analysis": "Product Compliance Analysis",
+  "product_compliance_analysis_description": "Upload your product details and get comprehensive compliance analysis for international trade.",
+  "product_image": "Product Image",
+  "product_name": "Product Name",
+  "product_name_placeholder": "e.g., LED Light Bulb",
+  "select_category": "Select Category",
+  "product_description": "Product Description",
+  "product_description_placeholder": "Describe your product, its specifications, materials, intended use, etc.",
+  "select_origin_country": "Select Origin Country",
+  "destination_country": "Destination Country",
+  "select_destination_country": "Select Destination Country",
+  "start_compliance_analysis": "Start Compliance Analysis",
+  "compliance_reports": "Compliance Reports",
+  "compliance_reports_description": "View and manage your previous compliance analysis reports.",
+  "no_reports_yet": "No reports yet",
+  "start_your_first_compliance_analysis_to_generate_reports": "Start your first compliance analysis to generate reports.",
+  "start_new_analysis": "Start New Analysis",
+  "new_analysis": "New Analysis",
+  "click_to_upload_or_drag_and_drop": "Click to upload or drag and drop",
+  "product_category": "Product Category",
+  "country_of_origin": "Country of Origin"
 }

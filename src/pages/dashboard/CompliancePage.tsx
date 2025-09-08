@@ -11,6 +11,7 @@ import {
   GlobeAltIcon,
   FlagIcon
 } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 
 const CompliancePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('new-analysis');
@@ -22,6 +23,8 @@ const CompliancePage: React.FC = () => {
     destinationCountry: '',
     productImage: null as File | null
   });
+
+  const { t } = useTranslation();
 
   const productCategories = [
     'Electronics',
@@ -70,15 +73,14 @@ const CompliancePage: React.FC = () => {
     <div className="space-y-6">
       {/* AI Analysis Information Section - Top of Page */}
       <div className="bg-gradient-to-r from-blue-50 to-cargo-50 border border-blue-200 rounded-xl p-6">
-        <div className="flex items-center space-x-4">
-          <div className="p-3 bg-blue-100 rounded-lg">
+        <div className="flex items-center">
+          <div className="p-3 bg-blue-100 rounded-lg ml-4">
             <InformationCircleIcon className="h-8 w-8 text-blue-600" />
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">AI Analysis Information</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">{t("ai_analysis_information")}</h2>
             <p className="text-gray-700 text-lg leading-relaxed">
-              Our AI will analyze your product for international trade compliance, identifying required certificates, 
-              legal requirements, and estimated timelines.
+              {t("ai_analysis_information_description")}
             </p>
           </div>
         </div>
@@ -96,7 +98,7 @@ const CompliancePage: React.FC = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              New Analysis
+              {t("new_analysis")}
             </button>
             <button
               onClick={() => setActiveTab('compliance-reports')}
@@ -106,7 +108,7 @@ const CompliancePage: React.FC = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Compliance Reports
+              {t("compliance_reports")}
             </button>
           </nav>
         </div>
@@ -115,8 +117,8 @@ const CompliancePage: React.FC = () => {
           {activeTab === 'new-analysis' ? (
             <div>
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Product Compliance Analysis</h3>
-                <p className="text-gray-600">Upload your product details and get comprehensive compliance analysis for international trade.</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("product_compliance_analysis")}</h3>
+                <p className="text-gray-600">{t("product_compliance_analysis_description")}</p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -125,7 +127,7 @@ const CompliancePage: React.FC = () => {
                   <div className="space-y-6">
                     {/* Product Image Upload */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t("product_image")}</label>
                       <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-cargo-400 transition-colors">
                         <input
                           type="file"
@@ -137,7 +139,7 @@ const CompliancePage: React.FC = () => {
                         <label htmlFor="product-image" className="cursor-pointer">
                           <PhotoIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                           <p className="text-sm text-gray-600">
-                            Click to upload or drag and drop
+                            {t("click_to_upload_or_drag_and_drop")}
                           </p>
                           <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
                         </label>
@@ -146,25 +148,25 @@ const CompliancePage: React.FC = () => {
 
                     {/* Product Name */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t("product_name")}</label>
                       <input
                         type="text"
                         value={formData.productName}
                         onChange={(e) => handleInputChange('productName', e.target.value)}
-                        placeholder="e.g., LED Light Bulb"
+                        placeholder={t("product_name_placeholder")}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                       />
                     </div>
 
                     {/* Product Category */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Product Category</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t("product_category")}</label>
                       <select
                         value={formData.productCategory}
                         onChange={(e) => handleInputChange('productCategory', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                       >
-                        <option value="">Select category</option>
+                        <option value="">{t("select_category")}</option>
                         {productCategories.map(category => (
                           <option key={category} value={category}>{category}</option>
                         ))}
@@ -173,12 +175,12 @@ const CompliancePage: React.FC = () => {
 
                     {/* Product Description */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Product Description</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t("product_description")}</label>
                       <textarea
                         value={formData.productDescription}
                         onChange={(e) => handleInputChange('productDescription', e.target.value)}
                         rows={4}
-                        placeholder="Describe your product, its specifications, materials, intended use, etc."
+                        placeholder={t("product_description_placeholder")}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                       />
                     </div>
@@ -189,13 +191,13 @@ const CompliancePage: React.FC = () => {
                     {/* Country Selection */}
                     <div className="grid grid-cols-1 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Country of Origin</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">{t("country_of_origin")}</label>
                         <select
                           value={formData.originCountry}
                           onChange={(e) => handleInputChange('originCountry', e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                         >
-                          <option value="">Select origin country</option>
+                          <option value="">{t("select_origin_country")}</option>
                           {countries.map(country => (
                             <option key={country} value={country}>{country}</option>
                           ))}
@@ -203,13 +205,13 @@ const CompliancePage: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Destination Country</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">{t("destination_country")}</label>
                         <select
                           value={formData.destinationCountry}
                           onChange={(e) => handleInputChange('destinationCountry', e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                         >
-                          <option value="">Select destination country</option>
+                          <option value="">{t("select_destination_country")}</option>
                           {countries.map(country => (
                             <option key={country} value={country}>{country}</option>
                           ))}
@@ -228,7 +230,7 @@ const CompliancePage: React.FC = () => {
                     className="w-full bg-cargo-600 hover:bg-cargo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
                   >
                     <ShieldCheckIcon className="h-5 w-5" />
-                    <span>Start Compliance Analysis</span>
+                    <span>{t("start_compliance_analysis")}</span>
                   </button>
                 </div>
               </form>
@@ -236,20 +238,20 @@ const CompliancePage: React.FC = () => {
           ) : (
             <div>
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Compliance Reports</h3>
-                <p className="text-gray-600">View and manage your previous compliance analysis reports.</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("compliance_reports")}</h3>
+                <p className="text-gray-600">{t("compliance_reports_description")}</p>
               </div>
 
               {/* Placeholder for Compliance Reports */}
               <div className="text-center py-12">
                 <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No reports yet</h3>
-                <p className="text-gray-500 mb-4">Start your first compliance analysis to generate reports.</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">{t("no_reports_yet")}</h3>
+                <p className="text-gray-500 mb-4">{t("start_your_first_compliance_analysis_to_generate_reports")}</p>
                 <button
                   onClick={() => setActiveTab('new-analysis')}
                   className="bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                 >
-                  Start New Analysis
+                  {t("start_new_analysis")}
                 </button>
               </div>
             </div>
