@@ -19,6 +19,21 @@ export interface AuthResponse {
   error: string | null;
 }
 
+export interface CaseData {
+  user_id: string;
+  assigned_to: string | null;
+  plaintiff_type: string;
+  headquarter: string;
+  defendant_name: string;
+  subject: string;
+  description: string;
+}
+
+export interface CaseDocument {
+  case_id: string;
+  doc_type: string;
+  file_url?: string;
+}
 export class SupabaseService {
   // Sign up with email and password, send verification link with redirect
   static async signUp(
@@ -312,4 +327,90 @@ export class SupabaseService {
       return { error: err.message || "Failed to upload supplier files" };
     }
   }
+
+  // create table cases (
+  //   id uuid primary key default gen_random_uuid(),
+  //   user_id uuid references auth.users(id) not null,   -- the user who created the case
+  //   assigned_to uuid references auth.users(id),        -- lawyer id (nullable initially)
+  //   plaintiff_type text check (plaintiff_type in ('company', 'individual')) not null,
+  //   headquarter text,
+  //   defendant_name text not null,
+  //   subject text not null,
+  //   description text not null,
+  //   created_at timestamp with time zone default now(),
+  //   updated_at timestamp with time zone default now()
+  // );
+
+  // create table case_documents (
+  //   id uuid primary key default gen_random_uuid(),
+  //   case_id uuid references cases(id) on delete cascade not null,
+  //   doc_type text check (doc_type in ('contract', 'proforma', 'receipt', 'shipping', 'other')) not null,
+  //   file_url text not null,   -- Supabase Storage URL for the file
+  //   created_at timestamp with time zone default now()
+  // );
+
+  static async createCase(caseData: CaseData) {
+    try {
+      const { data, error } = await supabase
+        .from("cases")
+        .insert(caseData)
+        .select()
+        .single();
+      if (error) return { case: null, error: error.message };
+
+      return { case: data, error: null };
+    } catch (error: any) {
+      return { case: null, error: error.message || "Failed to create case" };
+    }
+  }
+
+  static async createCaseDocuments(caseId: string, document: CaseDocument) {
+    try {
+      const { data, error } = await supabase
+        .from("case_documents")
+        .insert(document);
+      if (error) return { documents: null, error: error.message };
+      return { documents: data, error: null };
+    } catch (error: any) {
+      return {
+        documents: null,
+        error: error.message || "Failed to create case documents",
+      };
+    }
+  }
+
+  static async uploadCaseDocuments(
+    caseId: string,
+    document: File,
+    doc_type: string
+  ) {
+    try {
+      const filePath = `${caseId}/${doc_type}/${document.name}`;
+  
+      // Upload file to storage (no overwrite by default unless upsert:true)
+      const { error: uploadError } = await supabase.storage
+        .from("case_documents")
+        .upload(filePath, document, { upsert: true, cacheControl: "3600" });
+  
+      if (uploadError) throw uploadError;
+  
+      // Get public URL
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("case_documents").getPublicUrl(filePath);
+  
+      // Update ONLY the file_url for existing row
+      const { data: caseDocument, error: caseDocumentError } = await supabase
+        .from("case_documents")
+        .update({ file_url: publicUrl })
+        .match({ case_id: caseId, doc_type: doc_type });
+  
+      if (caseDocumentError) throw caseDocumentError;
+  
+      return { caseDocument, error: null };
+    } catch (error: any) {
+      return { error: error.message || "Failed to upload case documents" };
+    }
+  }
+  
 }
