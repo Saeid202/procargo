@@ -1,18 +1,16 @@
 {
   "welcome": "خوش آمدید",
   "hero_title": "بار خود را پل بزنید",
-  "hero_sub_title":"چین به کانادا",
+  "hero_sub_title": "چین به کانادا",
   "hero_subtitle": "خدمات باربری مطمئن، سریع و امن که بزرگترین مرکز تولید دنیا را به بازار رو به رشد آمریکای شمالی متصل می‌کند. تجربه یک لجستیک بدون مشکل با CargoBridge.",
   "get_started": "همین حالا شروع کنید",
   "learn_more": "بیشتر بدانید",
-  
   "stats": {
     "shipments": "ارسال‌های موفق",
     "delivery": "تحویل به موقع",
     "support": "پشتیبانی ۲۴/۷",
     "experience": "سال تجربه"
   },
-  
   "services_title": "خدمات باربری ما",
   "services_subtitle": "راه‌حل‌های جامع لجستیک برای مسیرهای تجاری چین-کانادا",
   "sea_freight": "حمل و نقل دریایی",
@@ -21,7 +19,6 @@
   "sea_freight_desc": "حمل و نقل دریایی مقرون به صرفه با گزینه‌های FCL و LCL، مناسب برای بارهای بزرگ.",
   "air_freight_desc": "خدمات حمل و نقل هوایی سریع برای بارهای حساس به زمان و تحویل فوری.",
   "customs_compliance_desc": "خدمات کارشناسی گمرک و رعایت مقررات برای عبور بدون مشکل از مرزها.",
-  
   "features_title": "چرا CargoBridge را انتخاب کنیم؟",
   "features_subtitle": "ما حمل و نقل بین‌المللی را ساده، مطمئن و مقرون به صرفه می‌کنیم",
   "fast_transit": "زمان حمل سریع",
@@ -33,12 +30,10 @@
   "get_quote": "دریافت پیش‌فاکتور رایگان",
   "calculate_cost": "محاسبه هزینه حمل و زمان رسیدن بار شما",
   "request_quote": "درخواست پیش‌فاکتور",
-  
   "cta_title": "آماده ارسال بار خود هستید؟",
   "cta_subtitle": "به هزاران مشتری راضی بپیوندید که به CargoBridge برای نیازهای حمل و نقل بین‌المللی خود اعتماد دارند.",
   "start_shipping": "شروع حمل و نقل",
   "contact_sales": "تماس با فروش",
-  
   "footer_services": "خدمات",
   "footer_company": "شرکت",
   "footer_contact": "تماس",
@@ -46,7 +41,6 @@
   "footer_careers": "فرصت‌های شغلی",
   "footer_news": "اخبار",
   "footer_contact_page": "تماس",
-
   "login_title": "خوش آمدید",
   "login_subtitle": "ورود به حساب کاربری خود",
   "login_email": "آدرس ایمیل",
@@ -63,7 +57,6 @@
   "login_secure_platform": "پلتفرم امن",
   "login_fast_processing": "پردازش سریع",
   "login_global_support": "پشتیبانی جهانی",
-
   "overview": "خلاصه",
   "orders": "سفارشات",
   "shipments": "ارسال‌ها",
@@ -72,7 +65,6 @@
   "legal_issue": "مشکلات قانونی",
   "support": "پشتیبانی",
   "dashboard": "داشبورد",
-
   "overview_description": "خوش آمدید! این چیزهایی که با ارسال‌های شما اتفاق می‌افتد.",
   "shipments_description": "مدیریت و ردیابی همه ارسال‌های شما.",
   "orders_description": "ردیابی تاریخچه سفارشات، مدیریت به روز رسانی وضعیت و ردیابی ارسال‌های بار بین‌المللی از چین به کانادا.",
@@ -83,12 +75,38 @@
   "agent_orders_description": "مدیریت ثبت سفارشات و تنظیمات ارسال از تامین کنندگان.",
   "agent_logistics_description": "تماس با شرکا لجستیک، درخواست پیش‌فاکتور و مدیریت حمل و نقل.",
   "agent_settings_description": "تنظیمات داشبورد و تنظیمات حساب کاربری.",
-
   "agent_orders": "سفارشات صندوق",
   "agent_logistics": "لجستیک صندوق",
   "agent_settings": "تنظیمات صندوق",
   "lawyer_cases": "موارد قانونی",
   "lawyer_settings": "تنظیمات قانونی",
   "legal": "قانونی",
-  "settings": "تنظیمات"
+  "settings": "تنظیمات",
+  "new_order": "سفارش جدید",
+  "submit_new_order": "ثبت سفارش جدید",
+  "add_supplier": "افزودن تامین کننده",
+  "supplier": "تامین کننده",
+  "suppliers_and_products": "تامین کنندگان و محصولات",
+  "product_name_and_description": "نام محصول و توضیحات",
+  "supplier_links": "لینک تامین کننده",
+  "alibaba_1688_link": "لینک آلیباب / 1688",
+  "description_optional": "توضیحات (اختیاری)",
+  "qty": "تعداد",
+  "add_another_link": "افزودن لینک دیگر",
+  "quantity": "تعداد",
+  "logistics_type": "نوع لجستیک",
+  "air": "هوایی",
+  "sea_lcl": "دریایی LCL",
+  "sea_fcl": "دریایی FCL",
+  "express": "فشرده سازی",
+  "consolidation": "پایداری",
+  "special_instructions": "توضیحات خاص",
+  "special_instructions_optional": "توضیحات خاص (اختیاری)",
+  "notes": "یادداشت",
+  "notes_optional": "یادداشت (اختیاری)",
+  "upload_files": "فایل های آپلود",
+  "add_another_file": "افزودن فایل دیگر",
+  "submit_order": "ثبت سفارش",
+  "cancel": "انصراف",
+  "attach_invoices_specs_or_photos_for_this_supplier_product": "افزودن فایل های آپلود"
 }

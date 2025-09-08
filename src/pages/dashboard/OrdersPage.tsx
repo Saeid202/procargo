@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { SupabaseService } from '../../services/supabaseService';
+import { useTranslation } from 'react-i18next';
 
 export interface Order {
   id: string;
@@ -90,6 +91,8 @@ const OrdersPage: React.FC = () => {
     }]
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (user) {
@@ -363,7 +366,7 @@ const OrdersPage: React.FC = () => {
           className="bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-md flex items-center gap-2"
         >
           <PlusIcon className="h-5 w-5" />
-          New Order
+          {t("new_order")}
         </button>
       </div>
 
@@ -371,14 +374,14 @@ const OrdersPage: React.FC = () => {
         <div className="pb-6">
           <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gradient-to-br from-slate-50 to-slate-200">
-              <h2 className="text-xl font-semibold">Submit New Order</h2>
+              <h2 className="text-xl font-semibold">{t("submit_new_order")}</h2>
               <button
                 type="button"
                 onClick={addSupplier}
                 className="bg-gradient-to-tr from-green-600 to-green-700 text-white px-3 py-2 rounded-xl flex items-center gap-2 text-sm font-medium"
               >
                 <PlusIcon className="h-4 w-4 opacity-70" />
-                Add Supplier
+                {t("add_supplier")}
               </button>
             </div>
 
@@ -391,7 +394,7 @@ const OrdersPage: React.FC = () => {
                       className="relative border border-gray-200 rounded-2xl p-6 bg-white hover:border-2 hover:border-indigo-500 transition-all duration-200"
                     >
                       {formData.suppliers.length > 1 && (
-                        <div className='bg-gray-100 h-8 w-10 absolute top-6 right-6 flex items-center justify-center rounded-xl' >
+                        <div className='bg-gray-100 h-8 w-10 absolute top-6 right-6 rtl:left-6 rtl:right-auto flex items-center justify-center rounded-xl' >
                           <button
                             type="button"
                             onClick={() => removeSupplier(supplier.id)}
@@ -406,16 +409,16 @@ const OrdersPage: React.FC = () => {
                       <div className="mb-4 flex w-full items-center justify-between">
                         <div className='flex items-center gap-2' >
                           <span className="inline-block bg-blue-700 text-white text-sm px-4 py-1.5 rounded-lg">
-                            Supplier {index + 1}
+                            {t("supplier")} {index + 1}
                           </span>
-                          <span className="font-medium text-gray-500">Suppliers & Products</span>
+                          <span className="font-medium text-gray-500">{t("suppliers_and_products")}</span>
                         </div>
 
 
                         <div className="flex justify-between items-center mb-4">
                           {
                             formData.suppliers.length == 1 ? (
-                              <div className='bg-gray-100 h-8 w-10 absolute top-6 right-6 flex items-center justify-center rounded-xl' >
+                              <div className='bg-gray-100 h-8 w-10 absolute top-6 right-6 rtl:left-6 rtl:right-auto flex items-center justify-center rounded-xl' >
                                 <button
                                   onClick={() => setShowForm(false)}
                                   className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -433,7 +436,7 @@ const OrdersPage: React.FC = () => {
 
                       <div className="mb-4">
                         <label className="block text-sm font-semibold text-gray-700 mb-1">
-                          Product Name & Description <span className="text-red-500">*</span>
+                          {t("product_name_and_description")} <span className="text-red-500">*</span>
                         </label>
                         <textarea
                           value={supplier.product_name}
@@ -451,7 +454,7 @@ const OrdersPage: React.FC = () => {
 
                       <div className="mb-4">
                         <label className="block text-sm font-semibold text-gray-700 mb-1">
-                          Supplier Links
+                          {t("supplier_links")}
                         </label>
                         <div className="space-y-2">
                           {supplier.supplier_links.map((link, linkIndex) => (
@@ -464,7 +467,7 @@ const OrdersPage: React.FC = () => {
                                     updateSupplierLink(supplier.id, linkIndex, 'url', e.target.value)
                                   }
                                   className="flex-1 px-3 py-2 border border-gray-300 rounded-xl w-full focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
-                                  placeholder="Alibaba / 1688 link"
+                                  placeholder={t("alibaba_1688_link")}
                                 />
                                 {errors[`supplier-${index}-link-${linkIndex}-url`] && (
                                   <p className="text-red-500 text-xs mt-1">
@@ -479,7 +482,7 @@ const OrdersPage: React.FC = () => {
                                       updateSupplierLink(supplier.id, linkIndex, 'description', e.target.value)
                                     }
                                     className="w-full md:w-3/4 px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
-                                    placeholder="Description (optional)"
+                                    placeholder={t("description_optional")}
                                   />
                                   <input
                                     type="number"
@@ -488,7 +491,7 @@ const OrdersPage: React.FC = () => {
                                       updateSupplierLink(supplier.id, linkIndex, 'quantity', e.target.value)
                                     }
                                     className="w-full md:w-1/4 px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
-                                    placeholder="Qty"
+                                    placeholder={t("qty")}
                                   />
                                   {errors[`supplier-${index}-link-${linkIndex}-quantity`] && (
                                     <p className="text-red-500 text-xs mt-1">
@@ -518,7 +521,7 @@ const OrdersPage: React.FC = () => {
                             onClick={() => addSupplierLink(supplier.id)}
                             className="text-gray-600 hover:text-gray-800 text-sm font-medium mt-1"
                           >
-                            + Add Another Link
+                            + {t("add_another_link")}
                           </button>
                         </div>
                       </div>
@@ -526,7 +529,7 @@ const OrdersPage: React.FC = () => {
                       <div className="grid grid-cols-1 gap-4 mb-4">
                         <div className='w-full md:max-w-[30%]' >
                           <label className="block text-sm font-semibold text-gray-700 mb-1">
-                            Quantity <span className='text-red-500' >*</span>
+                            {t("quantity")} <span className='text-red-500' >*</span>
                           </label>
                           <input
                             type="number"
@@ -540,7 +543,7 @@ const OrdersPage: React.FC = () => {
                         </div>
                         <div>
                           <label className="block text-sm font-semibold text-gray-700 mb-1">
-                            Logistics Type <span className="text-red-500">*</span>
+                            {t("logistics_type")} <span className="text-red-500">*</span>
                           </label>
                           <select
                             value={supplier.logistics_type}
@@ -549,11 +552,11 @@ const OrdersPage: React.FC = () => {
                             }
                             className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
                           >
-                            <option>Air</option>
-                            <option>Sea (LCL)</option>
-                            <option>Sea (FCL)</option>
-                            <option>Express</option>
-                            <option>Consolidation</option>
+                            <option value={'Air'}>{t("air")}</option>
+                            <option value={'Sea LCL'}>{t("sea_lcl")}</option>
+                            <option value={'Sea FCL'}>{t("sea_fcl")}</option>
+                            <option value={'Express'}>{t("express")}</option>
+                            <option value={'Consolidation'}>{t("consolidation")}</option>
                           </select>
                         </div>
                       </div>
@@ -561,7 +564,7 @@ const OrdersPage: React.FC = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
                           <label className="block text-sm font-semibold text-gray-700 mb-1">
-                            Special Instructions
+                            {t("special_instructions")}
                           </label>
                           <textarea
                             value={supplier.special_instructions}
@@ -570,12 +573,12 @@ const OrdersPage: React.FC = () => {
                             }
                             rows={2}
                             className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
-                            placeholder="Special handling requirements..."
+                            placeholder={t("special_instructions_optional")}
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-semibold text-gray-700 mb-1">
-                            Notes
+                            {t("notes")}
                           </label>
                           <textarea
                             value={supplier.notes}
@@ -584,14 +587,14 @@ const OrdersPage: React.FC = () => {
                             }
                             rows={2}
                             className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
-                            placeholder="Additional notes..."
+                            placeholder={t("notes_optional")}
                           />
                         </div>
                       </div>
 
                       <div className="mb-4">
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Upload Files
+                          {t("upload_files")}
                         </label>
                         <div className="space-y-2">
                           {supplier.files.map((file, fileIndex) => (
@@ -629,9 +632,9 @@ const OrdersPage: React.FC = () => {
                             onClick={() => addSupplierFile(supplier.id)}
                             className="text-gray-600 hover:text-gray-800 text-sm font-medium mt-1"
                           >
-                            + Add Another File
+                            + {t("add_another_file")}
                           </button>
-                          <div className="text-sm mt-1">Attach invoices, specs, or photos for this supplier/product.</div>
+                          <div className="text-sm mt-1">{t("attach_invoices_specs_or_photos_for_this_supplier_product")}</div>
                         </div>
                       </div>
                     </section>
@@ -650,7 +653,7 @@ const OrdersPage: React.FC = () => {
                   ) : (
                     <>
                       <PlusIcon className="h-5 w-5" />
-                      Submit Order
+                      {t("submit_order")}
                     </>
                   )}
                 </button>
@@ -659,7 +662,7 @@ const OrdersPage: React.FC = () => {
                   onClick={() => setShowForm(false)}
                   className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-3 rounded-md font-medium"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
               </div>
             </form>

@@ -98,7 +98,7 @@ const Dashboard: React.FC = () => {
     },
     {
       id: "support",
-      name: "Support",
+      name: t("support"),
       icon: QuestionMarkCircleIcon,
       color: "text-indigo-600",
     },
