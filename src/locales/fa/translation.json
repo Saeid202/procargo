@@ -170,5 +170,11 @@
   "back": "بازگشت",
   "next": "بعدی",
   "submit_case": "ثبت پرونده",
-  "support_page_content_will_be_added_here": "محتوای صفحه پشتیبانی به زودی اضافه خواهد شد."
+  "support_page_content_will_be_added_here": "محتوای صفحه پشتیبانی به زودی اضافه خواهد شد.",
+  "home": "خانه",
+  "services": "خدمات",
+  "about": "درباره ما",
+  "contact": "تماس",
+  "login": "ورود",
+  "sign_up": "ثبت نام"
 }

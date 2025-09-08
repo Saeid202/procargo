@@ -3,16 +3,18 @@ import { Link, useLocation } from 'react-router-dom';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import Logo from './Logo';
 import LanguageDropdown from '../lib/i18n/LanguageDropdown';
+import { useTranslation } from 'react-i18next';
 
 const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { t } = useTranslation();
 
   const navigation = [
-    { name: 'Home', href: '/' },
-    { name: 'Services', href: '#services' },
-    { name: 'About', href: '#about' },
-    { name: 'Contact', href: '#contact' },
+    { name: t('home'), href: '/' },
+    { name: t('services'), href: '#services' },
+    { name: t('about'), href: '#about' },
+    { name: t('contact'), href: '#contact' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -34,9 +36,8 @@ const Navigation: React.FC = () => {
               <a
                 key={item.name}
                 href={item.href}
-                className={`text-gray-700 hover:text-cargo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive(item.href) ? 'text-cargo-600' : ''
-                }`}
+                className={`text-gray-700 hover:text-cargo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive(item.href) ? 'text-cargo-600' : ''
+                  }`}
               >
                 {item.name}
               </a>
@@ -45,13 +46,13 @@ const Navigation: React.FC = () => {
               to="/login"
               className="text-gray-700 hover:text-cargo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
-              Login
+              {t('login')}
             </Link>
             <Link
               to="/signup"
               className="bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
             >
-              Sign Up
+              {t('sign_up')}
             </Link>
             <LanguageDropdown />
           </div>
@@ -81,11 +82,10 @@ const Navigation: React.FC = () => {
               <a
                 key={item.name}
                 href={item.href}
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive(item.href)
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive(item.href)
                     ? 'text-cargo-600 bg-cargo-50'
                     : 'text-gray-700 hover:text-cargo-600 hover:bg-gray-50'
-                }`}
+                  }`}
                 onClick={() => setIsOpen(false)}
               >
                 {item.name}

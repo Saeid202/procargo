@@ -19,7 +19,7 @@ const LanguageDropdown: React.FC = () => {
       className="p-2 border rounded outline-none"
     >
       <option value="en">English</option>
-      <option value="fa">Persian</option>
+      <option value="fa">فارسی</option>
     </select>
   );
 };

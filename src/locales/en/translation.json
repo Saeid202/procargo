@@ -170,5 +170,11 @@
   "back": "Back",
   "next": "Next",
   "submit_case": "Submit Case",
-  "support_page_content_will_be_added_here": "Support page content will be added here."
+  "support_page_content_will_be_added_here": "Support page content will be added here.",
+  "home": "Home",
+  "services": "Services",
+  "about": "About",
+  "contact": "Contact",
+  "login": "Login",
+  "sign_up": "Sign Up"
 }
