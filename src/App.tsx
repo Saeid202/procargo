@@ -10,6 +10,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AgentDashboard from "./components/AgentDashboard";
 import "./lib/i18n"; 
+import LawyerDashboard from "./components/LawyerDashboard";
 
 function App() {
   return (
@@ -35,6 +36,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AgentDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/lawyer"
+              element={
+                <ProtectedRoute>
+                  <LawyerDashboard />
                 </ProtectedRoute>
               }
             />

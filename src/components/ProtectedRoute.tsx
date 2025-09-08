@@ -30,6 +30,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   if (user.role === RolesEnum.AGENT && !location.pathname?.includes('agent')) {
     return <Navigate to={'/dashboard/agent'} replace />
   }
+  
+  if (user.role === RolesEnum.LAWYER && !location.pathname?.includes('lawyer')) {
+    return <Navigate to={'/dashboard/lawyer'} replace />
+  }
 
   return <>{children}</>
 }
