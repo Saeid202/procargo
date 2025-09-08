@@ -68,25 +68,7 @@ const LawyerSettingPage: React.FC = () => {
                 </div>
               </div>
               
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Notification Preferences</h3>
-                <div className="space-y-3">
-                  <label className="flex items-center">
-                    <input type="checkbox" checked className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                    <span className="ml-2 text-sm text-gray-700">Email notifications for new orders</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input type="checkbox" checked className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                    <span className="ml-2 text-sm text-gray-700">SMS alerts for urgent updates</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                    <span className="ml-2 text-sm text-gray-700">Weekly summary reports</span>
-                  </label>
-                </div>
-              </div>
-              
-              <div className="pt-4 border-t">
+              <div className="pt-4 ">
                 <button type='button' onClick={handleSubmit} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
                   Save Changes
                 </button>
