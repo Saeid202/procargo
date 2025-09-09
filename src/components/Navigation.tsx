@@ -4,12 +4,15 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import Logo from './Logo';
 import LanguageDropdown from '../lib/i18n/LanguageDropdown';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../contexts/AuthContext';
+import { RolesEnum } from '../abstractions/enums/roles.enum';
 
 const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { t } = useTranslation();
-
+  const { user } = useAuth();
+  
   const navigation = [
     { name: t('home'), href: '/' },
     { name: t('services'), href: '#services' },
@@ -42,18 +45,33 @@ const Navigation: React.FC = () => {
                 {item.name}
               </a>
             ))}
+            {
+              user ? (
+                <>
             <Link
-              to="/login"
-              className="text-gray-700 hover:text-cargo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              {t('login')}
-            </Link>
-            <Link
-              to="/signup"
+              to={`/dashboard/${user.role == RolesEnum.USER ? '' : user.role?.toLowerCase()}`}
               className="bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
             >
-              {t('sign_up')}
+              {t('dashboard')}
             </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="text-gray-700 hover:text-cargo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    {t('login')}
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    {t('sign_up')}
+                  </Link>
+                </>
+              )
+            }
             <LanguageDropdown />
           </div>
 
@@ -83,8 +101,8 @@ const Navigation: React.FC = () => {
                 key={item.name}
                 href={item.href}
                 className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive(item.href)
-                    ? 'text-cargo-600 bg-cargo-50'
-                    : 'text-gray-700 hover:text-cargo-600 hover:bg-gray-50'
+                  ? 'text-cargo-600 bg-cargo-50'
+                  : 'text-gray-700 hover:text-cargo-600 hover:bg-gray-50'
                   }`}
                 onClick={() => setIsOpen(false)}
               >
