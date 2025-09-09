@@ -251,5 +251,9 @@
   "agent_notes": "Agent Notes",
   "order_successfully_completed": "Order Successfully Completed",
   "buyer_satisfied_with_delivery": "Buyer Satisfied with Delivery",
-  "all_requirements_met_and_product_quality_exceeded_expectations": "All Requirements Met and Product Quality Exceeded Expectations"
+  "all_requirements_met_and_product_quality_exceeded_expectations": "All Requirements Met and Product Quality Exceeded Expectations",
+  "add_partner": "Add Partner",
+  "all_services": "All Services",
+  "land_transport": "Land Transport",
+  "customs": "Customs"
 }

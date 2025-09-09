@@ -1,6 +1,10 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const AgentLogisticsPage: React.FC = () => {
+
+  const { t } = useTranslation();
+
   return (
     <div id="logistics" className="tab-content">
 
@@ -13,7 +17,7 @@ const AgentLogisticsPage: React.FC = () => {
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-              Add Partner
+              {t("add_partner")}
             </button>
             <button
               // onclick="showQuoteModal()"
@@ -21,17 +25,17 @@ const AgentLogisticsPage: React.FC = () => {
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Request Quote
+              {t("request_quote")}
             </button>
           </div>
           <div className="flex items-center space-x-2">
             <input type="text" placeholder="Search partners..." className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm" />
             <select className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
-              <option value="all">All Services</option>
-              <option value="air">Air Freight</option>
-              <option value="sea">Sea Freight</option>
-              <option value="land">Land Transport</option>
-              <option value="customs">Customs</option>
+              <option value="all">{t("all_services")}</option>
+              <option value="air">{t("air_freight")}</option>
+              <option value="sea">{t("sea_freight")}</option>
+              <option value="land">{t("land_transport")}</option>
+              <option value="customs">{t("customs")}</option>
             </select>
           </div>
         </div>
