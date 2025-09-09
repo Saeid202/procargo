@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import Loading from '../../components/ui/Loading';
 import { SupabaseService } from '../../services/supabaseService';
 import { toast } from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 const AgentSettingPage: React.FC = () => {
   const [profileData, setProfileData] = useState({
@@ -13,6 +14,7 @@ const AgentSettingPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   useEffect(() => {
     setProfileData({
@@ -51,18 +53,18 @@ const AgentSettingPage: React.FC = () => {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Profile Settings</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">{t("profile_settings")}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t("first_name")}</label>
                     <input type="text" value={`${profileData.firstName}`} onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t("last_name")}</label>
                     <input type="text" value={`${profileData.lastName}`} onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t("email")}</label>
                     <input type="email" value={user?.email} disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
                   </div>
                 </div>
@@ -70,7 +72,7 @@ const AgentSettingPage: React.FC = () => {
               
               <div className="pt-4 ">
                 <button type='button' onClick={handleSubmit} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                  Save Changes
+                {t("save")}
                 </button>
               </div>
 

@@ -271,5 +271,7 @@
   "quote_request_sent_to_global_freight": "Quote request sent to Global Freight",
   "customs_clearance_confirmed": "Customs Clearance Confirmed",
   "waiting_for_ocean_cargo_quote": "Waiting for Ocean Cargo Quote",
-  "3_days_ago": "3 Days Ago"
+  "3_days_ago": "3 Days Ago",
+  "profile_settings": "Profile Settings",
+  "save": "Save"
 }

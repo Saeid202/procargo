@@ -208,7 +208,7 @@
   "sms_notifications": "اطلاعات تلفن همراه",
   "push_notifications": "اطلاعات پوش",
   "saving": "ذخیره",
-  "save_changes": "ذخیره تغییرات", 
+  "save_changes": "ذخیره تغییرات",
   "sign_out": "خروج",
   "cases": "موارد قانونی",
   "plaintiff": "صادر کننده",
@@ -251,7 +251,8 @@
   "agent_notes": "یادداشت‌های وکیل",
   "order_successfully_completed": "سفارش با موفقیت تکمیل شد",
   "buyer_satisfied_with_delivery": "خریدار رضایتمند از تحویل",
-  "all_requirements_met_and_product_quality_exceeded_expectations": "تمام الزامات برآورده شده و کیفیت محصول بیشتر از انتظارات", "add_partner": "افزودن شریک",
+  "all_requirements_met_and_product_quality_exceeded_expectations": "تمام الزامات برآورده شده و کیفیت محصول بیشتر از انتظارات",
+  "add_partner": "افزودن شریک",
   "all_services": "همه خدمات",
   "land_transport": "حمل و نقل زمینی",
   "customs": "گمرک",
@@ -267,5 +268,7 @@
   "quote_request_sent_to_global_freight": "درخواست قیمت به Global Freight",
   "customs_clearance_confirmed": "تایید گمرک",
   "waiting_for_ocean_cargo_quote": "در انتظار قیمت دریایی",
-  "3_days_ago": "3 روز پیش"
+  "3_days_ago": "3 روز پیش",
+  "profile_settings": "تنظیمات پروفایل",
+  "save": "ذخیره"
 }
