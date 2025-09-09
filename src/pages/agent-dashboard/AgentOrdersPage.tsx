@@ -4,11 +4,14 @@ import { useAuth } from '../../contexts/AuthContext';
 import { SupabaseService } from '../../services/supabaseService';
 import { Order } from '../dashboard/OrdersPage';
 import { cn } from '../../utils/cn';
+import { useTranslation } from 'react-i18next';
 
 
 const AgentOrdersPage: React.FC = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (user) {
@@ -36,37 +39,17 @@ const AgentOrdersPage: React.FC = () => {
   return (
     <div id="orders" className="tab-content">
 
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <input
-          type="text"
-          placeholder="Search by name, product..."
-          className="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          // oninput="filterOrders()"
-          id="searchInput"
-        />
-        <select
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          // onchange="filterOrders()"
-          id="statusFilter"
-        >
-          <option value="all">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="in-progress">In Progress</option>
-          <option value="completed">Completed</option>
-        </select>
-      </div>
-
       <div className="bg-white shadow overflow-hidden rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Buyer</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("order_id")}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("buyer")}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("product")}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("qty")}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("status")}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("date")}</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t("actions")}</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200" id="orderTableBody">
@@ -110,14 +93,14 @@ const AgentOrdersPage: React.FC = () => {
                               <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                               </svg>
-                              Product Information
+                              {t("product_information")}
                             </h4>
                             <div className="grid grid-cols-2 gap-4 text-sm">
-                              <div><span className="font-medium">Name:</span> {order.suppliers?.map((supplier) => supplier.product_name).join(', ')}</div>
-                              <div><span className="font-medium">Quantity:</span> {order.suppliers?.reduce((acc, supplier) => acc + supplier.quantity, 0)} units</div>
+                              <div><span className="font-medium">{t("name")}:</span> {order.suppliers?.map((supplier) => supplier.product_name).join(', ')}</div>
+                              <div><span className="font-medium">{t("quantity")}:</span> {order.suppliers?.reduce((acc, supplier) => acc + supplier.quantity, 0)} units</div>
                               {/* //TODO-Question: What is the category? */}
-                              <div><span className="font-medium">Category:</span> Commercial Equipment</div>
-                              <div><span className="font-medium">Priority:</span> <span className="text-red-600 font-medium capitalize">{order.priority}</span></div>
+                              <div><span className="font-medium">{t("category")}:</span> Commercial Equipment</div>
+                              <div><span className="font-medium">{t("priority")}:</span> <span className="text-red-600 font-medium capitalize">{order.priority}</span></div>
                             </div>
                           </div>
 
@@ -126,13 +109,13 @@ const AgentOrdersPage: React.FC = () => {
                               <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                               </svg>
-                              Supplier Links
+                              {t("supplier_links")}
                             </h4>
                             {
                               order.suppliers?.map((supplier) => (
                                 <div className="space-y-2 text-sm">
                                   <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                                    <span className="text-blue-600">{supplier.supplier_links?.[0].url} (Primary)</span>
+                                    <span className="text-blue-600">{supplier.supplier_links?.[0].url}</span>
                                     <span className="text-xs text-gray-500">{supplier.supplier_links?.[0].description}</span>
                                   </div>
 
@@ -146,7 +129,7 @@ const AgentOrdersPage: React.FC = () => {
                               <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                               </svg>
-                              Attachments
+                              {t("attachments")}
                             </h4>
                             {
                               order.suppliers?.map((supplier) => (
@@ -180,23 +163,23 @@ const AgentOrdersPage: React.FC = () => {
                                   <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                   </svg>
-                                  Order Summary
+                                  {t("order_summary")}
                                 </h4>
                                 <div className="grid grid-cols-3 gap-4 text-center">
                                   <div className="p-3 bg-green-50 rounded-lg">
-                                    <p className="text-xs text-gray-600">Final Price</p>
+                                    <p className="text-xs text-gray-600">{t("final_price")}</p>
                                     <p className="text-lg font-bold text-green-600">${order.total_value}</p>
                                   </div>
                                   <div className="p-3 bg-blue-50 rounded-lg">
                                     {/* //TODO-Question: Delivery Date */}
-                                    <p className="text-xs text-gray-600">Delivery Date</p>
+                                    <p className="text-xs text-gray-600">{t("delivery_date")}</p>
                                     <p className="text-sm font-semibold text-blue-600">May 15, 2025</p>
                                   </div>
                                   <div className="p-3 bg-purple-50 rounded-lg">
                                     {/* //TODO-Question: Status */}
-                                    <p className="text-xs text-gray-600">Status</p>
+                                    <p className="text-xs text-gray-600">{t("status")}</p>
                                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                      Delivered
+                                      {t("delivered")}
                                     </span>
                                   </div>
                                 </div>
@@ -211,13 +194,13 @@ const AgentOrdersPage: React.FC = () => {
                               <svg className="w-5 h-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
-                              Current Status
+                              {t("current_status")}
                             </h4>
                             <div className="text-center">
                               <span className={cn("capitalize inline-flex items-center px-3 py-1 rounded-full text-sm font-medium", order.status === 'pending' ? 'bg-red-100 text-red-800' : order.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800')}>
                                 {order.status?.replace('-', ' ')}
                               </span>
-                              <p className="text-xs text-gray-600 mt-1">Waiting for response</p>
+                              <p className="text-xs text-gray-600 mt-1">{t("waiting_for_response")}</p>
                             </div>
                           </div>
 
@@ -228,10 +211,10 @@ const AgentOrdersPage: React.FC = () => {
                                   <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                   </svg>
-                                  Agent Notes
+                                  {t("agent_notes")}
                                 </h4>
                                 <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                                  Order successfully completed. Buyer satisfied with delivery. All requirements met and product quality exceeded expectations.
+                                  {t("order_successfully_completed")}. {t("buyer_satisfied_with_delivery")}. {t("all_requirements_met_and_product_quality_exceeded_expectations")}.
                                 </div>
                               </div>
                             ) : (
@@ -240,18 +223,18 @@ const AgentOrdersPage: React.FC = () => {
                                   <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                   </svg>
-                                  Quick Response
+                                  {t("quick_response")}
                                 </h4>
                                 <form className="space-y-3">
                                   <textarea
-                                    placeholder="Type your response..."
+                                    placeholder={t("type_your_response")}
                                     rows={3}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm resize-none"
                                   ></textarea>
                                   <div className="grid grid-cols-2 gap-2">
                                     <input
                                       type="number"
-                                      placeholder="Price $"
+                                      placeholder={t("price_dollar")}
                                       className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                                     />
                                     <input
@@ -261,12 +244,12 @@ const AgentOrdersPage: React.FC = () => {
                                   </div>
                                   <div className="flex gap-2">
                                     <button type="submit" className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium">
-                                      Send Reply
+                                      {t("send_reply")}
                                     </button>
                                     <button
                                       // onclick="updateOrderStatus('ORD-001', 'in-progress')"
                                       type="button" className="px-3 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 text-sm font-medium">
-                                      In Progress
+                                      {t("in_progress")}
                                     </button>
                                   </div>
                                 </form>

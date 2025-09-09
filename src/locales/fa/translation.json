@@ -235,5 +235,21 @@
   "total_orders": "تعداد سفارشات",
   "pending": "در انتظار",
   "completed": "تکمیل شده",
-  "revenue": "درآمد"
+  "revenue": "درآمد",
+  "order_id": "شناسه سفارش",
+  "buyer": "خریدار",
+  "product": "محصول",
+  "date": "تاریخ",
+  "product_information": "اطلاعات محصول",
+  "name": "نام",
+  "category": "دسته‌بندی",
+  "priority": "اولویت",
+  "order_summary": "خلاصه سفارش",
+  "final_price": "قیمت نهایی",
+  "delivery_date": "تاریخ تحویل",
+  "delivered": "تحویل شده",
+  "agent_notes": "یادداشت‌های وکیل",
+  "order_successfully_completed": "سفارش با موفقیت تکمیل شد",
+  "buyer_satisfied_with_delivery": "خریدار رضایتمند از تحویل",
+  "all_requirements_met_and_product_quality_exceeded_expectations": "تمام الزامات برآورده شده و کیفیت محصول بیشتر از انتظارات"
 }
