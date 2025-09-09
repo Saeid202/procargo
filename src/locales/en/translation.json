@@ -255,5 +255,21 @@
   "add_partner": "Add Partner",
   "all_services": "All Services",
   "land_transport": "Land Transport",
-  "customs": "Customs"
+  "customs": "Customs",
+  "search_partners": "Search Partners",
+  "global_freight_solutions": "Global Freight Solutions",
+  "air_sea_freight": "Air & Sea Freight",
+  "avg_response": "Avg Response",
+  "hours": "Hours",
+  "message": "Message",
+  "ocean_cargo_express": "Ocean Cargo Express",
+  "sea_freight_specialist": "Sea Freight Specialist",
+  "customs_clear_pro": "Customs Clear Pro",
+  "customs_brokerage": "Customs Brokerage",
+  "hour": "Hour",
+  "recent_communications": "Recent Communications",
+  "quote_request_sent_to_global_freight": "Quote request sent to Global Freight",
+  "customs_clearance_confirmed": "Customs Clearance Confirmed",
+  "waiting_for_ocean_cargo_quote": "Waiting for Ocean Cargo Quote",
+  "3_days_ago": "3 Days Ago"
 }

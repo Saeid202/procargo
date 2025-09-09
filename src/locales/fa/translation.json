@@ -254,5 +254,18 @@
   "all_requirements_met_and_product_quality_exceeded_expectations": "تمام الزامات برآورده شده و کیفیت محصول بیشتر از انتظارات", "add_partner": "افزودن شریک",
   "all_services": "همه خدمات",
   "land_transport": "حمل و نقل زمینی",
-  "customs": "گمرک"
+  "customs": "گمرک",
+  "search_partners": "جستجوی شرکا",
+  "hours": "ساعت",
+  "message": "پیام",
+  "ocean_cargo_express": "دریایی سریع",
+  "sea_freight_specialist": "خیال سریع دریایی",
+  "customs_clear_pro": "گمرک Clear Pro",
+  "customs_brokerage": "گمرک Brokerage",
+  "hour": "ساعت",
+  "recent_communications": "آخرین پیام ها",
+  "quote_request_sent_to_global_freight": "درخواست قیمت به Global Freight",
+  "customs_clearance_confirmed": "تایید گمرک",
+  "waiting_for_ocean_cargo_quote": "در انتظار قیمت دریایی",
+  "3_days_ago": "3 روز پیش"
 }
