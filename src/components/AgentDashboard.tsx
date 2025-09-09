@@ -10,22 +10,22 @@ import AgentOverviewPage from '../pages/agent-dashboard/AgentOverviewPage';
 import AgentOrdersPage from '../pages/agent-dashboard/AgentOrdersPage';
 import AgentLogisticsPage from '../pages/agent-dashboard/AgentLogisticsPage';
 import AgentSettingPage from '../pages/agent-dashboard/AgentSettingPage';
+import { useTranslation } from 'react-i18next';
 
 const AgentDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('agent-overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // Tab change handler
+  const { t } = useTranslation();
+
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
   };
 
-  // Sidebar collapse handler
   const handleToggleCollapse = () => {
     setSidebarCollapsed(!sidebarCollapsed);
   };
 
-  // Render the appropriate page content based on active tab
   const renderPageContent = () => {
     switch (activeTab) {
       case 'agent-overview':
@@ -44,25 +44,25 @@ const AgentDashboard: React.FC = () => {
   const sidebarItems = [
     {
       id: "agent-overview",
-      name: "Overview",
+      name: t("overview"),
       icon: HomeIcon,
       color: "text-cargo-600",
     },
     {
       id: "agent-orders",
-      name: "Orders",
+      name: t("orders"),
       icon: CalculatorIcon,
       color: "text-green-600",
     },
     {
       id: "agent-logistics",
-      name: "Logistics",
+      name: t("logistics"),
       icon: TruckIcon,
       color: "text-blue-600",
     },
     {
       id: "agent-settings",
-      name: "Settings",
+      name: t("settings"),
       icon: ClipboardDocumentListIcon,
       color: "text-orange-600",
     },

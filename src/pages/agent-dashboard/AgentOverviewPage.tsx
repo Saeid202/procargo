@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { SupabaseService } from '../../services/supabaseService';
-import { useAuth } from '../../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const AgentOverviewPage: React.FC = () => {
 
@@ -8,7 +8,8 @@ const AgentOverviewPage: React.FC = () => {
   const [pendingOrders, setPendingOrders] = useState(0);
   const [completedOrders, setCompletedOrders] = useState(0);
   const [revenue, setRevenue] = useState(0);
-  const { user } = useAuth();
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadOverview();
@@ -37,8 +38,8 @@ const AgentOverviewPage: React.FC = () => {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Orders</p>
+            <div className="ms-4">
+              <p className="text-sm font-medium text-gray-600">{t("total_orders")}</p>
               <p className="text-2xl font-semibold text-gray-900">{totalOrders}</p>
             </div>
           </div>
@@ -51,8 +52,8 @@ const AgentOverviewPage: React.FC = () => {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Pending</p>
+            <div className="ms-4">
+              <p className="text-sm font-medium text-gray-600">{t("pending")}</p>
               <p className="text-2xl font-semibold text-gray-900">{pendingOrders}</p>
             </div>
           </div>
@@ -65,8 +66,8 @@ const AgentOverviewPage: React.FC = () => {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Completed</p>
+            <div className="ms-4">
+              <p className="text-sm font-medium text-gray-600">{t("completed")}</p>
               <p className="text-2xl font-semibold text-gray-900">{completedOrders}</p>
             </div>
           </div>
@@ -79,8 +80,8 @@ const AgentOverviewPage: React.FC = () => {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Revenue</p>
+            <div className="ms-4">
+              <p className="text-sm font-medium text-gray-600">{t("revenue")}</p>
               <p className="text-2xl font-semibold text-gray-900">${revenue}</p>
             </div>
           </div>

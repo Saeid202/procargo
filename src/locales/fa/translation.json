@@ -230,5 +230,10 @@
   "price_dollar": "قیمت $",
   "send_reply": "ارسال پاسخ",
   "in_progress": "در حال انجام",
-  "defendant": "متهم"
+  "defendant": "متهم",
+  "logistics": "لجستیک",
+  "total_orders": "تعداد سفارشات",
+  "pending": "در انتظار",
+  "completed": "تکمیل شده",
+  "revenue": "درآمد"
 }

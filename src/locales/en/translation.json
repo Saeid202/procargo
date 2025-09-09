@@ -230,5 +230,10 @@
   "price_dollar": "Price $",
   "send_reply": "Send Reply",
   "in_progress": "In Progress",
-  "defendant": "Defendant"
+  "defendant": "Defendant",
+  "logistics": "Logistics",
+  "total_orders": "Total Orders",
+  "pending": "Pending",
+  "completed": "Completed",
+  "revenue": "Revenue"
 }
