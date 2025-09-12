@@ -6,8 +6,6 @@ import {
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import LawyerOverviewPage from '../pages/lawyer-dashboard/LawyerOverviewPage';
-import LawyerSettingPage from '../pages/lawyer-dashboard/LawyerSettingPage';
-import LawyerCasesPage from '../pages/lawyer-dashboard/LawyerCasesPage';
 import { useTranslation } from 'react-i18next';
 import TranslationManagementPage from '../pages/admin/TranslationManagementPage';
 import MigrationPage from '../pages/admin/MigrationPage';
