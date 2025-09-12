@@ -11,6 +11,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AgentDashboard from "./components/AgentDashboard";
 import "./lib/i18n"; 
 import LawyerDashboard from "./components/LawyerDashboard";
+import TranslationManagementPage from "./pages/admin/TranslationManagementPage";
+import MigrationPage from "./pages/admin/MigrationPage";
+import AdminDashboard from "./components/AdminDashboard.";
 
 function App() {
   return (
@@ -47,6 +50,30 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/dashboard/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            {/* <Route
+              path="/admin/translations"
+              element={
+                <ProtectedRoute>
+                  <TranslationManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/migration"
+              element={
+                <ProtectedRoute>
+                  <MigrationPage />
+                </ProtectedRoute>
+              }
+            /> */}
           </Routes>
         </div>
       </Router>

@@ -270,5 +270,11 @@
   "waiting_for_ocean_cargo_quote": "در انتظار قیمت دریایی",
   "3_days_ago": "3 روز پیش",
   "profile_settings": "تنظیمات پروفایل",
-  "save": "ذخیره"
+  "save": "ذخیره",
+  "translations": "ترجمه ها",
+  "migration": "مهاجرت",
+  "admin_translations_descripton": "مدیریت ترجمه های اپلیکیشن",
+  "admin_migration_description": "مهاجرت ترجمه های از فایل های JSON به پایگاه داده",
+  "admin_translations": "ترجمه ها",
+  "admin_migration": "مهاجرت"
 }

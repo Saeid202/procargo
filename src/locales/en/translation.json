@@ -273,5 +273,11 @@
   "waiting_for_ocean_cargo_quote": "Waiting for Ocean Cargo Quote",
   "3_days_ago": "3 Days Ago",
   "profile_settings": "Profile Settings",
-  "save": "Save"
+  "save": "Save",
+  "translations": "Translations",
+  "migration": "Migration",
+  "admin_translations_descripton": "Manage application translations and content",
+  "admin_migration_description": "Migrate existing translations from JSON files to the database",
+  "admin_translations": "Translations",
+  "admin_migration": "Migration"
 }
