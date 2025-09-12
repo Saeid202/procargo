@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import DashboardLayout from './layout/DashboardLayout';
 import {
-  CalculatorIcon,
-  ClipboardDocumentListIcon,
   HomeIcon,
+  GlobeAltIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import LawyerOverviewPage from '../pages/lawyer-dashboard/LawyerOverviewPage';
 import LawyerSettingPage from '../pages/lawyer-dashboard/LawyerSettingPage';
@@ -49,13 +49,13 @@ const AdminDashboard: React.FC = () => {
     {
       id: "admin-translations",
       name: t("translations"),
-      icon: CalculatorIcon,
+      icon: GlobeAltIcon,
       color: "text-green-600",
     },
     {
       id: "admin-migration",
       name: t("migration"),
-      icon: ClipboardDocumentListIcon,
+      icon: ArrowPathIcon,
       color: "text-orange-600",
     },
   ];
