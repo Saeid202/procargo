@@ -1,14 +1,20 @@
-# CargoBridge - Cargo Services Platform
+# ProCargo - Cargo Services Platform
 
-A comprehensive React-based platform for managing cargo services between China and Canada, featuring a modern dashboard, order management, and user profile management.
+A comprehensive React-based platform for managing cargo services between China and Canada, featuring role-based dashboards, order management, legal case management, and multi-language support.
 
 ## 🚀 Features
 
-- **Landing Page**: Beautiful, responsive landing page with hero section, services, and CTA
-- **Authentication**: User signup and login system
-- **Dashboard**: Comprehensive dashboard with left sidebar navigation
-- **Order Management**: Complete order tracking with automatic numbering and status management
-- **Profile Management**: Comprehensive user profile settings with business information
+- **Role-Based Dashboards**: Specialized interfaces for different user types
+  - **User Dashboard**: Order management and tracking
+  - **Agent Dashboard**: Logistics coordination and partner management
+  - **Lawyer Dashboard**: Legal case management and document handling
+  - **Admin Dashboard**: Translation management and system administration
+- **Multi-Language Support**: Full internationalization with English and Farsi
+- **Authentication**: Secure user signup and login system with role-based access
+- **Order Management**: Complete order tracking with supplier management
+- **Legal Case Management**: Comprehensive case tracking and document management
+- **Partner Network**: Logistics partner directory with communication tools
+- **Translation Management**: Admin interface for managing multi-language content
 - **Responsive Design**: Mobile-first design using Tailwind CSS
 - **Modern UI**: Clean, professional interface with consistent design system
 
@@ -18,26 +24,62 @@ A comprehensive React-based platform for managing cargo services between China a
 src/
 ├── components/           # Reusable UI components
 │   ├── layout/          # Layout components (Header, Sidebar, DashboardLayout)
-│   ├── forms/           # Form components
+│   ├── admin/           # Admin-specific components
+│   │   ├── TranslationEditor.tsx
+│   │   ├── TranslationList.tsx
+│   │   ├── TranslationFilters.tsx
+│   │   └── TranslationImportExport.tsx
 │   ├── ui/              # Basic UI components
-│   ├── Dashboard.tsx    # Main dashboard container
+│   ├── Dashboard.tsx    # Main user dashboard container
+│   ├── AgentDashboard.tsx    # Agent dashboard container
+│   ├── LawyerDashboard.tsx   # Lawyer dashboard container
+│   ├── AdminDashboard.tsx    # Admin dashboard container
 │   ├── OrderForm.tsx    # Order creation form
 │   ├── LoginPage.tsx    # User login page
 │   ├── SignUpPage.tsx   # User registration page
 │   ├── LandingPage.tsx  # Landing page
 │   └── Navigation.tsx   # Navigation component
 ├── pages/               # Page components organized by feature
-│   ├── dashboard/       # Dashboard-specific pages
+│   ├── dashboard/       # User dashboard pages
 │   │   ├── OverviewPage.tsx    # Dashboard overview
-│   │   └── OrdersPage.tsx      # Orders management
+│   │   ├── OrdersPage.tsx      # Orders management
+│   │   ├── ShipmentsPage.tsx   # Shipments tracking
+│   │   ├── CompliancePage.tsx  # Compliance management
+│   │   ├── LegalAssistancePage.tsx
+│   │   ├── LegalIssuePage.tsx
+│   │   └── SupportPage.tsx
+│   ├── agent-dashboard/ # Agent-specific pages
+│   │   ├── AgentOverviewPage.tsx
+│   │   ├── AgentOrdersPage.tsx
+│   │   ├── AgentLogisticsPage.tsx
+│   │   └── AgentSettingPage.tsx
+│   ├── lawyer-dashboard/ # Lawyer-specific pages
+│   │   ├── LawyerOverviewPage.tsx
+│   │   ├── LawyerCasesPage.tsx
+│   │   └── LawyerSettingPage.tsx
+│   ├── admin/           # Admin-specific pages
+│   │   ├── TranslationManagementPage.tsx
+│   │   └── MigrationPage.tsx
 │   ├── account/         # Account-related pages
 │   │   └── SettingsPage.tsx    # User profile settings
-│   └── business/        # Business-related pages
+│   └── auth/            # Authentication pages
+│       ├── LoginPage.tsx
+│       └── SignUpPage.tsx
 ├── services/            # API services and external integrations
-├── stores/              # State management (Zustand/Redux)
-├── types/               # TypeScript type definitions
+│   ├── supabaseService.ts
+│   └── translationService.ts
+├── contexts/            # React contexts
+│   └── AuthContext.tsx
+├── lib/                 # Library configurations
+│   ├── supabase.ts
+│   └── i18n/            # Internationalization
+├── locales/             # Translation files
+│   ├── en/
+│   └── fa/
+├── abstractions/        # Type definitions and enums
+│   └── enums/
 ├── utils/               # Utility functions and helpers
-└── constants/           # Application constants
+└── config/              # Configuration files
 ```
 
 ## 🎯 Architecture Benefits
@@ -70,10 +112,14 @@ src/
 - **Styling**: Tailwind CSS with custom color palette
 - **Icons**: Heroicons
 - **Routing**: React Router
-- **State Management**: React Hooks (with room for Zustand/Redux)
+- **State Management**: React Hooks with Context API
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth with role-based access
+- **File Storage**: Supabase Storage
+- **Internationalization**: React i18next
 - **Build Tool**: Create React App
 - **Package Manager**: npm
-- **Database**: Mock data (ready for future database integration)
+- **Notifications**: React Hot Toast
 
 ## 🚀 Getting Started
 
@@ -93,8 +139,15 @@ src/
    npm start
    ```
 
-4. **Open your browser**
-   Navigate to `nhttp://localhost:3000`
+4. **Configure Environment Variables**
+   Create a `.env` file with your Supabase credentials:
+   ```
+   REACT_APP_SUPABASE_URL=your_supabase_url
+   REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+5. **Open your browser**
+   Navigate to `http://localhost:3000`
 
 ## 📱 Available Scripts
 
@@ -102,6 +155,49 @@ src/
 - `npm run build` - Build for production
 - `npm test` - Run tests
 - `npm run eject` - Eject from Create React App
+
+## 👥 User Roles & Dashboards
+
+### **User Dashboard**
+- Order creation and management
+- Shipment tracking
+- Compliance management
+- Legal assistance requests
+- Profile settings
+
+### **Agent Dashboard**
+- Order processing and logistics coordination
+- Partner network management
+- Business metrics and analytics
+- Communication with logistics partners
+- Quote management
+
+### **Lawyer Dashboard**
+- Legal case management
+- Document handling and review
+- Case status tracking
+- Client communication
+- Legal response system
+
+### **Admin Dashboard**
+- Translation management
+- System administration
+- User management
+- Content management
+
+## 📚 Documentation
+
+### **Dashboard Documentation**
+- [Lawyer Dashboard Documentation](docs/LAWYER_DASHBOARD_DOCUMENTATION.md) - Comprehensive guide for legal case management
+- [Agent Dashboard Documentation](docs/AGENT_DASHBOARD_DOCUMENTATION.md) - Complete guide for logistics coordination
+- [Translation Admin Setup](docs/TRANSLATION_ADMIN_SETUP.md) - Multi-language content management
+
+### **Key Features by Role**
+- **Role-Based Access Control**: Secure access based on user permissions
+- **Multi-Language Support**: Full i18n with English and Farsi
+- **Real-Time Updates**: Live data synchronization
+- **File Management**: Secure document upload and storage
+- **Communication Tools**: Built-in messaging and response systems
 
 ## 🎨 Design System
 
@@ -122,13 +218,14 @@ src/
 
 ## 🔮 Future Enhancements
 
-- **Database**: Mock data (ready for future database integration)
-- **Authentication**: JWT-based authentication system
-- **Real-time Updates**: WebSocket integration for live data
 - **Mobile App**: React Native companion app
-- **Analytics**: Dashboard analytics and reporting
-- **Multi-language**: Internationalization support
-- **API Integration**: Real shipping API integrations
+- **Advanced Analytics**: Enhanced dashboard analytics and reporting
+- **Real-time Notifications**: WebSocket integration for live updates
+- **API Integration**: Third-party shipping and logistics APIs
+- **Advanced Search**: Enhanced filtering and search capabilities
+- **Workflow Automation**: Automated order processing workflows
+- **Calendar Integration**: Schedule management and deadline tracking
+- **Advanced Security**: Enhanced security features and audit logs
 
 ## 📁 File Organization Principles
 
@@ -145,6 +242,9 @@ src/
 3. Maintain consistent styling with Tailwind CSS
 4. Add proper TypeScript interfaces for props
 5. Follow React best practices and hooks
+6. Ensure proper role-based access control
+7. Add appropriate translations for new features
+8. Test with different user roles and permissions
 
 ## 📄 License
 
