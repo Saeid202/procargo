@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { TranslationFilters, TranslationGroup } from '../../services/translationService';
+import { useTranslation } from 'react-i18next';
 
 interface TranslationFiltersProps {
   filters: TranslationFilters;
@@ -13,6 +14,8 @@ const TranslationFiltersComponent: React.FC<TranslationFiltersProps> = ({
   onFiltersChange
 }) => {
   const [localFilters, setLocalFilters] = useState<TranslationFilters>(filters);
+
+  const {t} = useTranslation();
 
   const handleFilterChange = (field: keyof TranslationFilters, value: string) => {
     const newFilters = {
@@ -36,21 +39,21 @@ const TranslationFiltersComponent: React.FC<TranslationFiltersProps> = ({
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex-1 min-w-64">
           <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
-            Search
+            {t('search')}
           </label>
           <input
             type="text"
             id="search"
             value={localFilters.search || ''}
             onChange={(e) => handleFilterChange('search', e.target.value)}
-            placeholder="Search by key or value..."
+            placeholder={t('search_by_key_or_value')}
             className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           />
         </div>
 
         <div className="min-w-32">
           <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-1">
-            Language
+            {t('language')}
           </label>
           <select
             id="language"
@@ -58,7 +61,7 @@ const TranslationFiltersComponent: React.FC<TranslationFiltersProps> = ({
             onChange={(e) => handleFilterChange('language', e.target.value)}
             className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           >
-            <option value="">All Languages</option>
+            <option value="">{t('all_languages')}</option>
             <option value="en">English</option>
             <option value="fa">فارسی (Persian)</option>
           </select>
@@ -66,7 +69,7 @@ const TranslationFiltersComponent: React.FC<TranslationFiltersProps> = ({
 
         <div className="min-w-40">
           <label htmlFor="group" className="block text-sm font-medium text-gray-700 mb-1">
-            Group
+            {t('group')}
           </label>
           <select
             id="group"
@@ -74,7 +77,7 @@ const TranslationFiltersComponent: React.FC<TranslationFiltersProps> = ({
             onChange={(e) => handleFilterChange('group_id', e.target.value)}
             className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           >
-            <option value="">All Groups</option>
+            <option value="">{t('all_groups')}</option>
             {groups.map((group) => (
               <option key={group.id} value={group.id}>
                 {group.name}
@@ -89,7 +92,7 @@ const TranslationFiltersComponent: React.FC<TranslationFiltersProps> = ({
               onClick={clearFilters}
               className="bg-gray-100 text-gray-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
             >
-              Clear Filters
+              {t('clear_filters')}
             </button>
           </div>
         )}
@@ -104,7 +107,7 @@ const TranslationFiltersComponent: React.FC<TranslationFiltersProps> = ({
                 onClick={() => handleFilterChange('search', '')}
                 className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-500 focus:outline-none focus:bg-blue-500 focus:text-white"
               >
-                <span className="sr-only">Remove</span>
+                <span className="sr-only">{t('remove')}</span>
                 <svg className="w-2 h-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
                   <path strokeLinecap="round" strokeWidth="1.5" d="m1 1 6 6m0-6-6 6" />
                 </svg>
@@ -118,7 +121,7 @@ const TranslationFiltersComponent: React.FC<TranslationFiltersProps> = ({
                 onClick={() => handleFilterChange('language', '')}
                 className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-green-400 hover:bg-green-200 hover:text-green-500 focus:outline-none focus:bg-green-500 focus:text-white"
               >
-                <span className="sr-only">Remove</span>
+                <span className="sr-only">{t('remove')}</span>
                 <svg className="w-2 h-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
                   <path strokeLinecap="round" strokeWidth="1.5" d="m1 1 6 6m0-6-6 6" />
                 </svg>
@@ -132,7 +135,7 @@ const TranslationFiltersComponent: React.FC<TranslationFiltersProps> = ({
                 onClick={() => handleFilterChange('group_id', '')}
                 className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-purple-400 hover:bg-purple-200 hover:text-purple-500 focus:outline-none focus:bg-purple-500 focus:text-white"
               >
-                <span className="sr-only">Remove</span>
+                <span className="sr-only">{t('remove')}</span>
                 <svg className="w-2 h-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
                   <path strokeLinecap="round" strokeWidth="1.5" d="m1 1 6 6m0-6-6 6" />
                 </svg>

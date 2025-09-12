@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { runMigration } from '../../utils/migrateTranslations';
 import { toast } from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 const MigrationPage: React.FC = () => {
   const [migrating, setMigrating] = useState(false);
@@ -9,6 +10,8 @@ const MigrationPage: React.FC = () => {
     imported: { en: number; fa: number };
     errors: string[];
   } | null>(null);
+
+  const {t} = useTranslation();
 
   const handleMigration = async () => {
     if (window.confirm('This will migrate all existing translations to the database. Continue?')) {
@@ -40,36 +43,31 @@ const MigrationPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Translation Migration</h1>
-          <p className="mt-2 text-gray-600">Migrate existing translations from JSON files to the database</p>
-        </div>
-
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <div className="mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Migration Overview</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">{t('migration_overview')}</h3>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-blue-900 mb-2">What this migration does:</h4>
+                <h4 className="text-sm font-medium text-blue-900 mb-2">{t('what_this_migration_does')}:</h4>
                 <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• Imports all translations from <code>src/locales/en/translation.json</code></li>
-                  <li>• Imports all translations from <code>src/locales/fa/translation.json</code></li>
-                  <li>• Flattens nested translation objects (e.g., <code>stats.shipments</code>)</li>
-                  <li>• Assigns translations to appropriate groups for better organization</li>
-                  <li>• Enables dynamic translation management through the admin panel</li>
+                  <li>• {t('imports_all_translations_from')} <code>src/locales/en/translation.json</code></li>
+                  <li>• {t('imports_all_translations_from')} <code>src/locales/fa/translation.json</code></li>
+                  <li>• {t('flattens_nested_translation_objects')} (e.g., <code>stats.shipments</code>)</li>
+                  <li>• {t('assigns_translations_to_appropriate_groups_for_better_organization')}</li>
+                  <li>• {t('enables_dynamic_translation_management_through_the_admin_panel')}</li>
                 </ul>
               </div>
             </div>
 
             <div className="mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Before You Start</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">{t('before_you_start')}</h3>
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-yellow-900 mb-2">Important Notes:</h4>
+                <h4 className="text-sm font-medium text-yellow-900 mb-2">{t('important_notes')}:</h4>
                 <ul className="text-sm text-yellow-800 space-y-1">
-                  <li>• Make sure you have admin privileges in your Supabase database</li>
-                  <li>• The migration will create new translations or update existing ones</li>
-                  <li>• This is a one-time operation - you don't need to run it multiple times</li>
-                  <li>• After migration, translations will be managed through the admin panel</li>
+                  <li>• {t('make_sure_you_have_admin_privileges_in_your_supabase_database')}</li>
+                  <li>• {t('the_migration_will_create_new_translations_or_update_existing_ones')}</li>
+                  <li>• {t('this_is_a_one_time_operation_you_dont_need_to_run_it_multiple_times')}</li>
+                  <li>• {t('after_migration_translations_will_be_managed_through_the_admin_panel')}</li>
                 </ul>
               </div>
             </div>

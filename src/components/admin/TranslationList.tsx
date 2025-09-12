@@ -1,5 +1,6 @@
 import React from 'react';
 import { Translation } from '../../services/translationService';
+import { useTranslation } from 'react-i18next';
 
 interface TranslationListProps {
   translations: Translation[];
@@ -14,6 +15,9 @@ const TranslationList: React.FC<TranslationListProps> = ({
   onEdit,
   onDelete
 }) => {
+
+  const {t} = useTranslation();
+
   if (loading) {
     return (
       <div className="bg-white shadow rounded-lg">
@@ -60,22 +64,22 @@ const TranslationList: React.FC<TranslationListProps> = ({
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Key
+                  {t('key')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Language
+                  {t('language')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Value
+                  {t('value')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Group
+                  {t('group')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Updated
+                  {t('updated')}
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {t('actions')}
                 </th>
               </tr>
             </thead>
@@ -111,13 +115,13 @@ const TranslationList: React.FC<TranslationListProps> = ({
                         onClick={() => onEdit(translation)}
                         className="text-blue-600 hover:text-blue-900"
                       >
-                        Edit
+                        {t('edit')}
                       </button>
                       <button
                         onClick={() => onDelete(translation.id)}
                         className="text-red-600 hover:text-red-900"
                       >
-                        Delete
+                        {t('delete')}
                       </button>
                     </div>
                   </td>
