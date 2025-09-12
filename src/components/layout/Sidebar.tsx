@@ -24,6 +24,7 @@ interface SidebarProps {
     color: string;
   }[];
   showUserProfile: boolean;
+  showSettings?: boolean;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -32,7 +33,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   onTabChange,
   onToggleCollapse,
   sidebarItems,
-  showUserProfile
+  showUserProfile,
+  showSettings = true
 }) => {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
@@ -141,13 +143,13 @@ const Sidebar: React.FC<SidebarProps> = ({
               </div>
               {!sidebarCollapsed && (
                 <div className="flex items-center space-x-2 my-2">
-                  <button
+                  {showSettings && <button
                     className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
                     title="Profile Settings"
                     onClick={() => onTabChange("settings")}
                   >
                     <CogIcon className="h-5 w-5" />
-                  </button>
+                  </button>}
                   <button
                     onClick={handleLogout}
                     className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors border border-red-200 hover:border-red-300"

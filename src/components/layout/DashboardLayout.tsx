@@ -18,6 +18,7 @@ interface DashboardLayoutProps {
     color: string;
   }[];
   showUserProfile: boolean;
+  showSettings?: boolean;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({
@@ -27,13 +28,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   onTabChange,
   onToggleCollapse,
   sidebarItems,
-  showUserProfile
+  showUserProfile,
+  showSettings = true
 }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Left Sidebar */}
       <Sidebar
         showUserProfile={showUserProfile}
+        showSettings={showSettings}
         sidebarItems={sidebarItems}
         activeTab={activeTab}
         sidebarCollapsed={sidebarCollapsed}
