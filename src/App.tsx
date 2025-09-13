@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LandingPage from "./components/LandingPage";
 import SignUpPage from "./components/SignUpPage";
@@ -9,11 +8,10 @@ import Navigation from "./components/Navigation";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AgentDashboard from "./components/AgentDashboard";
-import "./lib/i18n"; 
 import LawyerDashboard from "./components/LawyerDashboard";
-import TranslationManagementPage from "./pages/admin/TranslationManagementPage";
-import MigrationPage from "./pages/admin/MigrationPage";
 import AdminDashboard from "./components/AdminDashboard.";
+import AboutPage from "./pages/about/AboutPage";
+import "./lib/i18n";
 
 function App() {
   return (
@@ -26,6 +24,7 @@ function App() {
             <Route path="/signup" element={<SignUpPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/about" element={<AboutPage />} />
             <Route
               path="/dashboard"
               element={
@@ -58,22 +57,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            {/* <Route
-              path="/admin/translations"
-              element={
-                <ProtectedRoute>
-                  <TranslationManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/migration"
-              element={
-                <ProtectedRoute>
-                  <MigrationPage />
-                </ProtectedRoute>
-              }
-            /> */}
           </Routes>
         </div>
       </Router>

@@ -16,7 +16,7 @@ const Navigation: React.FC = () => {
   const navigation = [
     { name: t('home'), href: '/' },
     { name: t('services'), href: '#services' },
-    { name: t('about'), href: '#about' },
+    { name: t('about'), href: '/about' },
     { name: t('contact'), href: '#contact' },
   ];
 
