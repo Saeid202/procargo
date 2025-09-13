@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import MobileBottomNav from './MobileBottomNav';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -32,8 +33,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   showSettings = true
 }) => {
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Left Sidebar */}
+    <div className="min-h-screen bg-gray-50 flex overflow-x-auto">
+      {/* Left Sidebar - Hidden on mobile */}
       <Sidebar
         showUserProfile={showUserProfile}
         showSettings={showSettings}
@@ -49,10 +50,19 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         {/* Top Header */}
         <Header activeTab={activeTab} />
         {/* Page Content */}
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 p-6 overflow-auto pb-20 md:pb-6">
           {children}
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation - Only visible on mobile */}
+      <MobileBottomNav
+        showUserProfile={showUserProfile}
+        showSettings={showSettings}
+        sidebarItems={sidebarItems}
+        activeTab={activeTab}
+        onTabChange={onTabChange}
+      />
     </div>
   );
 };

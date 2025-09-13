@@ -60,7 +60,8 @@ const LawyerDashboard: React.FC = () => {
 
   return (
     <DashboardLayout
-      showUserProfile={false}
+      showUserProfile={true}
+      showSettings={false}
       sidebarItems={sidebarItems}
       activeTab={activeTab}
       sidebarCollapsed={sidebarCollapsed}

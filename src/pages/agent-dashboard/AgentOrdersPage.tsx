@@ -115,7 +115,7 @@ const AgentOrdersPage: React.FC = () => {
                               order.suppliers?.map((supplier) => (
                                 <div className="space-y-2 text-sm">
                                   <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                                    <span className="text-blue-600">{supplier.supplier_links?.[0].url}</span>
+                                    <span className="text-blue-600 overflow-auto">{supplier.supplier_links?.[0].url}</span>
                                     <span className="text-xs text-gray-500">{supplier.supplier_links?.[0].description}</span>
                                   </div>
 

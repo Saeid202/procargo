@@ -55,7 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div
-      className={`bg-white shadow-lg transition-all duration-300 ${sidebarCollapsed ? "w-16" : "w-64"
+      className={`bg-white shadow-lg transition-all duration-300 hidden md:block ${sidebarCollapsed ? "w-16" : "w-64"
         }`}
     >
       <div className="p-4 border-b border-gray-200">
