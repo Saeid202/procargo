@@ -11,6 +11,7 @@ import AgentDashboard from "./components/AgentDashboard";
 import LawyerDashboard from "./components/LawyerDashboard";
 import AdminDashboard from "./components/AdminDashboard.";
 import AboutPage from "./pages/about/AboutPage";
+import ContactPage from "./pages/contact/ContactPage";
 import "./lib/i18n";
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
             <Route
               path="/dashboard"
               element={

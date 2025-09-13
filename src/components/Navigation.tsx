@@ -17,7 +17,7 @@ const Navigation: React.FC = () => {
     { name: t('home'), href: '/' },
     { name: t('services'), href: '#services' },
     { name: t('about'), href: '/about' },
-    { name: t('contact'), href: '#contact' },
+    { name: t('contact'), href: '/contact' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
