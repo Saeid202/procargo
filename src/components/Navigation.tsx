@@ -11,7 +11,7 @@ const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   const navigation = [
     { name: t('home'), href: '/' },
@@ -46,6 +46,7 @@ const Navigation: React.FC = () => {
               </a>
             ))}
             {
+              loading ? null : (
               user ? (
                 <>
                   <Link
@@ -71,6 +72,7 @@ const Navigation: React.FC = () => {
                   </Link>
                 </>
               )
+            )
             }
             <LanguageDropdown />
           </div>

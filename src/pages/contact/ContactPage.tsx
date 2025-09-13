@@ -15,6 +15,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import Footer from '../../components/ui/Footer';
+import { ContactService } from '../../services/contactService';
+import { toast } from 'react-hot-toast';
 
 const ContactPage = () => {
   const { t } = useTranslation();
@@ -43,7 +45,22 @@ const ContactPage = () => {
     setIsSubmitting(true);
     
     // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const { contactMessage, error } = await ContactService.createContactMessage({
+      full_name: formData.fullName,
+      email: formData.email,
+      phone: formData.phone,
+      company: formData.company,
+      subject: formData.subject,
+      message: formData.message
+    });
+
+    if (error) {
+      console.error(error);
+      toast.error(error);
+      return;
+    }
+
+    toast.success('Message sent successfully');
     
     setIsSubmitting(false);
     setIsSubmitted(true);
