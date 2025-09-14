@@ -73,7 +73,7 @@ const LegalAssistancePage: React.FC = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="px-6 py-4 border-b border-gray-100">
           <div className="flex items-center">
-            <div className="p-2 bg-cargo-100 rounded-lg ml-4">
+            <div className="p-2 bg-cargo-100 rounded-lg me-4">
               <ChatBubbleLeftRightIcon className="h-6 w-6 text-cargo-600" />
             </div>
             <div>
@@ -112,7 +112,7 @@ const LegalAssistancePage: React.FC = () => {
             </div>
 
             {/* Chat Input */}
-            <div className="flex">
+            <div className="flex max-[768px]:flex-col max-[768px]:gap-2">
               <input
                 type="text"
                 value={inputMessage}
@@ -124,7 +124,7 @@ const LegalAssistancePage: React.FC = () => {
               <button
                 onClick={handleSendMessage}
                 disabled={!inputMessage.trim()}
-                className="bg-cargo-600 hover:bg-cargo-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
+                className="bg-cargo-600 hover:bg-cargo-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center max-[768px]:max-w-12"
               >
                 <PaperAirplaneIcon className="h-4 w-4 rtl:rotate-180" />
               </button>

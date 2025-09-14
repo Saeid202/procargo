@@ -74,7 +74,7 @@ const CompliancePage: React.FC = () => {
       {/* AI Analysis Information Section - Top of Page */}
       <div className="bg-gradient-to-r from-blue-50 to-cargo-50 border border-blue-200 rounded-xl p-6">
         <div className="flex items-center">
-          <div className="p-3 bg-blue-100 rounded-lg ml-4">
+          <div className="p-3 bg-blue-100 rounded-lg me-4">
             <InformationCircleIcon className="h-8 w-8 text-blue-600" />
           </div>
           <div className="flex-1">
