@@ -96,12 +96,12 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({
   return (
     <div className="bg-white shadow rounded-lg">
       <div className="px-4 py-5 sm:p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4 sm:mb-6">
           {translation ? t('edit_translation') : t('create_new_translation')}
         </h3>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2">
             <div>
               <label htmlFor="key" className="block text-sm font-medium text-gray-700">
                 {t('translation_key')}
@@ -111,7 +111,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({
                 id="key"
                 value={formData.key}
                 onChange={(e) => handleInputChange('key', e.target.value)}
-                className={`mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
+                className={`mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm ${
                   errors.key ? 'border-red-300' : ''
                 }`}
                 placeholder={t('e_g_welcome_message')}
@@ -130,7 +130,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({
                 id="language"
                 value={formData.language}
                 onChange={(e) => handleInputChange('language', e.target.value)}
-                className={`mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
+                className={`mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm ${
                   errors.language ? 'border-red-300' : ''
                 }`}
                 disabled={!!translation} // Don't allow editing language for existing translations
@@ -152,7 +152,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({
               id="group_id"
               value={formData.group_id}
               onChange={(e) => handleInputChange('group_id', e.target.value)}
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
             >
               <option value="">{t('no_group')}</option>
               {groups.map((group) => (
@@ -172,7 +172,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({
               rows={4}
               value={formData.value}
               onChange={(e) => handleInputChange('value', e.target.value)}
-              className={`mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
+              className={`mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm ${
                 errors.value ? 'border-red-300' : ''
               }`}
               placeholder={t('enter_the_translation_text')}
@@ -184,25 +184,25 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({
 
           {/* Preview */}
           {formData.value && (
-            <div className="bg-gray-50 p-4 rounded-md">
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-md">
               <h4 className="text-sm font-medium text-gray-700 mb-2">{t('preview')}:</h4>
-              <div className="text-sm text-gray-900 whitespace-pre-wrap">
+              <div className="text-sm text-gray-900 whitespace-pre-wrap break-words">
                 {formData.value}
               </div>
             </div>
           )}
 
-          <div className="flex justify-end">
+          <div className="flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-0">
             <button
               type="button"
               onClick={onCancel}
-              className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto order-2 sm:order-1"
             >
               {t('cancel')}
             </button>
             <button
               type="submit"
-              className="bg-blue-600 ms-4 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="bg-blue-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto sm:ms-4 order-1 sm:order-2"
             >
               {translation ? t('update_translation') : t('create_translation')}
             </button>

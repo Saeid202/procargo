@@ -124,7 +124,7 @@ const TranslationImportExport: React.FC<TranslationImportExportProps> = ({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Import Section */}
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
@@ -143,7 +143,7 @@ const TranslationImportExport: React.FC<TranslationImportExportProps> = ({
                   id="import-language"
                   value={importLanguage}
                   onChange={(e) => setImportLanguage(e.target.value)}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
                 >
                   <option value="en">English</option>
                   <option value="fa">فارسی (Persian)</option>
@@ -158,7 +158,7 @@ const TranslationImportExport: React.FC<TranslationImportExportProps> = ({
                   id="import-group"
                   value={importGroupId}
                   onChange={(e) => setImportGroupId(e.target.value)}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
                 >
                   <option value="">{t('no_group')}</option>
                   {groups.map((group) => (
@@ -183,17 +183,17 @@ const TranslationImportExport: React.FC<TranslationImportExportProps> = ({
               />
             </div>
 
-            <div className="flex">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-0">
               <button
                 onClick={handleImport}
                 disabled={!importFile || importing}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
               >
                 {importing ? t('importing') : t('import_translations')}
               </button>
               <button
                 onClick={downloadTemplate}
-                className="bg-gray-100 ms-4 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200"
+                className="bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 w-full sm:w-auto sm:ms-4"
               >
                 {t('download_template')}
               </button>
@@ -219,7 +219,7 @@ const TranslationImportExport: React.FC<TranslationImportExportProps> = ({
                 id="export-language"
                 value={exportLanguage}
                 onChange={(e) => setExportLanguage(e.target.value)}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
               >
                 <option value="en">English</option>
                 <option value="fa">فارسی (Persian)</option>
@@ -229,7 +229,7 @@ const TranslationImportExport: React.FC<TranslationImportExportProps> = ({
             <button
               onClick={handleExport}
               disabled={exporting}
-              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
             >
               {exporting ? t('exporting') : t('export_translations')}
             </button>
@@ -238,7 +238,7 @@ const TranslationImportExport: React.FC<TranslationImportExportProps> = ({
       </div>
 
       {/* Instructions */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
         <h4 className="text-sm font-medium text-blue-900 mb-2">{t('import_export_instructions')}</h4>
         <ul className="text-sm text-blue-800 space-y-1">
           <li>• {t('import_files_must_be_valid_json_format_with_key_value_pairs')}</li>

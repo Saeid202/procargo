@@ -91,10 +91,10 @@ const TranslationManagementPage: React.FC = () => {
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
         {/* Tabs */}
         <div className="mb-6">
-          <nav className="flex">
+          <nav className="flex overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setActiveTab('list')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-2 px-3 sm:px-4 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'list'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -104,7 +104,7 @@ const TranslationManagementPage: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('editor')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm me-8 ms-8 ${
+              className={`py-2 px-3 sm:px-4 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap flex-shrink-0 sm:me-8 sm:ms-8 ${
                 activeTab === 'editor'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -114,7 +114,7 @@ const TranslationManagementPage: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('import-export')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-2 px-3 sm:px-4 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'import-export'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -127,16 +127,18 @@ const TranslationManagementPage: React.FC = () => {
 
         {/* Tab Content */}
         {activeTab === 'list' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <TranslationFiltersComponent
-                filters={filters}
-                groups={groups}
-                onFiltersChange={handleFiltersChange}
-              />
+          <div className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+              <div className="flex-1">
+                <TranslationFiltersComponent
+                  filters={filters}
+                  groups={groups}
+                  onFiltersChange={handleFiltersChange}
+                />
+              </div>
               <button
                 onClick={handleCreateTranslation}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 w-full sm:w-auto flex-shrink-0"
               >
                 {t('add_new_translation')}
               </button>

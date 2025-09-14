@@ -87,7 +87,8 @@ const TranslationList: React.FC<TranslationListProps> = ({
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden">
       <div className="px-4 py-5 sm:p-6">
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -158,22 +159,72 @@ const TranslationList: React.FC<TranslationListProps> = ({
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Card View */}
+        <div className="sm:hidden space-y-4">
+          {paginatedTranslations.map((translation) => (
+            <div key={translation.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-medium text-gray-900 truncate">
+                    {translation.key}
+                  </h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      {translation.language.toUpperCase()}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {new Date(translation.updated_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex space-x-2 ml-2">
+                  <button
+                    onClick={() => onEdit(translation)}
+                    className="text-blue-600 hover:text-blue-900 text-sm font-medium"
+                  >
+                    {t('edit')}
+                  </button>
+                  <button
+                    onClick={() => onDelete(translation.id)}
+                    className="text-red-600 hover:text-red-900 text-sm font-medium"
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+              </div>
+              
+              <div className="mb-2">
+                <p className="text-sm text-gray-900 break-words">
+                  {translation.value}
+                </p>
+              </div>
+              
+              <div className="text-xs text-gray-500">
+                <span className="font-medium">{t('group')}:</span> {(translation as any).translation_groups?.name || 'No Group'}
+              </div>
+            </div>
+          ))}
+        </div>
         
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+          <div className="bg-white px-3 py-3 sm:px-4 sm:py-3 flex items-center justify-between border-t border-gray-200">
             <div className="flex-1 flex justify-between sm:hidden">
               <button
                 onClick={handlePrevious}
                 disabled={currentPage === 1}
-                className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="relative inline-flex items-center px-3 py-2 border border-gray-300 text-xs sm:text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {t('previous')}
               </button>
+              <span className="flex items-center text-xs text-gray-500">
+                {currentPage} / {totalPages}
+              </span>
               <button
                 onClick={handleNext}
                 disabled={currentPage === totalPages}
-                className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="relative inline-flex items-center px-3 py-2 border border-gray-300 text-xs sm:text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {t('next')}
               </button>
