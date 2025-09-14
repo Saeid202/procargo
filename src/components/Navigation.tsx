@@ -15,7 +15,7 @@ const Navigation: React.FC = () => {
 
   const navigation = [
     { name: t('home'), href: '/' },
-    { name: t('services'), href: '#services' },
+    { name: t('services'), href: '/services' },
     { name: t('about'), href: '/about' },
     { name: t('contact'), href: '/contact' },
   ];
@@ -47,32 +47,32 @@ const Navigation: React.FC = () => {
             ))}
             {
               loading ? null : (
-              user ? (
-                <>
-                  <Link
-                    to={`/dashboard/${user.role == RolesEnum.USER ? '' : user.role?.toLowerCase()}`}
-                    className="bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                  >
-                    {t('dashboard')}
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="text-gray-700 hover:text-cargo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                  >
-                    {t('login')}
-                  </Link>
-                  <Link
-                    to="/signup"
-                    className="bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                  >
-                    {t('sign_up')}
-                  </Link>
-                </>
+                user ? (
+                  <>
+                    <Link
+                      to={`/dashboard/${user.role == RolesEnum.USER ? '' : user.role?.toLowerCase()}`}
+                      className="bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                    >
+                      {t('dashboard')}
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      className="text-gray-700 hover:text-cargo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                    >
+                      {t('login')}
+                    </Link>
+                    <Link
+                      to="/signup"
+                      className="bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                    >
+                      {t('sign_up')}
+                    </Link>
+                  </>
+                )
               )
-            )
             }
             <LanguageDropdown />
           </div>
@@ -112,33 +112,35 @@ const Navigation: React.FC = () => {
               </a>
             ))}
             {
-              user ? (
-              <>
-                <Link
-                  to={`/dashboard/${user.role == RolesEnum.USER ? '' : user.role?.toLowerCase()}`}
-                  className="block px-3 py-2 rounded-md text-base font-medium bg-cargo-600 text-white hover:bg-cargo-700 transition-colors"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {t('dashboard')}
-                </Link>
-              </>
-              ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-cargo-600 hover:bg-gray-50 transition-colors"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/signup"
-                  className="block px-3 py-2 rounded-md text-base font-medium bg-cargo-600 text-white hover:bg-cargo-700 transition-colors"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Sign Up
-                </Link>
-              </>
+              loading ? null : (
+                user ? (
+                  <>
+                    <Link
+                      to={`/dashboard/${user.role == RolesEnum.USER ? '' : user.role?.toLowerCase()}`}
+                      className="block px-3 py-2 rounded-md text-base font-medium bg-cargo-600 text-white hover:bg-cargo-700 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {t('dashboard')}
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-cargo-600 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      to="/signup"
+                      className="block px-3 py-2 rounded-md text-base font-medium bg-cargo-600 text-white hover:bg-cargo-700 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Sign Up
+                    </Link>
+                  </>
+                )
               )
             }
           </div>
