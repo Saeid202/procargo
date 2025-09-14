@@ -46,7 +46,7 @@ const Navigation: React.FC = () => {
               </a>
             ))}
             {
-              loading ? null : (
+              loading ? (<div className='w-[105px] h-1' ></div>) : (
                 user ? (
                   <>
                     <Link

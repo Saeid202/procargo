@@ -4,14 +4,16 @@ import {
   HomeIcon,
   GlobeAltIcon,
   ArrowPathIcon,
+  QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
-import LawyerOverviewPage from '../pages/lawyer-dashboard/LawyerOverviewPage';
+import AdminOverviewPage from '../pages/admin/AdminOverviewPage';
 import { useTranslation } from 'react-i18next';
 import TranslationManagementPage from '../pages/admin/TranslationManagementPage';
 import MigrationPage from '../pages/admin/MigrationPage';
+import AdminContactPage from '../pages/admin/AdminContactPage';
 
 const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('agent-overview');
+  const [activeTab, setActiveTab] = useState('admin-overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const { t } = useTranslation();
@@ -27,13 +29,15 @@ const AdminDashboard: React.FC = () => {
   const renderPageContent = () => {
     switch (activeTab) {
       case 'admin-overview':
-        return <LawyerOverviewPage />;
+        return <AdminOverviewPage />;
       case 'admin-translations':
         return <TranslationManagementPage />;
       case 'admin-migration':
         return <MigrationPage />;
+      case 'admin-contact':
+        return <AdminContactPage />;
       default:
-        return <LawyerOverviewPage />;
+        return <AdminOverviewPage />;
     }
   };
 
@@ -55,6 +59,12 @@ const AdminDashboard: React.FC = () => {
       name: t("migration"),
       icon: ArrowPathIcon,
       color: "text-orange-600",
+    },
+    {
+      id: "admin-contact",
+      name: t("contact"),
+      icon: QuestionMarkCircleIcon,
+      color: "text-indigo-600",
     },
   ];
 
