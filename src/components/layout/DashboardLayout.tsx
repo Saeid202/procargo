@@ -46,7 +46,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col pb-[100px] md:pb-0" style={{maxWidth:"100vw"}}>
         {/* Top Header */}
         <Header activeTab={activeTab} />
         {/* Page Content */}

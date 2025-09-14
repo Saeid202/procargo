@@ -23,6 +23,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab }) => {
       case 'agent-settings': return t("agent_settings_description");
       case 'admin-translations': return t("admin_translations_descripton");
       case 'admin-migration': return t("admin_migration_description");
+      case 'admin-users': return t("admin_users_description");
       default: return t("overview_description");
     }
   };
@@ -41,6 +42,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab }) => {
       case 'agent-settings': return t("agent_settings");
       case 'admin-translations': return t("admin_translations");
       case 'admin-migration': return t("admin_migration");
+      case 'admin-users': return t("admin_users");
       default: return t("overview");
     }
   };

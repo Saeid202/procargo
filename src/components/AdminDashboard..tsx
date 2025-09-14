@@ -5,12 +5,14 @@ import {
   GlobeAltIcon,
   ArrowPathIcon,
   QuestionMarkCircleIcon,
+  UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import AdminOverviewPage from '../pages/admin/AdminOverviewPage';
 import { useTranslation } from 'react-i18next';
 import TranslationManagementPage from '../pages/admin/TranslationManagementPage';
 import MigrationPage from '../pages/admin/MigrationPage';
 import AdminContactPage from '../pages/admin/AdminContactPage';
+import AdminUsersPage from '../pages/admin/AdminUsersPage';
 
 const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('admin-overview');
@@ -30,6 +32,8 @@ const AdminDashboard: React.FC = () => {
     switch (activeTab) {
       case 'admin-overview':
         return <AdminOverviewPage />;
+      case 'admin-users':
+        return <AdminUsersPage />;
       case 'admin-translations':
         return <TranslationManagementPage />;
       case 'admin-migration':
@@ -47,6 +51,12 @@ const AdminDashboard: React.FC = () => {
       name: t("overview"),
       icon: HomeIcon,
       color: "text-cargo-600",
+    },
+    {
+      id: "admin-users",
+      name: t("users_management"),
+      icon: UserGroupIcon,
+      color: "text-green-600",
     },
     {
       id: "admin-translations",
