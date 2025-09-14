@@ -29,7 +29,8 @@ const LawyerCasesPage: React.FC = () => {
   };
 
   const toggleCaseDetails = (caseId: string) => {
-    const caseDetails = document.getElementById(`${caseId}-details${window.innerWidth < 1024 ? '-mobile' : ''}`);
+    const isMobile = window.innerWidth < 1024;
+    const caseDetails = document.getElementById(`${caseId}-details${isMobile ? '-mobile' : ''}`);
 
     if (caseDetails) {
       caseDetails.classList.toggle('hidden');
