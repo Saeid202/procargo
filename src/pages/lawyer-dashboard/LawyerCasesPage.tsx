@@ -9,13 +9,8 @@ import { useTranslation } from 'react-i18next';
 const LawyerCasesPage: React.FC = () => {
   const { user } = useAuth();
   const [cases, setCases] = useState<CaseData[]>([]);
-  const { t } = useTranslation();
 
-  useEffect(() => {
-    if (user) {
-      loadCases();
-    }
-  }, [user]);
+  const { t } = useTranslation();
 
   const loadCases = async () => {
     const { cases, error } = await SupabaseService.getCases();
@@ -36,6 +31,14 @@ const LawyerCasesPage: React.FC = () => {
       caseDetails.classList.toggle('hidden');
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      loadCases();
+    }
+  }, [user]);
+
+
 
   return (
     <div id="orders" className="tab-content">
@@ -231,7 +234,7 @@ const LawyerCasesPage: React.FC = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-500">{t('plaintiff')}:</span>
@@ -246,7 +249,7 @@ const LawyerCasesPage: React.FC = () => {
                     <span className="font-medium text-gray-900">{caseData.created_at ? new Date(caseData.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}</span>
                   </div>
                 </div>
-                
+
                 <div className="mt-3 flex justify-center">
                   <span className={cn("capitalize inline-flex items-center px-3 py-1 rounded-full text-sm font-medium", caseData.status === 'SUBMITTED' ? 'bg-red-100 text-red-800' : caseData.status === 'IN_REVIEW' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800')}>
                     {caseData.status?.replace('-', ' ')}
@@ -357,7 +360,7 @@ const LawyerCasesPage: React.FC = () => {
                                 {t('send_reply')}
                               </button>
                               <button
-                                type="button" 
+                                type="button"
                                 className="w-full px-3 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 text-sm font-medium">
                                 {t('in_progress')}
                               </button>
