@@ -251,14 +251,178 @@ export class SupabaseService {
     }
   }
 
+  // Get single order by order number
+  static async getOrderByNumber(orderNumber: string) {
+    try {
+      const { data, error } = await supabase
+        .from("orders")
+        .select(
+          `
+        *,
+        suppliers (
+          *,
+          supplier_links (*),
+          supplier_files (*)
+        )
+      `
+        )
+        .eq("order_number", orderNumber)
+        .single();
+
+      if (error) {
+        return { order: null, error: error.message };
+      }
+
+      return { order: data, error: null };
+    } catch (err: any) {
+      return { order: null, error: err.message || "Failed to fetch order" };
+    }
+  }
+
+  static async updateOrder(
+    orderNumber: string, 
+    updateData: Partial<{
+      status: string;
+      priority: string;
+      origin_country: string;
+      destination_country: string;
+      total_value: number;
+      currency: string;
+      estimated_delivery: string;
+      notes: string;
+    }>
+  ) {
+    try {
+      const { data, error } = await supabase
+        .from("orders")
+        .update(updateData)
+        .eq("order_number", orderNumber)
+        .select()
+        .single();
+
+      if (error) {
+        return { order: null, error: error.message };
+      }
+
+      return { order: data, error: null };
+    } catch (err: any) {
+      return { 
+        order: null, 
+        error: err.message || "Failed to update order" 
+      };
+    }
+  }
+
+  static async createOrderResponse(orderNumber: string, agentId: string, response: { response: string, price: number, delivery_date: string }) {
+    try {
+      const { data, error } = await supabase.from("order_response").insert({ order_number: orderNumber, agent_id: agentId, response: response.response, price: response.price, delivery_date: response.delivery_date }).select().single();
+      if (error) {
+        return { orderResponse: null, error: error.message };
+      }
+      return { orderResponse: data, error: null };
+    } catch (err: any) {
+      return { orderResponse: null, error: err.message || "Failed to create order response" };
+    }
+  }
+
+  // Update supplier
+  static async updateSupplier(
+    supplierId: string, 
+    updateData: Partial<{
+      product_name: string;
+      quantity: number;
+      unit_type: string;
+      unit_price: number;
+      logistics_type: string;
+      special_instructions: string;
+      notes: string;
+    }>
+  ) {
+    try {
+      const { data, error } = await supabase
+        .from("suppliers")
+        .update(updateData)
+        .eq("id", supplierId)
+        .select()
+        .single();
+
+      if (error) {
+        return { supplier: null, error: error.message };
+      }
+
+      return { supplier: data, error: null };
+    } catch (err: any) {
+      return { 
+        supplier: null, 
+        error: err.message || "Failed to update supplier" 
+      };
+    }
+  }
+
+  // Update supplier links
+  static async updateSupplierLinks(
+    supplierId: string, 
+    links: SupplierLink[]
+  ) {
+    try {
+      // First, delete existing links for this supplier
+      const { error: deleteError } = await supabase
+        .from("supplier_links")
+        .delete()
+        .eq("supplier_id", supplierId);
+
+      if (deleteError) {
+        return { error: deleteError.message };
+      }
+
+      // Then insert new links
+      const payload = links.map((link) => ({
+        supplier_id: supplierId,
+        url: link.url,
+        description: link.description,
+        quantity: link.quantity,
+      }));
+
+      const { error: insertError } = await supabase
+        .from("supplier_links")
+        .insert(payload);
+
+      if (insertError) {
+        return { error: insertError.message };
+      }
+
+      return { error: null };
+    } catch (err: any) {
+      return { error: err.message || "Failed to update supplier links" };
+    }
+  }
+
+  // Delete supplier
+  static async deleteSupplier(supplierId: string) {
+    try {
+      const { error } = await supabase
+        .from("suppliers")
+        .delete()
+        .eq("id", supplierId);
+
+      if (error) {
+        return { error: error.message };
+      }
+
+      return { error: null };
+    } catch (err: any) {
+      return { error: err.message || "Failed to delete supplier" };
+    }
+  }
+
   // Create supplier
-  static async createSupplier(orderId: string, supplier: Supplier) {
+  static async createSupplier(orderNumber: string, supplier: Supplier) {
     try {
       const { data, error } = await supabase
         .from("suppliers")
         .insert([
           {
-            order_id: orderId,
+            order_number: orderNumber,
             product_name: supplier.product_name,
             quantity: supplier.quantity,
             unit_type: supplier.unit_type,
