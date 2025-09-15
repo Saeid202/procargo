@@ -32,7 +32,7 @@ const Footer = () => {
               <ul className="space-y-2 text-gray-400">
                 <li><a href="/about">{t("footer_about_us")}</a></li>
                 <li><a href="/careers">{t("footer_careers")}</a></li>
-                <li><a href="#news">{t("footer_news")}</a></li>
+                <li><a href="/news">{t("footer_news")}</a></li>
                 <li><a href="/contact">{t("footer_contact_page")}</a></li>
               </ul>
             </div>
