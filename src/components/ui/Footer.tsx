@@ -20,9 +20,9 @@ const Footer = () => {
             <div>
               <h3 className="text-lg font-semibold mb-4">{t("footer_services")}</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>{t("sea_freight")}</li>
-                <li>{t("air_freight")}</li>
-                <li>{t("customs_compliance")}</li>
+                <li><a href="/services">{t("sea_freight")}</a></li>
+                <li><a href="/services">{t("air_freight")}</a></li>
+                <li><a href="/services">{t("customs_compliance")}</a></li>
                 <li>Warehousing</li>
               </ul>
             </div>
@@ -30,18 +30,18 @@ const Footer = () => {
             <div>
               <h3 className="text-lg font-semibold mb-4">{t("footer_company")}</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>{t("footer_about_us")}</li>
-                <li>{t("footer_careers")}</li>
-                <li>{t("footer_news")}</li>
-                <li>{t("footer_contact_page")}</li>
+                <li><a href="/about">{t("footer_about_us")}</a></li>
+                <li><a href="#careers">{t("footer_careers")}</a></li>
+                <li><a href="#news">{t("footer_news")}</a></li>
+                <li><a href="/contact">{t("footer_contact_page")}</a></li>
               </ul>
             </div>
 
             <div>
               <h3 className="text-lg font-semibold mb-4">{t("footer_contact")}</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>+1 (555) 123-4567</li>
-                <li>info@cargobridge.com</li>
+                <li><a href="tel:+1 (555) 123-4567">+1 (555) 123-4567</a></li>
+                <li><a href="mailto:info@cargobridge.com">info@cargobridge.com</a></li>
                 <li>123 Shipping St, Toronto, ON</li>
               </ul>
             </div>
