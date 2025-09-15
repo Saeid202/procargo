@@ -23,7 +23,7 @@ const Footer = () => {
                 <li><a href="/services">{t("sea_freight")}</a></li>
                 <li><a href="/services">{t("air_freight")}</a></li>
                 <li><a href="/services">{t("customs_compliance")}</a></li>
-                <li>Warehousing</li>
+                <li><a href="/services">{t("warehousing")}</a></li>
               </ul>
             </div>
 
