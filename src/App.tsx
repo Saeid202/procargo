@@ -16,6 +16,7 @@ import ServicesPage from "./pages/services/ServicesPage";
 import CareersPage from "./pages/careers/CareersPage";
 import NewsPage from "./pages/news/NewsPage";
 import "./lib/i18n";
+import NotFound from "./pages/not-found/NotFound";
 
 function App() {
   return (
@@ -65,6 +66,8 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
       </Router>

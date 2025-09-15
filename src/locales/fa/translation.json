@@ -794,5 +794,19 @@
   "press_inquiries": "استعلامات مطبوعاتی",
   "media_kit": "کیت رسانه‌ای",
   "press_releases": "بیانیه‌های مطبوعاتی",
-  "contact_news_team": "تماس با تیم خبری"
+  "contact_news_team": "تماس با تیم خبری",
+  "not_found": "یافت نشد",
+  "page_not_found": "صفحه یافت نشد",
+  "page_not_found_title": "اوه! صفحه‌ای که دنبال آن می‌گردید وجود ندارد.",
+  "page_not_found_description": "صفحه‌ای که سعی می‌کنید به آن دسترسی پیدا کنید ممکن است جابجا شده، حذف شده یا آدرس اشتباه وارد کرده باشید.",
+  "error_code": "خطای 404",
+  "go_back_home": "بازگشت به خانه",
+  "go_to_dashboard": "رفتن به داشبورد",
+  "contact_support": "تماس با پشتیبانی",
+  "suggested_pages": "صفحات پیشنهادی",
+  "popular_links": "لینک‌های محبوب",
+  "recent_pages": "صفحات اخیر",
+  "helpful_links": "لینک‌های مفید",
+  "get_help": "دریافت کمک",
+  "report_issue": "گزارش مشکل"
 }
