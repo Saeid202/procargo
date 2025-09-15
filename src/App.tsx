@@ -13,6 +13,7 @@ import AdminDashboard from "./components/AdminDashboard.";
 import AboutPage from "./pages/about/AboutPage";
 import ContactPage from "./pages/contact/ContactPage";
 import ServicesPage from "./pages/services/ServicesPage";
+import CareersPage from "./pages/careers/CareersPage";
 import "./lib/i18n";
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/services" element={<ServicesPage />} />
+            <Route path="/careers" element={<CareersPage />} />
             <Route
               path="/dashboard"
               element={

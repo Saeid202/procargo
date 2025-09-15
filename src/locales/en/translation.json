@@ -642,9 +642,8 @@
   "ticket_information": "Ticket Information",
   "tickets_selected": "tickets selected",
   "loading": "Loading...",
-  "open_tickets": "Open",
-  "in_progress_tickets": "In Progress",
-  "resolved_tickets": "Resolved",
-  "closed_tickets": "Closed",
-  "view_ticket": "View Ticket"
+  "view_ticket": "View Ticket",
+  "careers_title": "Join Our Team",
+  "careers_subtitle": "Empowering Your Future",
+  "careers_hero_description": "Join our team and help us build the future of logistics"
 }

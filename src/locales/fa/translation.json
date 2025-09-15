@@ -639,9 +639,8 @@
   "ticket_information": "اطلاعات تیکت",
   "tickets_selected": "تیکت انتخاب شده",
   "loading": "در حال بارگذاری...",
-  "open_tickets": "باز",
-  "in_progress_tickets": "در حال انجام",
-  "resolved_tickets": "حل شده",
-  "closed_tickets": "بسته شده",
-  "view_ticket": "مشاهده تیکت"
+  "view_ticket": "مشاهده تیکت",
+  "careers_title": "به تیم ما بپیوندید",
+  "careers_subtitle": "قدرت به آینده شما",
+  "careers_hero_description": "به تیم ما بپیوندید و به آینده لجستیک بپیوندید"
 }
