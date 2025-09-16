@@ -23,7 +23,7 @@ const Footer = () => {
                 <li><a href="/services">{t("sea_freight")}</a></li>
                 <li><a href="/services">{t("air_freight")}</a></li>
                 <li><a href="/services">{t("customs_compliance")}</a></li>
-                <li>Warehousing</li>
+                <li><a href="/services">{t("warehousing")}</a></li>
               </ul>
             </div>
 
@@ -32,7 +32,7 @@ const Footer = () => {
               <ul className="space-y-2 text-gray-400">
                 <li><a href="/about">{t("footer_about_us")}</a></li>
                 <li><a href="/careers">{t("footer_careers")}</a></li>
-                <li><a href="#news">{t("footer_news")}</a></li>
+                <li><a href="/news">{t("footer_news")}</a></li>
                 <li><a href="/contact">{t("footer_contact_page")}</a></li>
               </ul>
             </div>

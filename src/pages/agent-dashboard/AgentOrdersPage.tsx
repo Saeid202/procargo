@@ -5,11 +5,17 @@ import { SupabaseService } from '../../services/supabaseService';
 import { Order } from '../dashboard/OrdersPage';
 import { cn } from '../../utils/cn';
 import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
+import Loading from '../../components/ui/Loading';
 
 
 const AgentOrdersPage: React.FC = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [orderResponse, setOrderResponse] = useState<string>('');
+  const [orderQuickPrice, setOrderQuickPrice] = useState<number>(0);
+  const [orderQuickDeliveryDate, setOrderQuickDeliveryDate] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { t } = useTranslation();
 
@@ -20,6 +26,7 @@ const AgentOrdersPage: React.FC = () => {
   }, [user]);
 
   const loadOrders = async () => {
+    setIsLoading(true);
     const { orders, error } = await SupabaseService.getAgentOrders();
 
     if (error) {
@@ -27,6 +34,7 @@ const AgentOrdersPage: React.FC = () => {
     } else {
       setOrders(orders || []);
     }
+    setIsLoading(false);
   };
 
   const toggleOrderDetails = (orderId: string) => {
@@ -35,6 +43,34 @@ const AgentOrdersPage: React.FC = () => {
       orderDetails.classList.toggle('hidden');
     }
   };
+
+  const updateOrderStatus = async (orderNumber: string, status: string) => {
+    setIsLoading(true);
+    const { error } = await SupabaseService.updateOrder(orderNumber, { status });
+    if (error) {
+      toast.error('Exception updating order status:', error);
+    } else {
+      toast.success('Order status updated successfully');
+      await loadOrders();
+    }
+    setIsLoading(false);
+  };
+
+  const createOrderResponse = async (orderNumber: string) => {
+    setIsLoading(true);
+    const { error } = await SupabaseService.createOrderResponse(orderNumber, user?.id as string, { response: orderResponse, price: orderQuickPrice, delivery_date: !!orderQuickDeliveryDate ? orderQuickDeliveryDate : new Date().toISOString() });
+    if (error) {
+      toast.error('Exception creating order response:', error);
+    } else {
+      toast.success('Order response created successfully');
+      await loadOrders();
+  };
+  setIsLoading(false);
+  };
+
+  if (isLoading) {
+    return <Loading />
+  }
 
   return (
     <div id="orders" className="tab-content">
@@ -230,24 +266,30 @@ const AgentOrdersPage: React.FC = () => {
                                     placeholder={t("type_your_response")}
                                     rows={3}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm resize-none"
+                                    value={orderResponse}
+                                    onChange={(e) => setOrderResponse(e.target.value)}
                                   ></textarea>
                                   <div className="grid grid-cols-2 gap-2">
                                     <input
                                       type="number"
                                       placeholder={t("price_dollar")}
                                       className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                      value={orderQuickPrice}
+                                      onChange={(e) => setOrderQuickPrice(Number(e.target.value))}
                                     />
                                     <input
                                       type="date"
                                       className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                      value={orderQuickDeliveryDate}
+                                      onChange={(e) => setOrderQuickDeliveryDate(e.target.value)}
                                     />
                                   </div>
                                   <div className="flex gap-2">
-                                    <button type="submit" className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium">
+                                    <button type="button" onClick={async () => await createOrderResponse(order.order_number)} className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium">
                                       {t("send_reply")}
                                     </button>
                                     <button
-                                      // onclick="updateOrderStatus('ORD-001', 'in-progress')"
+                                      onClick={async () => await updateOrderStatus(order.order_number, 'in-progress')}
                                       type="button" className="px-3 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 text-sm font-medium">
                                       {t("in_progress")}
                                     </button>

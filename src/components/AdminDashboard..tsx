@@ -7,11 +7,11 @@ import {
   QuestionMarkCircleIcon,
   UserGroupIcon,
   ChatBubbleBottomCenterTextIcon,
-  CogIcon,
   DocumentTextIcon,
-  TruckIcon,
   PhotoIcon,
   PencilSquareIcon,
+  CogIcon,
+  TruckIcon,
 } from "@heroicons/react/24/outline";
 import AdminOverviewPage from '../pages/admin/AdminOverviewPage';
 import { useTranslation } from 'react-i18next';

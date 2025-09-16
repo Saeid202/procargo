@@ -14,7 +14,9 @@ import AboutPage from "./pages/about/AboutPage";
 import ContactPage from "./pages/contact/ContactPage";
 import ServicesPage from "./pages/services/ServicesPage";
 import CareersPage from "./pages/careers/CareersPage";
+import NewsPage from "./pages/news/NewsPage";
 import "./lib/i18n";
+import NotFound from "./pages/not-found/NotFound";
 
 function App() {
   return (
@@ -31,6 +33,7 @@ function App() {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/careers" element={<CareersPage />} />
+            <Route path="/news" element={<NewsPage />} />
             <Route
               path="/dashboard"
               element={
@@ -63,6 +66,8 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
       </Router>
