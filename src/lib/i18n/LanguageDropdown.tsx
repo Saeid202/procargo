@@ -16,10 +16,10 @@ const LanguageDropdown: React.FC = () => {
     <select
       value={i18n.language}
       onChange={(e) => i18n.changeLanguage(e.target.value)}
-      className="p-2 border rounded outline-none"
+      className="p-2 border rounded outline-none bg-white"
     >
-      <option value="en">English</option>
-      <option value="fa">فارسی</option>
+      <option value="en">🇺🇸 English</option>
+      <option value="fa">🇮🇷 فارسی</option>
     </select>
   );
 };

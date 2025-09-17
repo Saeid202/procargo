@@ -1,6 +1,9 @@
 import React from 'react';
 import { BellIcon, CogIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline';
 
 interface HeaderProps {
   activeTab: string;
@@ -8,6 +11,8 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ activeTab }) => {
   const { t } = useTranslation();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const getTabDescription = () => {
     switch (activeTab) {
@@ -48,7 +53,19 @@ const Header: React.FC<HeaderProps> = ({ activeTab }) => {
       default: return t("overview");
     }
   };
-  
+
+  const handleLogout = async () => {
+    // Show confirmation dialog
+    const confirmed = window.confirm("Are you sure you want to logout?");
+    if (!confirmed) return;
+
+    try {
+      await signOut();
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4 m-4 rounded-lg">
@@ -67,9 +84,15 @@ const Header: React.FC<HeaderProps> = ({ activeTab }) => {
             <BellIcon className="h-6 w-6" />
             <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
           </button>
-          <button className="p-2 text-gray-400 hover:text-gray-500">
-            <CogIcon className="h-6 w-6" />
+
+          <button
+            onClick={handleLogout}
+            className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors border border-red-200 hover:border-red-300"
+            title="Logout"
+          >
+            <ArrowLeftOnRectangleIcon className="h-5 w-5" />
           </button>
+
         </div>
       </div>
     </header>

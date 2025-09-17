@@ -150,13 +150,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                   >
                     <CogIcon className="h-5 w-5" />
                   </button>}
-                  <button
-                    onClick={handleLogout}
-                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors border border-red-200 hover:border-red-300"
-                    title="Logout"
-                  >
-                    <ArrowLeftOnRectangleIcon className="h-5 w-5" />
-                  </button>
                 </div>
               )}
             </div>

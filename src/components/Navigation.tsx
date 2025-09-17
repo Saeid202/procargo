@@ -49,12 +49,13 @@ const Navigation: React.FC = () => {
               loading ? (<div className='w-[105px] h-1' ></div>) : (
                 user ? (
                   <>
-                    <Link
+                    {/* <Link
                       to={`/dashboard/${user.role == RolesEnum.USER ? '' : user.role?.toLowerCase()}`}
                       className="bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
                     >
                       {t('dashboard')}
-                    </Link>
+                    </Link> */}
+                    <div className='w-[105px] h-1'></div>
                   </>
                 ) : (
                   <>
@@ -115,13 +116,13 @@ const Navigation: React.FC = () => {
               loading ? null : (
                 user ? (
                   <>
-                    <Link
+                    {/* <Link
                       to={`/dashboard/${user.role == RolesEnum.USER ? '' : user.role?.toLowerCase()}`}
                       className="block px-3 py-2 rounded-md text-base font-medium bg-cargo-600 text-white hover:bg-cargo-700 transition-colors"
                       onClick={() => setIsOpen(false)}
                     >
                       {t('dashboard')}
-                    </Link>
+                    </Link> */}
                   </>
                 ) : (
                   <>

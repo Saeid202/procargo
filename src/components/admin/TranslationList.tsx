@@ -24,7 +24,7 @@ const TranslationList: React.FC<TranslationListProps> = ({
   const totalPages = Math.ceil(translations.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  
+
   const paginatedTranslations = useMemo(() => {
     return translations.slice(startIndex, endIndex);
   }, [translations, startIndex, endIndex]);
@@ -101,15 +101,15 @@ const TranslationList: React.FC<TranslationListProps> = ({
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {t('value')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('group')}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('updated')}
-                </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {t('actions')}
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('group')}
+                </th>
+                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('updated')}
+                </th> */}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -130,14 +130,6 @@ const TranslationList: React.FC<TranslationListProps> = ({
                       {translation.value}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">
-                      {(translation as any).translation_groups?.name || 'No Group'}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(translation.updated_at).toLocaleDateString()}
-                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
                       <button
@@ -154,6 +146,14 @@ const TranslationList: React.FC<TranslationListProps> = ({
                       </button>
                     </div>
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">
+                      {(translation as any).translation_groups?.name || 'No Group'}
+                    </div>
+                  </td>
+                  {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(translation.updated_at).toLocaleDateString()}
+                  </td> */}
                 </tr>
               ))}
             </tbody>
@@ -193,20 +193,20 @@ const TranslationList: React.FC<TranslationListProps> = ({
                   </button>
                 </div>
               </div>
-              
+
               <div className="mb-2">
                 <p className="text-sm text-gray-900 break-words">
                   {translation.value}
                 </p>
               </div>
-              
+
               <div className="text-xs text-gray-500">
                 <span className="font-medium">{t('group')}:</span> {(translation as any).translation_groups?.name || 'No Group'}
               </div>
             </div>
           ))}
         </div>
-        
+
         {/* Pagination Controls */}
         {totalPages > 1 && (
           <div className="bg-white px-3 py-3 sm:px-4 sm:py-3 flex items-center justify-between border-t border-gray-200">
@@ -247,12 +247,12 @@ const TranslationList: React.FC<TranslationListProps> = ({
                       <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   </button>
-                  
+
                   {/* Page numbers */}
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
                     // Show first page, last page, current page, and pages around current page
                     const shouldShow = page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1);
-                    
+
                     if (!shouldShow) {
                       // Show ellipsis for gaps
                       if (page === 2 && currentPage > 4) {
@@ -271,22 +271,21 @@ const TranslationList: React.FC<TranslationListProps> = ({
                       }
                       return null;
                     }
-                    
+
                     return (
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                          page === currentPage
+                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${page === currentPage
                             ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
                             : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                        }`}
+                          }`}
                       >
                         {page}
                       </button>
                     );
                   })}
-                  
+
                   <button
                     onClick={handleNext}
                     disabled={currentPage === totalPages}

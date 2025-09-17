@@ -165,12 +165,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             </span>
           </div>
           
-          <button
-            onClick={handleLogout}
-            className="flex items-center justify-center p-2 text-red-600 active:text-red-700 active:bg-red-50 rounded-lg transition-colors touch-manipulation"
-          >
-            <ArrowLeftOnRectangleIcon className="h-5 w-5" />
-          </button>
+          
         </div>
       )}
 

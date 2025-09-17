@@ -35,7 +35,7 @@ export class AIConfigService {
         .from('ai_configurations')
         .select('*')
         .eq('is_active', true)
-        .single();
+        .limit(1);
 
       if (error) {
         return {
@@ -44,8 +44,16 @@ export class AIConfigService {
         };
       }
 
+      // If no active configuration found, return null without error
+      if (!data || data.length === 0) {
+        return {
+          config: null,
+          error: null
+        };
+      }
+
       return {
-        config: data,
+        config: data[0],
         error: null
       };
     } catch (error) {
