@@ -823,5 +823,13 @@
   "recent_pages": "صفحات اخیر",
   "helpful_links": "لینک‌های مفید",
   "get_help": "دریافت کمک",
-  "report_issue": "گزارش مشکل"
+  "report_issue": "گزارش مشکل",
+  "pages": "صفحات",
+  "media_library": "کتابخانه رسانه‌ای",
+  "blog_posts": "مقالات وبلاگ",
+  "site_settings": "تنظیمات سایت",
+  "ai_management": "مدیریت AI",
+  "quotation_management": "مدیریت جریمه",
+  "other_requests": "درخواست‌های دیگر",
+  "orders_management": "مدیریت سفارشات"
 }

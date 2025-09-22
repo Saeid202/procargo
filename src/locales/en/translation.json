@@ -826,5 +826,13 @@
   "recent_pages": "Recent Pages",
   "helpful_links": "Helpful Links",
   "get_help": "Get Help",
-  "report_issue": "Report an Issue"
+  "report_issue": "Report an Issue",
+  "pages": "Pages",
+  "media_library": "Media Library",
+  "blog_posts": "Blog Posts",
+  "site_settings": "Site Settings",
+  "ai_management": "AI Management",
+  "quotation_management": "Quotation Management",
+  "other_requests": "Other Requests",
+  "orders_management": "Orders Management"
 }
