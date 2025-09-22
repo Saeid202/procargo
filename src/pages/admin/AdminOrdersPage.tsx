@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { 
   EyeIcon, 
   XCircleIcon,
-  TruckIcon,
   DocumentTextIcon,
-  CheckCircleIcon,
-  ClockIcon
 } from '@heroicons/react/24/outline';
 import { SupabaseService } from '../../services/supabaseService';
+import { useTranslation } from 'react-i18next';
 
 interface Order {
   id: string;
@@ -62,6 +60,8 @@ const AdminOrdersPage: React.FC = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadOrders();
@@ -128,9 +128,9 @@ const AdminOrdersPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Orders Management</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t("orders_management")}</h1>
         <div className="text-sm text-gray-500">
-          Total: {orders.length} | Filtered: {filteredOrders.length}
+          {t("total")}: {orders.length} | {t("filtered")}: {filteredOrders.length}
         </div>
       </div>
 

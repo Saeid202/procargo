@@ -119,7 +119,7 @@ const AdminOverviewPage: React.FC = () => {
 
   const statCards = [
     {
-      title: 'Total Users',
+      title: t("total_users"),
       value: stats.totalUsers,
       icon: UserGroupIcon,
       color: 'bg-blue-500',
@@ -127,7 +127,7 @@ const AdminOverviewPage: React.FC = () => {
       changeType: 'positive'
     },
     {
-      title: 'Pages',
+      title: t("pages"),
       value: stats.totalPages,
       icon: DocumentTextIcon,
       color: 'bg-green-500',
@@ -135,7 +135,7 @@ const AdminOverviewPage: React.FC = () => {
       changeType: 'positive'
     },
     {
-      title: 'Media Files',
+      title: t("media_files"),
       value: stats.totalMediaFiles,
       icon: PhotoIcon,
       color: 'bg-purple-500',
@@ -143,7 +143,7 @@ const AdminOverviewPage: React.FC = () => {
       changeType: 'positive'
     },
     {
-      title: 'Blog Posts',
+      title: t("blog_posts"),
       value: stats.totalBlogPosts,
       icon: GlobeAltIcon,
       color: 'bg-indigo-500',
@@ -151,7 +151,7 @@ const AdminOverviewPage: React.FC = () => {
       changeType: 'positive'
     },
     {
-      title: 'Quotations',
+      title: t("quotations"),
       value: stats.totalQuotations,
       icon: CurrencyDollarIcon,
       color: 'bg-yellow-500',
@@ -159,7 +159,7 @@ const AdminOverviewPage: React.FC = () => {
       changeType: 'positive'
     },
     {
-      title: 'Orders',
+      title: t("orders"),
       value: stats.totalOrders,
       icon: TruckIcon,
       color: 'bg-red-500',
@@ -167,7 +167,7 @@ const AdminOverviewPage: React.FC = () => {
       changeType: 'positive'
     },
     {
-      title: 'Support Tickets',
+      title: t("support_tickets"),
       value: stats.totalSupportTickets,
       icon: ChatBubbleLeftRightIcon,
       color: 'bg-orange-500',
@@ -175,7 +175,7 @@ const AdminOverviewPage: React.FC = () => {
       changeType: 'positive'
     },
     {
-      title: 'Contact Messages',
+      title: t("contact_messages"),
       value: stats.totalContactMessages,
       icon: ChatBubbleLeftRightIcon,
       color: 'bg-teal-500',
@@ -198,11 +198,11 @@ const AdminOverviewPage: React.FC = () => {
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-gray-600 mt-1">Welcome to your comprehensive content management system</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t("admin_dashboard")}</h1>
+            <p className="text-gray-600 mt-1">{t("welcome_to_your_comprehensive_content_management_system")}</p>
           </div>
           <div className="text-sm text-gray-500">
-            Last updated: {new Date().toLocaleString()}
+            {t("last_updated")}: {new Date().toLocaleString()}
           </div>
         </div>
       </div>
@@ -216,7 +216,7 @@ const AdminOverviewPage: React.FC = () => {
                 <p className="text-sm font-medium text-gray-600">{stat.title}</p>
                 <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
                 <p className={`text-sm ${stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'}`}>
-                  {stat.change} from last month
+                  {stat.change} {t("from_last_month")}
                 </p>
               </div>
               <div className={`${stat.color} p-3 rounded-lg`}>
@@ -229,30 +229,30 @@ const AdminOverviewPage: React.FC = () => {
 
       {/* Quick Actions */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t("quick_actions")}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <button className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <DocumentTextIcon className="h-5 w-5 text-blue-600 mr-3" />
-            <span className="text-sm font-medium">Create New Page</span>
+            <span className="text-sm font-medium">{t("create_new_page")}</span>
           </button>
           <button className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <PhotoIcon className="h-5 w-5 text-purple-600 mr-3" />
-            <span className="text-sm font-medium">Upload Media</span>
+            <span className="text-sm font-medium">{t("upload_media")}</span>
           </button>
           <button className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <GlobeAltIcon className="h-5 w-5 text-indigo-600 mr-3" />
-            <span className="text-sm font-medium">Write Blog Post</span>
+            <span className="text-sm font-medium">{t("write_blog_post")}</span>
           </button>
           <button className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <CogIcon className="h-5 w-5 text-gray-600 mr-3" />
-            <span className="text-sm font-medium">Site Settings</span>
+            <span className="text-sm font-medium">{t("site_settings")}</span>
           </button>
         </div>
       </div>
 
       {/* Recent Activity */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t("recent_activity")}</h2>
         <div className="space-y-3">
           {stats.recentActivity.length > 0 ? (
             stats.recentActivity.map((activity) => (
@@ -272,7 +272,7 @@ const AdminOverviewPage: React.FC = () => {
           ) : (
             <div className="text-center py-8">
               <ClockIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No recent activity</p>
+              <p className="text-gray-500">{t("no_recent_activity")}</p>
             </div>
           )}
         </div>
@@ -280,26 +280,26 @@ const AdminOverviewPage: React.FC = () => {
 
       {/* System Status */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">System Status</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t("system_status")}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="flex items-center p-3 bg-green-50 rounded-lg">
             <CheckCircleIcon className="h-5 w-5 text-green-600 mr-3" />
             <div>
-              <p className="text-sm font-medium text-green-900">Database</p>
+              <p className="text-sm font-medium text-green-900">{t("database")}</p>
               <p className="text-xs text-green-700">Online</p>
             </div>
           </div>
           <div className="flex items-center p-3 bg-green-50 rounded-lg">
             <CheckCircleIcon className="h-5 w-5 text-green-600 mr-3" />
             <div>
-              <p className="text-sm font-medium text-green-900">Storage</p>
+              <p className="text-sm font-medium text-green-900">{t("storage")}</p>
               <p className="text-xs text-green-700">Online</p>
             </div>
           </div>
           <div className="flex items-center p-3 bg-green-50 rounded-lg">
             <CheckCircleIcon className="h-5 w-5 text-green-600 mr-3" />
             <div>
-              <p className="text-sm font-medium text-green-900">API</p>
+              <p className="text-sm font-medium text-green-900">{t("api")}</p>
               <p className="text-xs text-green-700">Online</p>
             </div>
           </div>
