@@ -85,30 +85,30 @@ const AdminDashboard: React.FC = () => {
       icon: HomeIcon,
       color: "text-cargo-600",
     },
-    {
-      id: "admin-pages",
-      name: t("pages"),
-      icon: DocumentTextIcon,
-      color: "text-blue-600",
-    },
-    {
-      id: "admin-media",
-      name: t("media_library"),
-      icon: PhotoIcon,
-      color: "text-purple-600",
-    },
-    {
-      id: "admin-blog",
-      name: t("blog_posts"),
-      icon: PencilSquareIcon,
-      color: "text-indigo-600",
-    },
-    {
-      id: "admin-site-settings",
-      name: t("site_settings"),
-      icon: CogIcon,
-      color: "text-gray-600",
-    },
+    // {
+    //   id: "admin-pages",
+    //   name: t("pages"),
+    //   icon: DocumentTextIcon,
+    //   color: "text-blue-600",
+    // },
+    // {
+    //   id: "admin-media",
+    //   name: t("media_library"),
+    //   icon: PhotoIcon,
+    //   color: "text-purple-600",
+    // },
+    // {
+    //   id: "admin-blog",
+    //   name: t("blog_posts"),
+    //   icon: PencilSquareIcon,
+    //   color: "text-indigo-600",
+    // },
+    // {
+    //   id: "admin-site-settings",
+    //   name: t("site_settings"),
+    //   icon: CogIcon,
+    //   color: "text-gray-600",
+    // },
     {
       id: "admin-users",
       name: t("users_management"),
@@ -139,12 +139,12 @@ const AdminDashboard: React.FC = () => {
       icon: ChatBubbleBottomCenterTextIcon,
       color: "text-indigo-600",
     },
-    {
-      id: "admin-ai",
-      name: t("ai_management"),
-      icon: CogIcon,
-      color: "text-purple-600",
-    },
+    // {
+    //   id: "admin-ai",
+    //   name: t("ai_management"),
+    //   icon: CogIcon,
+    //   color: "text-purple-600",
+    // },
     {
       id: "admin-quotations",
       name: t("quotation_management"),

@@ -7,6 +7,7 @@ import {
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import { OtherRequestService, OtherRequest } from '../../services/otherRequestService';
+import { useTranslation } from 'react-i18next';
 
 const AdminOtherRequestPage: React.FC = () => {
   const [requests, setRequests] = useState<OtherRequest[]>([]);
@@ -16,6 +17,8 @@ const AdminOtherRequestPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [adminNotes, setAdminNotes] = useState('');
   const [newStatus, setNewStatus] = useState<string>('');
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadRequests();
@@ -112,9 +115,9 @@ const AdminOtherRequestPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Other Requests Management</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t("other_requests_management")}</h1>
         <div className="text-sm text-gray-500">
-          Total: {requests.length} | Filtered: {filteredRequests.length}
+          {t("total")}: {requests.length} | {t("filtered")}: {filteredRequests.length}
         </div>
       </div>
 
@@ -124,7 +127,7 @@ const AdminOtherRequestPage: React.FC = () => {
           <div className="flex-1 min-w-64">
             <input
               type="text"
-              placeholder="Search requests..."
+              placeholder={t("search_requests")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
@@ -135,11 +138,11 @@ const AdminOtherRequestPage: React.FC = () => {
             onChange={(e) => setFilterStatus(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
           >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="in_progress">In Progress</option>
-            <option value="resolved">Resolved</option>
-            <option value="closed">Closed</option>
+            <option value="all">{t("all_status")}</option>
+            <option value="pending">{t("pending")}</option>
+            <option value="in_progress">{t("in_progress")}</option>
+            <option value="resolved">{t("resolved")}</option>
+            <option value="closed">{t("closed")}</option>
           </select>
         </div>
       </div>
@@ -151,22 +154,22 @@ const AdminOtherRequestPage: React.FC = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Request
+                  {t("request")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Contact
+                  {t("contact")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Urgency
+                  {t("urgency")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  {t("status")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
+                  {t("date")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {t("actions")}
                 </th>
               </tr>
             </thead>
@@ -174,7 +177,7 @@ const AdminOtherRequestPage: React.FC = () => {
               {filteredRequests.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                    No requests found
+                    {t("no_requests_found")}
                   </td>
                 </tr>
               ) : (
@@ -225,7 +228,7 @@ const AdminOtherRequestPage: React.FC = () => {
           <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <div className="flex justify-between items-start mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Request Details</h3>
+                <h3 className="text-lg font-medium text-gray-900">{t("request_details")}</h3>
                 <button
                   onClick={() => setSelectedRequest(null)}
                   className="text-gray-400 hover:text-gray-600"
@@ -236,7 +239,7 @@ const AdminOtherRequestPage: React.FC = () => {
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Description</label>
+                  <label className="block text-sm font-medium text-gray-700">{t("description")}</label>
                   <p className="mt-1 text-sm text-gray-900 bg-gray-50 p-3 rounded-md">
                     {selectedRequest.description}
                   </p>
@@ -244,11 +247,11 @@ const AdminOtherRequestPage: React.FC = () => {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Contact Info</label>
+                    <label className="block text-sm font-medium text-gray-700">{t("contact_info")}</label>
                     <p className="mt-1 text-sm text-gray-900">{selectedRequest.contact_info || 'N/A'}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Urgency</label>
+                    <label className="block text-sm font-medium text-gray-700">{t("urgency")}</label>
                     <span className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${getUrgencyColor(selectedRequest.urgency)}`}>
                       {getUrgencyIcon(selectedRequest.urgency)}
                       <span className="ml-1">{selectedRequest.urgency}</span>
@@ -257,7 +260,7 @@ const AdminOtherRequestPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Current Status</label>
+                  <label className="block text-sm font-medium text-gray-700">{t("current_status")}</label>
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedRequest.status)}`}>
                     {selectedRequest.status}
                   </span>
@@ -265,13 +268,13 @@ const AdminOtherRequestPage: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Created</label>
+                    <label className="block text-sm font-medium text-gray-700">{t("created")}</label>
                     <p className="mt-1 text-sm text-gray-900">
                       {new Date(selectedRequest.created_at).toLocaleString()}
                     </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Last Updated</label>
+                    <label className="block text-sm font-medium text-gray-700">{t("last_updated")}</label>
                     <p className="mt-1 text-sm text-gray-900">
                       {new Date(selectedRequest.updated_at).toLocaleString()}
                     </p>
@@ -280,7 +283,7 @@ const AdminOtherRequestPage: React.FC = () => {
 
                 {selectedRequest.admin_notes && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Admin Notes</label>
+                    <label className="block text-sm font-medium text-gray-700">{t("admin_notes")}</label>
                     <p className="mt-1 text-sm text-gray-900 bg-gray-50 p-3 rounded-md">
                       {selectedRequest.admin_notes}
                     </p>
@@ -288,24 +291,24 @@ const AdminOtherRequestPage: React.FC = () => {
                 )}
 
                 <div className="border-t pt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Update Status</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t("update_status")}</label>
                   <div className="space-y-3">
                     <select
                       value={newStatus}
                       onChange={(e) => setNewStatus(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                     >
-                      <option value="">Select new status</option>
-                      <option value="pending">Pending</option>
-                      <option value="in_progress">In Progress</option>
-                      <option value="resolved">Resolved</option>
-                      <option value="closed">Closed</option>
+                      <option value="">{t("select_new_status")}</option>
+                      <option value="pending">{t("pending")}</option>
+                      <option value="in_progress">{t("in_progress")}</option>
+                      <option value="resolved">{t("resolved")}</option>
+                      <option value="closed">{t("closed")}</option>
                     </select>
                     
                     <textarea
                       value={adminNotes}
                       onChange={(e) => setAdminNotes(e.target.value)}
-                      placeholder="Add admin notes..."
+                      placeholder={t("add_admin_notes")}
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                     />
@@ -319,14 +322,14 @@ const AdminOtherRequestPage: React.FC = () => {
                         }}
                         className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
                       >
-                        Cancel
+                        {t("cancel")}
                       </button>
                       <button
                         onClick={() => handleStatusUpdate(selectedRequest.id, newStatus, adminNotes)}
                         disabled={!newStatus}
                         className="px-4 py-2 text-sm font-medium text-white bg-cargo-600 hover:bg-cargo-700 disabled:bg-gray-400 rounded-md"
                       >
-                        Update Status
+                        {t("update_status")}
                       </button>
                     </div>
                   </div>

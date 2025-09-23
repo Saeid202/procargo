@@ -151,13 +151,13 @@ const AdminOrdersPage: React.FC = () => {
             onChange={(e) => setFilterStatus(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
           >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="in_progress">In Progress</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
+            <option value="all">{t("all_status")}</option>
+            <option value="pending">{t("pending")}</option>
+            <option value="confirmed">{t("confirmed")}</option>
+            <option value="in_progress">{t("in_progress")}</option>
+            <option value="shipped">{t("shipped")}</option>
+            <option value="delivered">{t("delivered")}</option>
+            <option value="cancelled">{t("cancelled")}</option>
           </select>
         </div>
       </div>
@@ -169,28 +169,28 @@ const AdminOrdersPage: React.FC = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Order Number
+                  {t("order_number")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Route
+                  {t("route")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Value
+                  {t("value")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Priority
+                  {t("priority")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  {t("status")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Suppliers
+                  {t("suppliers")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
+                  {t("date")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {t("actions")}
                 </th>
               </tr>
             </thead>
@@ -198,7 +198,7 @@ const AdminOrdersPage: React.FC = () => {
               {filteredOrders.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
-                    No orders found
+                    {t("no_orders_found")}
                   </td>
                 </tr>
               ) : (
@@ -273,36 +273,36 @@ const AdminOrdersPage: React.FC = () => {
               <div className="space-y-6">
                 {/* Order Information */}
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="text-md font-medium text-gray-900 mb-3">Order Information</h4>
+                  <h4 className="text-md font-medium text-gray-900 mb-3">{t("order_information")}</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Order Number</label>
+                      <label className="block text-sm font-medium text-gray-700">{t("order_number")}</label>
                       <p className="mt-1 text-sm text-gray-900">{selectedOrder.order_number}</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Status</label>
+                      <label className="block text-sm font-medium text-gray-700">{t("status")}</label>
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedOrder.status)}`}>
                         {selectedOrder.status}
                       </span>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Priority</label>
+                      <label className="block text-sm font-medium text-gray-700">{t("priority")}</label>
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(selectedOrder.priority)}`}>
                         {selectedOrder.priority}
                       </span>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Total Value</label>
+                      <label className="block text-sm font-medium text-gray-700">{t("total_value")}</label>
                       <p className="mt-1 text-sm text-gray-900">{selectedOrder.currency} {selectedOrder.total_value.toLocaleString()}</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Route</label>
+                      <label className="block text-sm font-medium text-gray-700">{t("route")}</label>
                       <p className="mt-1 text-sm text-gray-900">
                         {selectedOrder.origin_country} → {selectedOrder.destination_country}
                       </p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Estimated Delivery</label>
+                      <label className="block text-sm font-medium text-gray-700">{t("estimated_delivery")}</label>
                       <p className="mt-1 text-sm text-gray-900">
                         {selectedOrder.estimated_delivery ? new Date(selectedOrder.estimated_delivery).toLocaleDateString() : 'Not set'}
                       </p>
@@ -310,7 +310,7 @@ const AdminOrdersPage: React.FC = () => {
                   </div>
                   {selectedOrder.notes && (
                     <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700">Notes</label>
+                      <label className="block text-sm font-medium text-gray-700">{t("notes")}</label>
                       <p className="mt-1 text-sm text-gray-900 bg-white p-3 rounded-md">{selectedOrder.notes}</p>
                     </div>
                   )}
@@ -319,22 +319,22 @@ const AdminOrdersPage: React.FC = () => {
                 {/* Suppliers */}
                 {selectedOrder.suppliers && selectedOrder.suppliers.length > 0 && (
                   <div>
-                    <h4 className="text-md font-medium text-gray-900 mb-3">Suppliers ({selectedOrder.suppliers.length})</h4>
+                    <h4 className="text-md font-medium text-gray-900 mb-3">{t("suppliers")} ({selectedOrder.suppliers.length})</h4>
                     <div className="space-y-4">
                       {selectedOrder.suppliers.map((supplier, index) => (
                         <div key={supplier.id} className="border border-gray-200 rounded-lg p-4">
                           <div className="flex justify-between items-start mb-2">
-                            <h5 className="text-sm font-medium text-gray-900">Supplier {index + 1}</h5>
+                            <h5 className="text-sm font-medium text-gray-900">{t("supplier")} {index + 1}</h5>
                             <span className="text-xs text-gray-500">{supplier.logistics_type}</span>
                           </div>
                           
                           <div className="grid grid-cols-2 gap-4 mb-3">
                             <div>
-                              <label className="block text-xs font-medium text-gray-700">Product</label>
+                              <label className="block text-xs font-medium text-gray-700">{t("product")}</label>
                               <p className="mt-1 text-sm text-gray-900">{supplier.product_name}</p>
                             </div>
                             <div>
-                              <label className="block text-xs font-medium text-gray-700">Quantity</label>
+                              <label className="block text-xs font-medium text-gray-700">{t("quantity")}</label>
                               <p className="mt-1 text-sm text-gray-900">{supplier.quantity} {supplier.unit_type}</p>
                             </div>
                             <div>
@@ -342,21 +342,21 @@ const AdminOrdersPage: React.FC = () => {
                               <p className="mt-1 text-sm text-gray-900">{selectedOrder.currency} {supplier.unit_price}</p>
                             </div>
                             <div>
-                              <label className="block text-xs font-medium text-gray-700">Total</label>
+                              <label className="block text-xs font-medium text-gray-700">{t("total")}</label>
                               <p className="mt-1 text-sm text-gray-900">{selectedOrder.currency} {(supplier.quantity * supplier.unit_price).toLocaleString()}</p>
                             </div>
                           </div>
 
                           {supplier.special_instructions && (
                             <div className="mb-3">
-                              <label className="block text-xs font-medium text-gray-700">Special Instructions</label>
+                              <label className="block text-xs font-medium text-gray-700">{t("special_instructions")}</label>
                               <p className="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded">{supplier.special_instructions}</p>
                             </div>
                           )}
 
                           {supplier.notes && (
                             <div className="mb-3">
-                              <label className="block text-xs font-medium text-gray-700">Notes</label>
+                              <label className="block text-xs font-medium text-gray-700">{t("notes")}</label>
                               <p className="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded">{supplier.notes}</p>
                             </div>
                           )}
@@ -364,7 +364,7 @@ const AdminOrdersPage: React.FC = () => {
                           {/* Supplier Links */}
                           {supplier.supplier_links && supplier.supplier_links.length > 0 && (
                             <div className="mb-3">
-                              <label className="block text-xs font-medium text-gray-700 mb-2">Supplier Links</label>
+                              <label className="block text-xs font-medium text-gray-700 mb-2">{t("supplier_links")}</label>
                               <div className="space-y-2">
                                 {supplier.supplier_links.map((link, linkIndex) => (
                                   <div key={link.id} className="bg-blue-50 p-2 rounded text-sm">
@@ -393,7 +393,7 @@ const AdminOrdersPage: React.FC = () => {
                           {/* Supplier Files */}
                           {supplier.supplier_files && supplier.supplier_files.length > 0 && (
                             <div>
-                              <label className="block text-xs font-medium text-gray-700 mb-2">Files</label>
+                              <label className="block text-xs font-medium text-gray-700 mb-2">{t("files")}</label>
                               <div className="space-y-1">
                                 {supplier.supplier_files.map((file) => (
                                   <div key={file.id} className="flex items-center justify-between bg-gray-50 p-2 rounded text-sm">
@@ -407,7 +407,7 @@ const AdminOrdersPage: React.FC = () => {
                                       rel="noopener noreferrer"
                                       className="text-blue-600 hover:text-blue-800 text-xs"
                                     >
-                                      Download
+                                      {t("download")}
                                     </a>
                                   </div>
                                 ))}

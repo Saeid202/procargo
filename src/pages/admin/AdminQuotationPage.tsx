@@ -12,6 +12,7 @@ import {
   CurrencyDollarIcon,
   TruckIcon
 } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminQuotationPage() {
   const { user } = useAuth();
@@ -26,6 +27,8 @@ export default function AdminQuotationPage() {
     quoted_price: '',
     estimated_delivery_days: ''
   });
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadQuotations();
@@ -133,11 +136,11 @@ export default function AdminQuotationPage() {
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Quotation Management</h1>
-            <p className="text-gray-600 mt-1">Manage customer quotation requests and provide quotes</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t("quotation_management")}</h1>
+            <p className="text-gray-600 mt-1">{t("manage_customer_quotation_requests_and_provide_quotes")}</p>
           </div>
           <div className="text-sm text-gray-500">
-            Total Requests: {quotations.length}
+            {t("total_requests")}: {quotations.length}
           </div>
         </div>
       </div>
@@ -145,14 +148,14 @@ export default function AdminQuotationPage() {
       {/* Quotations List */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-lg font-semibold text-gray-900">All Quotation Requests</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t("all_quotation_requests")}</h2>
         </div>
         
         {quotations.length === 0 ? (
           <div className="text-center py-12">
             <TruckIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No quotation requests</h3>
-            <p className="mt-1 text-sm text-gray-500">No quotation requests have been submitted yet.</p>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">{t("no_quotation_requests")}</h3>
+            <p className="mt-1 text-sm text-gray-500">{t("no_quotation_requests_have_been_submitted_yet")}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -160,19 +163,19 @@ export default function AdminQuotationPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Product
+                    {t("product")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Quantity
+                    {t("quantity")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    {t("status")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Submitted
+                    {t("submitted")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                    {t("actions")}
                   </th>
                 </tr>
               </thead>
@@ -224,7 +227,7 @@ export default function AdminQuotationPage() {
               {/* Modal Header */}
               <div className="flex items-center justify-between pb-4 border-b border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  Quotation Request Details
+                  {t("quotation_request_details")}
                 </h3>
                 <button
                   onClick={() => setShowModal(false)}
@@ -238,19 +241,19 @@ export default function AdminQuotationPage() {
               <div className="mt-4 space-y-6">
                 {/* Product Information */}
                 <div>
-                  <h4 className="text-md font-semibold text-gray-900 mb-3">Product Information</h4>
+                  <h4 className="text-md font-semibold text-gray-900 mb-3">{t("product_information")}</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Product Name</label>
+                      <label className="block text-sm font-medium text-gray-700">{t("product_name")}</label>
                       <p className="mt-1 text-sm text-gray-900">{selectedQuotation.product_name}</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Quantity</label>
+                      <label className="block text-sm font-medium text-gray-700">{t("quantity")}</label>
                       <p className="mt-1 text-sm text-gray-900">{selectedQuotation.quantity}</p>
                     </div>
                   </div>
                   <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700">Description</label>
+                    <label className="block text-sm font-medium text-gray-700">{t("description")}</label>
                     <p className="mt-1 text-sm text-gray-900">{selectedQuotation.description}</p>
                   </div>
                 </div>
@@ -258,7 +261,7 @@ export default function AdminQuotationPage() {
                 {/* Reference Links */}
                 {selectedQuotation.reference_links && selectedQuotation.reference_links.length > 0 && (
                   <div>
-                    <h4 className="text-md font-semibold text-gray-900 mb-3">Reference Links</h4>
+                    <h4 className="text-md font-semibold text-gray-900 mb-3">{t("reference_links")}</h4>
                     <div className="space-y-2">
 
                       {selectedQuotation.reference_links.map((link: string, index: number) => (
@@ -279,43 +282,43 @@ export default function AdminQuotationPage() {
 
                 {/* Needs Explanation */}
                 <div>
-                  <h4 className="text-md font-semibold text-gray-900 mb-3">Customer Needs</h4>
+                  <h4 className="text-md font-semibold text-gray-900 mb-3">{t("customer_needs")}</h4>
                   <p className="text-sm text-gray-900">{selectedQuotation.explanation_of_needs}</p>
                 </div>
 
                 {/* Admin Actions */}
                 <div>
-                  <h4 className="text-md font-semibold text-gray-900 mb-3">Admin Actions</h4>
+                  <h4 className="text-md font-semibold text-gray-900 mb-3">{t("admin_actions")}</h4>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t("status")}</label>
                       <select
                         value={formData.status}
                         onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as QuotationRequest['status'] }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                       >
-                        <option value="pending">Pending</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="quoted">Quoted</option>
-                        <option value="rejected">Rejected</option>
-                        <option value="completed">Completed</option>
+                        <option value="pending">{t("pending")}</option>
+                        <option value="in_progress">{t("in_progress")}</option>
+                        <option value="quoted">{t("quoted")}</option>
+                        <option value="rejected">{t("rejected")}</option>
+                        <option value="completed">{t("completed")}</option>
                       </select>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Agent Notes</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t("agent_notes")}</label>
                       <textarea
                         value={formData.agent_notes}
                         onChange={(e) => setFormData(prev => ({ ...prev, agent_notes: e.target.value }))}
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
-                        placeholder="Add notes about this quotation request..."
+                        placeholder={t("add_notes_about_this_quotation_request")}
                       />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Quoted Price (CAD)</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">{t("quoted_price")} (CAD)</label>
                         <input
                           type="number"
                           step="0.01"
@@ -326,7 +329,7 @@ export default function AdminQuotationPage() {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Estimated Delivery (Days)</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">{t("estimated_delivery")} ({t("days")})</label>
                         <input
                           type="number"
                           value={formData.estimated_delivery_days}
@@ -346,13 +349,13 @@ export default function AdminQuotationPage() {
                   onClick={() => setShowModal(false)}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
                 <button
                   onClick={handleUpdateStatus}
                   className="px-4 py-2 text-sm font-medium text-white bg-cargo-600 hover:bg-cargo-700 rounded-lg transition-colors"
                 >
-                  Update Status
+                  {t("update_status")}
                 </button>
               </div>
             </div>
