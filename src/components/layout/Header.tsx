@@ -30,6 +30,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab }) => {
       case 'admin-migration': return t("admin_migration_description");
       case 'admin-users': return t("admin_users_description");
       case 'admin-support': return t("admin_support_description");
+      case 'admin-documents': return t("admin_documents_description");
       default: return t("overview_description");
     }
   };

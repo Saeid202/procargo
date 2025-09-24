@@ -28,6 +28,7 @@ import AdminPagesPage from '../../pages/admin/AdminPagesPage';
 import AdminMediaPage from '../../pages/admin/AdminMediaPage';
 import AdminBlogPage from '../../pages/admin/AdminBlogPage';
 import AdminSiteSettingsPage from '../../pages/admin/AdminSiteSettingsPage';
+import AdminDocumentsPage from '../../pages/admin/AdminDocumentsPage';
 
 const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('admin-overview');
@@ -73,6 +74,8 @@ const AdminDashboard: React.FC = () => {
         return <AdminOtherRequestPage />;
       case 'admin-orders':
         return <AdminOrdersPage />;
+      case 'admin-documents':
+        return <AdminDocumentsPage />;
       default:
         return <AdminOverviewPage />;
     }
@@ -161,6 +164,12 @@ const AdminDashboard: React.FC = () => {
       id: "admin-orders",
       name: t("orders_management"),
       icon: TruckIcon,
+      color: "text-green-600",
+    },
+    {
+      id: "admin-documents",
+      name: t("documents_management"),
+      icon: DocumentTextIcon,
       color: "text-green-600",
     },
   ];
