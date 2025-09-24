@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import Logo from './Logo';
 import LanguageDropdown from '../lib/i18n/LanguageDropdown';
@@ -10,8 +10,20 @@ import { RolesEnum } from '../abstractions/enums/roles.enum';
 const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, loading } = useAuth();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (!!searchParams.get("language")) {
+      i18n.changeLanguage(searchParams.get("language") || "en");
+      if (searchParams.get("language") === "fa") {
+        document.documentElement.dir = "rtl";
+      } else {
+        document.documentElement.dir = "ltr";
+      }
+    }
+  }, [searchParams]);
 
   const navigation = [
     { name: t('home'), href: '/' },

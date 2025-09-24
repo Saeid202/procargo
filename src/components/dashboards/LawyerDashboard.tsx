@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import DashboardLayout from './layout/DashboardLayout';
+import DashboardLayout from '../layout/DashboardLayout';
 import {
   CalculatorIcon,
   ClipboardDocumentListIcon,
   HomeIcon,
 } from "@heroicons/react/24/outline";
-import LawyerOverviewPage from '../pages/lawyer-dashboard/LawyerOverviewPage';
-import LawyerSettingPage from '../pages/lawyer-dashboard/LawyerSettingPage';
-import LawyerCasesPage from '../pages/lawyer-dashboard/LawyerCasesPage';
+import LawyerOverviewPage from '../../pages/lawyer-dashboard/LawyerOverviewPage';
+import LawyerSettingPage from '../../pages/lawyer-dashboard/LawyerSettingPage';
+import LawyerCasesPage from '../../pages/lawyer-dashboard/LawyerCasesPage';
 import { useTranslation } from 'react-i18next';
 
 const LawyerDashboard: React.FC = () => {

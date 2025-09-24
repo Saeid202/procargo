@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import DashboardLayout from './layout/DashboardLayout';
-import OverviewPage from '../pages/dashboard/OverviewPage';
-import OrdersPage from '../pages/dashboard/OrdersPage';
-import ShipmentsPage from '../pages/dashboard/ShipmentsPage';
-import CompliancePage from '../pages/dashboard/CompliancePage';
-import LegalAssistancePage from '../pages/dashboard/LegalAssistancePage';
-import SupportPage from '../pages/dashboard/SupportPage';
-import SettingsPage from '../pages/account/SettingsPage';
+import DashboardLayout from '../layout/DashboardLayout';
+import OverviewPage from '../../pages/dashboard/OverviewPage';
+import OrdersPage from '../../pages/dashboard/OrdersPage';
+import ShipmentsPage from '../../pages/dashboard/ShipmentsPage';
+import CompliancePage from '../../pages/dashboard/CompliancePage';
+import LegalAssistancePage from '../../pages/dashboard/LegalAssistancePage';
+import SupportPage from '../../pages/dashboard/SupportPage';
+import SettingsPage from '../../pages/account/SettingsPage';
 import {
   HomeIcon,
   CalculatorIcon,
@@ -16,7 +16,7 @@ import {
   QuestionMarkCircleIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
-import LegalIssuePage from '../pages/dashboard/LegalIssuePage';
+import LegalIssuePage from '../../pages/dashboard/LegalIssuePage';
 import { useTranslation } from 'react-i18next';
 
 const Dashboard: React.FC = () => {

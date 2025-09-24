@@ -1,7 +1,7 @@
 import React from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
-import { RolesEnum } from '../abstractions/enums/roles.enum'
+import { useAuth } from '../../contexts/AuthContext'
+import { RolesEnum } from '../../abstractions/enums/roles.enum'
 
 interface ProtectedRouteProps {
   children: React.ReactNode

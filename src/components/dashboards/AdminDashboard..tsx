@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import DashboardLayout from './layout/DashboardLayout';
+import DashboardLayout from '../layout/DashboardLayout';
 import {
   HomeIcon,
   GlobeAltIcon,
@@ -13,21 +13,21 @@ import {
   CogIcon,
   TruckIcon,
 } from "@heroicons/react/24/outline";
-import AdminOverviewPage from '../pages/admin/AdminOverviewPage';
+import AdminOverviewPage from '../../pages/admin/AdminOverviewPage';
 import { useTranslation } from 'react-i18next';
-import TranslationManagementPage from '../pages/admin/TranslationManagementPage';
-import MigrationPage from '../pages/admin/MigrationPage';
-import AdminContactPage from '../pages/admin/AdminContactPage';
-import AdminUsersPage from '../pages/admin/AdminUsersPage';
-import AdminSupportPage from '../pages/admin/AdminSupportPage';
-import AdminAIPage from '../pages/admin/AdminAIPage';
-import AdminQuotationPage from '../pages/admin/AdminQuotationPage';
-import AdminOtherRequestPage from '../pages/admin/AdminOtherRequestPage';
-import AdminOrdersPage from '../pages/admin/AdminOrdersPage';
-import AdminPagesPage from '../pages/admin/AdminPagesPage';
-import AdminMediaPage from '../pages/admin/AdminMediaPage';
-import AdminBlogPage from '../pages/admin/AdminBlogPage';
-import AdminSiteSettingsPage from '../pages/admin/AdminSiteSettingsPage';
+import TranslationManagementPage from '../../pages/admin/TranslationManagementPage';
+import MigrationPage from '../../pages/admin/MigrationPage';
+import AdminContactPage from '../../pages/admin/AdminContactPage';
+import AdminUsersPage from '../../pages/admin/AdminUsersPage';
+import AdminSupportPage from '../../pages/admin/AdminSupportPage';
+import AdminAIPage from '../../pages/admin/AdminAIPage';
+import AdminQuotationPage from '../../pages/admin/AdminQuotationPage';
+import AdminOtherRequestPage from '../../pages/admin/AdminOtherRequestPage';
+import AdminOrdersPage from '../../pages/admin/AdminOrdersPage';
+import AdminPagesPage from '../../pages/admin/AdminPagesPage';
+import AdminMediaPage from '../../pages/admin/AdminMediaPage';
+import AdminBlogPage from '../../pages/admin/AdminBlogPage';
+import AdminSiteSettingsPage from '../../pages/admin/AdminSiteSettingsPage';
 
 const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('admin-overview');

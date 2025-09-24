@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import DashboardLayout from './layout/DashboardLayout';
+import DashboardLayout from '../layout/DashboardLayout';
 import {
   CalculatorIcon,
   ClipboardDocumentListIcon,
   HomeIcon,
   TruckIcon,
 } from "@heroicons/react/24/outline";
-import AgentOverviewPage from '../pages/agent-dashboard/AgentOverviewPage';
-import AgentOrdersPage from '../pages/agent-dashboard/AgentOrdersPage';
-import AgentLogisticsPage from '../pages/agent-dashboard/AgentLogisticsPage';
-import AgentSettingPage from '../pages/agent-dashboard/AgentSettingPage';
+import AgentOverviewPage from '../../pages/agent-dashboard/AgentOverviewPage';
+import AgentOrdersPage from '../../pages/agent-dashboard/AgentOrdersPage';
+import AgentLogisticsPage from '../../pages/agent-dashboard/AgentLogisticsPage';
+import AgentSettingPage from '../../pages/agent-dashboard/AgentSettingPage';
 import { useTranslation } from 'react-i18next';
 
 const AgentDashboard: React.FC = () => {
