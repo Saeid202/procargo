@@ -402,7 +402,7 @@ const LegalAssistancePage: React.FC = () => {
                   <div className="bg-gray-100 text-gray-900 max-w-xs lg:max-w-md px-4 py-2 rounded-lg">
                     <div className="flex items-center space-x-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-cargo-600"></div>
-                      <span className="text-sm">AI is thinking...</span>
+                      <span className="text-sm">{t("ai_is_thinking")}</span>
                     </div>
                   </div>
                 </div>

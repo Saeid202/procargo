@@ -549,24 +549,24 @@ const OrdersPage: React.FC = () => {
       {/* Instructions */}
       <div className="mb-6">
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">Choose the appropriate option based on your needs:</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">{t("choose_the_appropriate_option_based_on_your_needs")}</h3>
           <div className="space-y-3 text-sm text-gray-700">
             <div className="flex items-start gap-3">
               <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-600 text-white text-xs font-bold rounded-full flex-shrink-0 mt-0.5">1</span>
               <div>
-                <span className="font-semibold text-blue-900">I have a Supplier</span> - Use this form if you have already negotiated prices with suppliers and need us to purchase, consolidate, and ship your products. You can also request supplier credibility verification.
+                <span className="font-semibold text-blue-900">{t("i_have_a_supplier")}</span> - {t("use_this_form_if_you_have_already_negotiated_prices_with_suppliers_and_need_us_to_purchase_consolidate_and_ship_your_products_you_can_also_request_supplier_credibility_verification")}
               </div>
             </div>
             <div className="flex items-start gap-3">
               <span className="inline-flex items-center justify-center w-6 h-6 bg-green-600 text-white text-xs font-bold rounded-full flex-shrink-0 mt-0.5">2</span>
               <div>
-                <span className="font-semibold text-green-900">I don't have a Supplier</span> - Use this form if you need us to source products for you. Please provide detailed specifications and attach any relevant documents.
+                <span className="font-semibold text-green-900">{t("i_dont_have_a_supplier")}</span> - {t("use_this_form_if_you_need_us_to_source_products_for_you_please_provide_detailed_specifications_and_attach_any_relevant_documents")}
               </div>
             </div>
             <div className="flex items-start gap-3">
               <span className="inline-flex items-center justify-center w-6 h-6 bg-purple-600 text-white text-xs font-bold rounded-full flex-shrink-0 mt-0.5">3</span>
               <div>
-                <span className="font-semibold text-purple-900">Other requests</span> - Use this form for any other inquiries related to the Chinese market.
+                <span className="font-semibold text-purple-900">{t("other_requests")}</span> - {t("use_this_form_for_any_other_inquiries_related_to_the_chinese_market")}
               </div>
             </div>
           </div>
@@ -585,7 +585,7 @@ const OrdersPage: React.FC = () => {
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               }`}
             >
-              I have a Supplier
+              {t("i_have_a_supplier")}
             </button>
             <button 
               onClick={() => setActiveSegment('I don\'t have a Supplier')}
@@ -595,7 +595,7 @@ const OrdersPage: React.FC = () => {
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               }`}
             >
-              I don't have a Supplier
+              {t("i_dont_have_a_supplier")}
             </button>
             <button 
               onClick={() => setActiveSegment('Other requests')}
@@ -605,7 +605,7 @@ const OrdersPage: React.FC = () => {
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               }`}
             >
-              Other requests
+              {t("other_requests")}
             </button>
           </div>
         </div>
@@ -616,14 +616,14 @@ const OrdersPage: React.FC = () => {
         <div className="mb-6">
           <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-br from-slate-50 to-slate-200">
-              <h2 className="text-xl font-semibold text-gray-900">Describe Your Request</h2>
-              <p className="text-gray-600 text-sm mt-1">Tell us what you need and we'll help you find the right solution.</p>
+              <h2 className="text-xl font-semibold text-gray-900">{t("describe_your_request")}</h2>
+              <p className="text-gray-600 text-sm mt-1">{t("tell_us_what_you_need_and_we_ll_help_you_find_the_right_solution")}</p>
             </div>
 
             <form onSubmit={handleOtherRequestSubmit} className="p-6 space-y-6">
               <div>
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                  What do you need help with? *
+                  {t("what_do_you_need_help_with")} *
                 </label>
                 <textarea
                   id="description"
@@ -631,7 +631,7 @@ const OrdersPage: React.FC = () => {
                   value={otherRequestData.description}
                   onChange={(e) => setOtherRequestData(prev => ({ ...prev, description: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500 resize-none"
-                  placeholder="Please describe your specific requirements, questions, or needs in detail..."
+                  placeholder={t("please_describe_your_specific_requirements_questions_or_needs_in_detail")}
                   required
                 />
               </div>
@@ -639,7 +639,7 @@ const OrdersPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="contactInfo" className="block text-sm font-medium text-gray-700 mb-2">
-                    Contact Information
+                    {t("contact_information")}
                   </label>
                   <input
                     type="text"
@@ -647,13 +647,13 @@ const OrdersPage: React.FC = () => {
                     value={otherRequestData.contactInfo}
                     onChange={(e) => setOtherRequestData(prev => ({ ...prev, contactInfo: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
-                    placeholder="Phone number or email (optional)"
+                    placeholder={t("phone_number_or_email_optional")}
                   />
                 </div>
 
                 <div>
                   <label htmlFor="urgency" className="block text-sm font-medium text-gray-700 mb-2">
-                    Urgency Level
+                    {t("urgency_level")}
                   </label>
                   <select
                     id="urgency"
@@ -661,10 +661,10 @@ const OrdersPage: React.FC = () => {
                     onChange={(e) => setOtherRequestData(prev => ({ ...prev, urgency: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                   >
-                    <option value="low">Low - No rush</option>
-                    <option value="normal">Normal - Within a week</option>
-                    <option value="high">High - Within 2-3 days</option>
-                    <option value="urgent">Urgent - Same day</option>
+                    <option value="low">{t("low_no_rush")}</option>
+                    <option value="normal">{t("normal_within_a_week")}</option>
+                    <option value="high">{t("high_within_2_3_days")}</option>
+                    <option value="urgent">{t("urgent_same_day")}</option>
                   </select>
                 </div>
               </div>
@@ -680,7 +680,7 @@ const OrdersPage: React.FC = () => {
                   ) : (
                     <>
                       <PlusIcon className="h-5 w-5" />
-                      Submit Request
+                      {t("submit_request")}
                     </>
                   )}
                 </button>
@@ -695,7 +695,7 @@ const OrdersPage: React.FC = () => {
         <div className="mb-6">
           <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gradient-to-br from-blue-50 to-blue-100">
-              <h2 className="text-xl font-semibold text-gray-900">Submit New Order</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t("submit_new_order")}</h2>
               <button
                 type="button"
                 onClick={addSupplier}
@@ -994,19 +994,19 @@ const OrdersPage: React.FC = () => {
         <div className="mb-6">
           <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-br from-green-50 to-green-100">
-              <h2 className="text-xl font-semibold text-gray-900">Request Quotation from Our Agents</h2>
-              <p className="text-gray-600 text-sm mt-1">Tell us about the product you need and our agents will find the best suppliers for you.</p>
+              <h2 className="text-xl font-semibold text-gray-900">{t("request_quotation_from_our_agents")}</h2>
+              <p className="text-gray-600 text-sm mt-1">{t("tell_us_about_the_product_you_need_and_our_agents_will_find_the_best_suppliers_for_you")}</p>
             </div>
 
             <form onSubmit={handleQuotationRequestSubmit} className="p-6 space-y-6">
               {/* Product Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Product Information</h3>
+                <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">{t("product_information")}</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="productName" className="block text-sm font-medium text-gray-700 mb-2">
-                      Product Name *
+                      {t("product_name")} *
                     </label>
                     <input
                       type="text"
@@ -1014,14 +1014,14 @@ const OrdersPage: React.FC = () => {
                       value={quotationRequestData.productName}
                       onChange={(e) => setQuotationRequestData(prev => ({ ...prev, productName: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
-                      placeholder="e.g., LED Strip Lights, Water Bottles, etc."
+                      placeholder={t("e_g_led_strip_lights_water_bottles_etc")}
                       required
                     />
                   </div>
 
                   <div>
                     <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-2">
-                      Quantity *
+                      {t("quantity")} *
                     </label>
                     <div className="flex gap-2">
                       <input
@@ -1030,7 +1030,7 @@ const OrdersPage: React.FC = () => {
                         value={quotationRequestData.quantity}
                         onChange={(e) => setQuotationRequestData(prev => ({ ...prev, quantity: parseInt(e.target.value) || 0 }))}
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
-                        placeholder="1000"
+                        placeholder={t("1000")}
                         min="1"
                         required
                       />
@@ -1039,13 +1039,13 @@ const OrdersPage: React.FC = () => {
                         onChange={(e) => setQuotationRequestData(prev => ({ ...prev, unitType: e.target.value }))}
                         className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                       >
-                        <option value="Pcs">Pcs</option>
-                        <option value="Sets">Sets</option>
-                        <option value="Boxes">Boxes</option>
-                        <option value="Kg">Kg</option>
-                        <option value="Lbs">Lbs</option>
-                        <option value="Meters">Meters</option>
-                        <option value="Feet">Feet</option>
+                        <option value="Pcs">{t("pcs")}</option>
+                        <option value="Sets">{t("sets")}</option>
+                        <option value="Boxes">{t("boxes")}</option>
+                        <option value="Kg">{t("kg")}</option>
+                        <option value="Lbs">{t("lbs")}</option>
+                        <option value="Meters">{t("meters")}</option>
+                        <option value="Feet">{t("feet")}</option>
                       </select>
                     </div>
                   </div>
@@ -1053,7 +1053,7 @@ const OrdersPage: React.FC = () => {
 
                 <div>
                   <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                    Product Description *
+                    {t("product_description")} *
                   </label>
                   <textarea
                     id="description"
@@ -1061,7 +1061,7 @@ const OrdersPage: React.FC = () => {
                     value={quotationRequestData.description}
                     onChange={(e) => setQuotationRequestData(prev => ({ ...prev, description: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500 resize-none"
-                    placeholder="Describe the product specifications, materials, colors, dimensions, etc."
+                    placeholder={t("describe_the_product_specifications_materials_colors_dimensions_etc")}
                     required
                   />
                 </div>
@@ -1070,14 +1070,14 @@ const OrdersPage: React.FC = () => {
               {/* Reference Links */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium text-gray-900">Reference Links</h3>
+                  <h3 className="text-lg font-medium text-gray-900">{t("reference_links")}</h3>
                   <button
                     type="button"
                     onClick={addReferenceLink}
                     className="text-cargo-600 hover:text-cargo-700 text-sm font-medium flex items-center gap-1"
                   >
                     <PlusIcon className="h-4 w-4" />
-                    Add Link
+                    {t("add_link")}
                   </button>
                 </div>
 
@@ -1085,7 +1085,7 @@ const OrdersPage: React.FC = () => {
                   <div key={index} className="flex gap-3 items-end">
                     <div className="flex-1">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Website URL
+                        {t("website_url")}
                       </label>
                       <input
                         type="url"
@@ -1097,14 +1097,14 @@ const OrdersPage: React.FC = () => {
                     </div>
                     <div className="flex-1">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Description
+                        {t("description")}
                       </label>
                       <input
                         type="text"
                         value={link.description}
                         onChange={(e) => updateReferenceLink(index, 'description', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
-                        placeholder="What is this link for?"
+                        placeholder={t("what_is_this_link_for")}
                       />
                     </div>
                     {quotationRequestData.referenceLinks.length > 1 && (
@@ -1122,7 +1122,7 @@ const OrdersPage: React.FC = () => {
 
               {/* Product Images */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">Product Images</h3>
+                <h3 className="text-lg font-medium text-gray-900">{t("product_images")}</h3>
                 
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                   <input
@@ -1140,8 +1140,8 @@ const OrdersPage: React.FC = () => {
                     <div className="p-3 bg-cargo-50 rounded-full">
                       <PlusIcon className="h-8 w-8 text-cargo-600" />
                     </div>
-                    <span className="text-sm font-medium text-gray-700">Upload Product Images</span>
-                    <span className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB each</span>
+                    <span className="text-sm font-medium text-gray-700">{t("upload_product_images")}</span>
+                    <span className="text-xs text-gray-500">{t("png_jpg_gif_up_to_10mb_each")}</span>
                   </label>
                 </div>
 
@@ -1169,11 +1169,11 @@ const OrdersPage: React.FC = () => {
 
               {/* Additional Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Additional Information</h3>
+                <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">{t("additional_information")}</h3>
                 
                 <div>
                   <label htmlFor="needsExplanation" className="block text-sm font-medium text-gray-700 mb-2">
-                    Please explain your needs *
+                    {t("please_explain_your_needs")} *
                   </label>
                   <textarea
                     id="needsExplanation"
@@ -1181,7 +1181,7 @@ const OrdersPage: React.FC = () => {
                     value={quotationRequestData.needsExplanation}
                     onChange={(e) => setQuotationRequestData(prev => ({ ...prev, needsExplanation: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500 resize-none"
-                    placeholder="Explain what you're looking for, any specific requirements, quality standards, etc."
+                    placeholder={t("explain_what_you_re_looking_for_any_specific_requirements_quality_standards_etc")}
                     required
                   />
                 </div>
@@ -1189,7 +1189,7 @@ const OrdersPage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-2">
-                      Budget Range
+                      {t("budget_range")}
                     </label>
                     <input
                       type="text"
@@ -1197,13 +1197,13 @@ const OrdersPage: React.FC = () => {
                       value={quotationRequestData.budget}
                       onChange={(e) => setQuotationRequestData(prev => ({ ...prev, budget: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
-                      placeholder="e.g., $1000-5000"
+                      placeholder={t("e_g_1000_5000")}
                     />
                   </div>
 
                   <div>
                     <label htmlFor="timeline" className="block text-sm font-medium text-gray-700 mb-2">
-                      Timeline
+                      {t("timeline")}
                     </label>
                     <select
                       id="timeline"
@@ -1211,17 +1211,17 @@ const OrdersPage: React.FC = () => {
                       onChange={(e) => setQuotationRequestData(prev => ({ ...prev, timeline: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                     >
-                      <option value="">Select timeline</option>
-                      <option value="urgent">Urgent (1-2 weeks)</option>
-                      <option value="normal">Normal (2-4 weeks)</option>
-                      <option value="flexible">Flexible (1-2 months)</option>
-                      <option value="long-term">Long-term (2+ months)</option>
+                      <option value="">{t("select_timeline")}</option>
+                      <option value="urgent">{t("urgent_1_2_weeks")}</option>
+                      <option value="normal">{t("normal_2_4_weeks")}</option>
+                      <option value="flexible">{t("flexible_1_2_months")}</option>
+                      <option value="long-term">{t("long_term_2_plus_months")}</option>
                     </select>
                   </div>
 
                   <div>
                     <label htmlFor="specialRequirements" className="block text-sm font-medium text-gray-700 mb-2">
-                      Special Requirements
+                      {t("special_requirements")}
                     </label>
                     <input
                       type="text"
@@ -1229,7 +1229,7 @@ const OrdersPage: React.FC = () => {
                       value={quotationRequestData.specialRequirements}
                       onChange={(e) => setQuotationRequestData(prev => ({ ...prev, specialRequirements: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
-                      placeholder="e.g., Custom packaging, Certifications"
+                      placeholder={t("e_g_custom_packaging_certifications")}
                     />
                   </div>
                 </div>
@@ -1246,7 +1246,7 @@ const OrdersPage: React.FC = () => {
                   ) : (
                     <>
                       <PlusIcon className="h-5 w-5" />
-                      Request Quotation
+                      {t("request_quotation")}
                     </>
                   )}
                 </button>
@@ -1261,4 +1261,3 @@ const OrdersPage: React.FC = () => {
 };
 
 export default OrdersPage;
-
