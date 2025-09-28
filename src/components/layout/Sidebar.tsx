@@ -94,10 +94,10 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <Icon
                 className={`h-5 w-5 ${activeTab === item.id ? item.color : "text-gray-400"
-                  }`}
+                  } ${!sidebarCollapsed ? "ml-3" : ""}`}
               />
               {!sidebarCollapsed && (
-                <span className="ms-3 font-medium">{item.name}</span>
+                <span className="font-medium text-right flex-1">{item.name}</span>
               )}
             </button>
           );
