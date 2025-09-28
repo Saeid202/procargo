@@ -1,7 +1,12 @@
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { cn } from "../../utils/cn";
 
-const LanguageDropdown: React.FC = () => {
+interface IProps {
+  className?: string;
+}
+
+const LanguageDropdown: React.FC<IProps> = ({ className }) => {
   const { i18n } = useTranslation();
 
   useEffect(() => {
@@ -16,7 +21,7 @@ const LanguageDropdown: React.FC = () => {
     <select
       value={i18n.language}
       onChange={(e) => i18n.changeLanguage(e.target.value)}
-      className="p-2 border rounded outline-none bg-white"
+      className={cn("p-2 border rounded outline-none bg-white",className)}
     >
       <option value="en">🇺🇸 English</option>
       <option value="fa">🇮🇷 فارسی</option>

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "../../contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
@@ -23,6 +24,8 @@ const SignUpPage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+
+  const { t } = useTranslation();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -174,14 +177,14 @@ const SignUpPage: React.FC = () => {
               <span className="text-white font-bold text-xl">C</span>
             </div>
             <span className="ml-2 text-2xl font-bold text-gray-900">
-              CargoBridge
+              {t("app_name")}
             </span>
           </Link>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Create Your Account
+            {t("create_your_account")}
           </h1>
           <p className="text-gray-600">
-            Join thousands of businesses shipping between China and Canada
+            {t("join_thousands_of_businesses_shipping_between_china_and_canada")}
           </p>
         </div>
 
@@ -195,7 +198,7 @@ const SignUpPage: React.FC = () => {
                   htmlFor="firstName"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  First Name *
+                  {t("first_name")} *
                 </label>
                 <input
                   type="text"
@@ -206,7 +209,7 @@ const SignUpPage: React.FC = () => {
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-transparent transition-colors ${
                     errors.firstName ? "border-red-300" : "border-gray-300"
                   }`}
-                  placeholder="John"
+                  placeholder={t("john")}
                 />
                 {errors.firstName && (
                   <p className="mt-1 text-sm text-red-600">
@@ -220,7 +223,7 @@ const SignUpPage: React.FC = () => {
                   htmlFor="lastName"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Last Name *
+                  {t("last_name")} *
                 </label>
                 <input
                   type="text"
@@ -231,7 +234,7 @@ const SignUpPage: React.FC = () => {
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-transparent transition-colors ${
                     errors.lastName ? "border-red-300" : "border-gray-300"
                   }`}
-                  placeholder="Doe"
+                  placeholder={t("doe")}
                 />
                 {errors.lastName && (
                   <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
@@ -245,7 +248,7 @@ const SignUpPage: React.FC = () => {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Email Address *
+                {t("email_address")} *
               </label>
               <input
                 type="email"
@@ -256,7 +259,7 @@ const SignUpPage: React.FC = () => {
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-transparent transition-colors ${
                   errors.email ? "border-red-300" : "border-gray-300"
                 }`}
-                placeholder="john@company.com"
+                placeholder={t("john_company_com")}
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email}</p>
@@ -269,7 +272,7 @@ const SignUpPage: React.FC = () => {
                 htmlFor="phone"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Phone Number *
+                {t("phone_number")} *
               </label>
               <input
                 type="tel"
@@ -280,7 +283,7 @@ const SignUpPage: React.FC = () => {
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-transparent transition-colors ${
                   errors.phone ? "border-red-300" : "border-gray-300"
                 }`}
-                placeholder="+1 (555) 123-4567"
+                placeholder={t("plus_one_five_five_five_one_two_three_four_five_six_seven")}
               />
               {errors.phone && (
                 <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
@@ -293,7 +296,7 @@ const SignUpPage: React.FC = () => {
                 htmlFor="company"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Company Name *
+                {t("company_name")} *
               </label>
               <input
                 type="text"
@@ -304,7 +307,7 @@ const SignUpPage: React.FC = () => {
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-transparent transition-colors ${
                   errors.company ? "border-red-300" : "border-gray-300"
                 }`}
-                placeholder="Your Company Ltd."
+                placeholder={t("your_company_ltd")}
               />
               {errors.company && (
                 <p className="mt-1 text-sm text-red-600">{errors.company}</p>
@@ -317,7 +320,7 @@ const SignUpPage: React.FC = () => {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Password *
+                {t("password")} *
               </label>
               <div className="relative">
                 <input
@@ -329,7 +332,7 @@ const SignUpPage: React.FC = () => {
                   className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-transparent transition-colors ${
                     errors.password ? "border-red-300" : "border-gray-300"
                   }`}
-                  placeholder="Create a strong password"
+                  placeholder={t("create_a_strong_password")}
                 />
                 <button
                   type="button"
@@ -347,7 +350,7 @@ const SignUpPage: React.FC = () => {
                 <p className="mt-1 text-sm text-red-600">{errors.password}</p>
               )}
               <p className="mt-1 text-xs text-gray-500">
-                Must be at least 8 characters long
+                {t("must_be_at_least_8_characters_long")}
               </p>
             </div>
 
@@ -357,7 +360,7 @@ const SignUpPage: React.FC = () => {
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Confirm Password *
+                {t("confirm_password")} *
               </label>
               <div className="relative">
                 <input
@@ -371,7 +374,7 @@ const SignUpPage: React.FC = () => {
                       ? "border-red-300"
                       : "border-gray-300"
                   }`}
-                  placeholder="Confirm your password"
+                  placeholder={t("confirm_your_password")}
                 />
                 <button
                   type="button"
@@ -409,11 +412,11 @@ const SignUpPage: React.FC = () => {
                   <label htmlFor="agreeToTerms" className="text-gray-700">
                     I agree to the{" "}
                     <a href="#" className="text-cargo-600 hover:text-cargo-500">
-                      Terms of Service
+                      {t("terms_of_service")}
                     </a>{" "}
                     and{" "}
                     <a href="#" className="text-cargo-600 hover:text-cargo-500">
-                      Privacy Policy
+                      {t("privacy_policy")}
                     </a>{" "}
                     *
                   </label>
@@ -471,10 +474,10 @@ const SignUpPage: React.FC = () => {
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Creating Account...
+                  {t("creating_account")}
                 </>
               ) : (
-                "Create Account"
+                t("create_account")
               )}
             </button>
           </form>
@@ -487,7 +490,7 @@ const SignUpPage: React.FC = () => {
                 to="/login"
                 className="text-cargo-600 hover:text-cargo-500 font-medium"
               >
-                Sign in here
+                {t("sign_in_here")}
               </Link>
             </p>
           </div>
@@ -496,20 +499,20 @@ const SignUpPage: React.FC = () => {
         {/* Benefits */}
         <div className="mt-8 text-center">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Why Sign Up?
+            {t("why_sign_up")}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-600">
             <div className="flex items-center justify-center">
               <CheckIcon className="h-5 w-5 text-green-500 mr-2" />
-              Free Quotes
+              {t("free_quotes")}
             </div>
             <div className="flex items-center justify-center">
               <CheckIcon className="h-5 w-5 text-green-500 mr-2" />
-              Track Shipments
+              {t("track_shipments")}
             </div>
             <div className="flex items-center justify-center">
               <CheckIcon className="h-5 w-5 text-green-500 mr-2" />
-              24/7 Support
+              {t("24_7_support")}
             </div>
           </div>
         </div>

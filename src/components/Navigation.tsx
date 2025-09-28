@@ -18,8 +18,10 @@ const Navigation: React.FC = () => {
     if (!!searchParams.get("language")) {
       i18n.changeLanguage(searchParams.get("language") || "en");
       if (searchParams.get("language") === "fa") {
+        localStorage.setItem("i18nextLng", "fa");
         document.documentElement.dir = "rtl";
       } else {
+        localStorage.setItem("i18nextLng", "en");
         document.documentElement.dir = "ltr";
       }
     }
@@ -156,6 +158,7 @@ const Navigation: React.FC = () => {
                 )
               )
             }
+            <LanguageDropdown className="w-full !mt-4" />
           </div>
         </div>
       )}
