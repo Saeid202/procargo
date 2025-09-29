@@ -36,9 +36,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   showUserProfile,
   showSettings = true
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  
+  // Check if current language is Persian/Farsi for RTL layout
+  const currentLanguage = i18n.language;
+  const isPersian = currentLanguage === 'fa' || currentLanguage === 'fa-IR';
 
   const handleLogout = async () => {
     // Show confirmation dialog
@@ -92,12 +96,28 @@ const Sidebar: React.FC<SidebarProps> = ({
                   : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 }`}
             >
-              <Icon
-                className={`h-5 w-5 ${activeTab === item.id ? item.color : "text-gray-400"
-                  } ${!sidebarCollapsed ? "ml-3" : ""}`}
-              />
-              {!sidebarCollapsed && (
-                <span className="font-medium text-right flex-1">{item.name}</span>
+              {isPersian ? (
+                // RTL Layout for Persian/Farsi
+                <>
+                  <Icon
+                    className={`h-5 w-5 ${activeTab === item.id ? item.color : "text-gray-400"
+                      } ${!sidebarCollapsed ? "ml-3" : ""}`}
+                  />
+                  {!sidebarCollapsed && (
+                    <span className="font-medium text-right flex-1">{item.name}</span>
+                  )}
+                </>
+              ) : (
+                // LTR Layout for English
+                <>
+                  {!sidebarCollapsed && (
+                    <span className="font-medium text-left flex-1">{item.name}</span>
+                  )}
+                  <Icon
+                    className={`h-5 w-5 ${activeTab === item.id ? item.color : "text-gray-400"
+                      } ${!sidebarCollapsed ? "mr-3" : ""}`}
+                  />
+                </>
               )}
             </button>
           );
