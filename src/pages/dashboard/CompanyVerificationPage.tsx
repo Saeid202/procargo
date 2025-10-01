@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../contexts/AuthContext';
+import { CompanyVerificationService } from '../../services/companyVerificationService';
 import {
   BuildingOfficeIcon,
   DocumentTextIcon,
@@ -12,6 +14,7 @@ const CompanyVerificationPage: React.FC = () => {
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
   const isPersian = currentLanguage === 'fa' || currentLanguage === 'fa-IR';
+  const { user } = useAuth();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -46,24 +49,50 @@ const CompanyVerificationPage: React.FC = () => {
       return;
     }
     
+    if (!user) {
+      alert('برای ارسال درخواست، ابتدا وارد حساب کاربری خود شوید.');
+      return;
+    }
+
     setIsSubmitting(true);
     
-    // Here you would typically send the data to your backend
-    console.log('Company verification form data:', formData);
-    console.log('Files:', selectedFiles);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      alert('درخواست اعتبار سنجی شرکت چینی با موفقیت ارسال شد!');
-      // Reset form
+    try {
+      const { request, error } = await CompanyVerificationService.createVerificationRequest(user.id, {
+        company_name_english: formData.companyNameEnglish || undefined,
+        company_name_chinese: formData.companyNameChinese || undefined,
+        business_license: formData.businessLicense || undefined
+      });
+
+      if (error || !request) {
+        console.error('Error creating verification request:', error);
+        alert('خطا در ایجاد درخواست اعتبارسنجی. لطفاً دوباره تلاش کنید.');
+        return;
+      }
+
+      for (const file of selectedFiles) {
+        const { error: fileError } = await CompanyVerificationService.uploadFile(
+          user.id,
+          request.id,
+          file
+        );
+        if (fileError) {
+          console.error(`Failed to upload ${file.name}:`, fileError);
+        }
+      }
+
+      alert('درخواست اعتبار سنجی شرکت چینی با موفقیت ثبت و فایل‌ها آپلود شد!');
       setFormData({
         companyNameEnglish: '',
         companyNameChinese: '',
         businessLicense: ''
       });
       setSelectedFiles([]);
-    }, 2000);
+    } catch (err) {
+      console.error('Unexpected error submitting verification:', err);
+      alert('خطای غیرمنتظره رخ داد. لطفاً دوباره تلاش کنید.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Only show for Persian language
