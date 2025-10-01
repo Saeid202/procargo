@@ -126,7 +126,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       {
         showUserProfile && (
-          <div className="px-4 pt-4 pb-4 border-t border-gray-200 bg-white">
+          <div className="px-4 pt-4 pb-4 border-t border-gray-200 bg-white block md:hidden">
             <div
               className={`flex ${sidebarCollapsed
                 ? "flex-col items-center"

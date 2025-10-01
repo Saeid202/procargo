@@ -1,5 +1,5 @@
 import React from 'react';
-import { BellIcon, CogIcon } from '@heroicons/react/24/outline';
+import { BellIcon, CogIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -81,6 +81,40 @@ const Header: React.FC<HeaderProps> = ({ activeTab }) => {
         </div>
 
         <div className="flex items-center space-x-4">
+
+          <div className="px-4 pt-4 pb-4 hidden md:block">
+            <div
+              className={`flex items-center space-x-3`}
+            >
+              <button
+                onClick={() => navigate("/settings")}
+                className="relative flex-shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-cargo-600"
+                title="Profile Settings"
+              >
+                <UserCircleIcon className="h-10 w-10 text-cargo-600" />
+              </button>
+              <div className={`flex-1 min-w-0`}>
+                <p className="text-sm font-semibold text-gray-900 truncate">
+                  {user?.firstName && user?.lastName
+                    ? `${user.firstName} ${user.lastName}`
+                    : user?.email?.split("@")[0] || "User"}
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {user?.email || "No email"}
+                </p>
+              </div>
+              <div className="flex items-center space-x-2 my-2">
+                <button
+                  className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Profile Settings"
+                  onClick={() => navigate("/settings")}
+                >
+                  <CogIcon className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
           <button className="p-2 text-gray-400 hover:text-gray-500 relative">
             <BellIcon className="h-6 w-6" />
             <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ExportService } from '../../services/exportService';
+import { useAuth } from '../../contexts/AuthContext';
 
 const ExportPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -19,6 +21,8 @@ const ExportPage: React.FC = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { user } = useAuth();
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -36,27 +40,65 @@ const ExportPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Here you would typically send the data to your backend
-    console.log('Form data:', formData);
-    console.log('Files:', selectedFiles);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      alert('درخواست شما با موفقیت ارسال شد!');
+
+    try {
+      if (!user) {
+        console.error("No user authenticated");
+        return;
+      }
+
+      // Create export request
+      const { export: exportRequest, error: exportError } =
+        await ExportService.createExportRequest(user.id, {
+          company_name: formData.companyName,
+          company_type: formData.companyType,
+          company_introduction: formData.companyIntroduction,
+          product_name: formData.productName,
+          product_description: formData.productDescription,
+          additional_info: formData.additionalInfo,
+        });
+
+      if (exportError || !exportRequest) {
+        console.error("Error creating export request:", exportError);
+        return;
+      }
+
+      console.log("Export request created:", exportRequest);
+
+      // Upload files if any
+      for (const file of selectedFiles) {
+        const { fileRecord, error: fileError } = await ExportService.uploadFile(
+          user.id,
+          exportRequest.id,
+          file
+        );
+
+        if (fileError) {
+          console.error(`Failed to upload ${file.name}:`, fileError);
+        } else {
+          console.log("Uploaded file record:", fileRecord);
+        }
+      }
+
+      alert("Export request and files uploaded successfully!");
+
       // Reset form
       setFormData({
-        companyName: '',
-        companyType: '',
-        companyIntroduction: '',
-        productName: '',
-        productDescription: '',
-        additionalInfo: ''
+        companyName: "",
+        companyType: "",
+        companyIntroduction: "",
+        productName: "",
+        productDescription: "",
+        additionalInfo: "",
       });
       setSelectedFiles([]);
-    }, 2000);
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   return (
     <div className="p-6">
@@ -69,7 +111,7 @@ const ExportPage: React.FC = () => {
             <p className="text-gray-600 mb-8">
               صادرات و ارسال کالا به خارج از کشور
             </p>
-            
+
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
               <h2 className="text-xl font-semibold text-blue-900 mb-4">
                 خدمات صادرات و پشتیبانی ما
@@ -126,14 +168,14 @@ const ExportPage: React.FC = () => {
                   <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
                     فرم درخواست صادرات
                   </h2>
-                  
+
                   <form onSubmit={handleSubmit} className="space-y-6">
                     {/* 1. Company Information */}
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                       <h3 className="text-lg font-semibold text-blue-900 mb-4">
                         1. معرفی شرکت صادراتی یا تولید کننده
                       </h3>
-                      
+
                       <div className="grid md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -149,7 +191,7 @@ const ExportPage: React.FC = () => {
                             placeholder="نام کامل شرکت خود را وارد کنید"
                           />
                         </div>
-                        
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             نوع شرکت *
@@ -169,7 +211,7 @@ const ExportPage: React.FC = () => {
                           </select>
                         </div>
                       </div>
-                      
+
                       <div className="mt-4">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           معرفی شرکت *
@@ -191,7 +233,7 @@ const ExportPage: React.FC = () => {
                       <h3 className="text-lg font-semibold text-green-900 mb-4">
                         2. معرفی محصول
                       </h3>
-                      
+
                       <div className="space-y-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -207,7 +249,7 @@ const ExportPage: React.FC = () => {
                             placeholder="نام محصول خود را وارد کنید"
                           />
                         </div>
-                        
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             توضیحات محصول *
@@ -230,7 +272,7 @@ const ExportPage: React.FC = () => {
                       <h3 className="text-lg font-semibold text-orange-900 mb-4">
                         3. توضیحات تکمیلی
                       </h3>
-                      
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           اطلاعات اضافی (اختیاری)
@@ -251,7 +293,7 @@ const ExportPage: React.FC = () => {
                       <h3 className="text-lg font-semibold text-purple-900 mb-4">
                         4. آپلود مدارک
                       </h3>
-                      
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           مدارک و فایل‌های مرتبط
@@ -266,7 +308,7 @@ const ExportPage: React.FC = () => {
                         <p className="text-sm text-gray-500 mt-2">
                           فرمت‌های مجاز: PDF, DOC, DOCX, JPG, PNG (حداکثر 10MB هر فایل)
                         </p>
-                        
+
                         {selectedFiles.length > 0 && (
                           <div className="mt-3">
                             <p className="text-sm font-medium text-gray-700 mb-2">
@@ -287,11 +329,10 @@ const ExportPage: React.FC = () => {
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className={`px-8 py-3 rounded-lg font-semibold text-white transition-colors ${
-                          isSubmitting 
-                            ? 'bg-gray-400 cursor-not-allowed' 
+                        className={`px-8 py-3 rounded-lg font-semibold text-white transition-colors ${isSubmitting
+                            ? 'bg-gray-400 cursor-not-allowed'
                             : 'bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300'
-                        }`}
+                          }`}
                       >
                         {isSubmitting ? 'در حال ارسال...' : 'ارسال درخواست'}
                       </button>
