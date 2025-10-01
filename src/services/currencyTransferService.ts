@@ -14,6 +14,7 @@ export interface CurrencyTransferRequest {
   additional_info?: string | null;
   customer_request: string;
   status?: "pending" | "in_review" | "processed" | "rejected";
+  admin_notes?: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -65,6 +66,69 @@ export class CurrencyTransferService {
     } catch (err) {
       console.error("Unexpected error creating currency transfer:", err);
       return { transfer: null, error: err instanceof Error ? err.message : "Unknown error" };
+    }
+  }
+
+  static async getAllTransfers(): Promise<{
+    transfers: CurrencyTransferRequest[];
+    error?: string;
+  }> {
+    try {
+      const { data: transfers, error } = await supabase
+        .from("currency_transfer_requests")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching all currency transfers:", error);
+        return {
+          transfers: [],
+          error: `Failed to fetch transfers: ${error.message}`,
+        };
+      }
+
+      return { transfers: transfers || [] };
+    } catch (error) {
+      console.error("Error fetching all currency transfers:", error);
+      return {
+        transfers: [],
+        error: `Failed to fetch transfers: ${error instanceof Error ? error.message : "Unknown error"}`,
+      };
+    }
+  }
+
+  static async updateTransferStatus(
+    transferId: string,
+    status: NonNullable<CurrencyTransferRequest["status"]>,
+    adminNotes?: string
+  ): Promise<{
+    success: boolean;
+    error?: string;
+  }> {
+    try {
+      const updateData: Record<string, any> = { status };
+      if (adminNotes) updateData.admin_notes = adminNotes;
+
+      const { error } = await supabase
+        .from("currency_transfer_requests")
+        .update(updateData)
+        .eq("id", transferId);
+
+      if (error) {
+        console.error("Error updating currency transfer status:", error);
+        return {
+          success: false,
+          error: `Failed to update transfer: ${error.message}`,
+        };
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error("Error updating currency transfer status:", error);
+      return {
+        success: false,
+        error: `Failed to update transfer: ${error instanceof Error ? error.message : "Unknown error"}`,
+      };
     }
   }
 }

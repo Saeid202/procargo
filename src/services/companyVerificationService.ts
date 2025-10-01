@@ -105,6 +105,63 @@ export class CompanyVerificationService {
       };
     }
   }
+
+  static async getAllVerificationRequests(): Promise<{
+    requests: CompanyVerificationRequest[];
+    error?: string;
+  }> {
+    try {
+      const { data, error } = await supabase
+        .from("company_verification_requests")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching verification requests:", error);
+        return { requests: [], error: `Failed to fetch requests: ${error.message}` };
+      }
+
+      return { requests: data || [] };
+    } catch (error) {
+      console.error("Error fetching verification requests:", error);
+      return { requests: [], error: error instanceof Error ? error.message : "Unknown error" };
+    }
+  }
+
+  static async getVerificationRequestFiles(verificationRequestId: string): Promise<{
+    files: CompanyVerificationFile[];
+    error?: string;
+  }> {
+    try {
+      const { data, error } = await supabase
+        .from("company_verification_files")
+        .select("*")
+        .eq("verification_request_id", verificationRequestId)
+        .order("uploaded_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching verification files:", error);
+        return { files: [], error: `Failed to fetch files: ${error.message}` };
+      }
+
+      return { files: data || [] };
+    } catch (error) {
+      console.error("Error fetching verification files:", error);
+      return { files: [], error: error instanceof Error ? error.message : "Unknown error" };
+    }
+  }
+
+  static getFilePublicUrl(filePath: string): string | null {
+    try {
+      const { data } = supabase.storage
+        .from("company-verification-files")
+        .getPublicUrl(filePath);
+      return data?.publicUrl || null;
+    } catch (error) {
+      console.error("Error getting public URL:", error);
+      return null;
+    }
+  }
 }
 
 

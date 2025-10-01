@@ -9,6 +9,9 @@ import {
   ChatBubbleBottomCenterTextIcon,
   DocumentTextIcon,
   TruckIcon,
+  CurrencyDollarIcon,
+  ArrowUpTrayIcon,
+  DocumentCheckIcon,
 } from "@heroicons/react/24/outline";
 import AdminOverviewPage from '../../pages/admin/AdminOverviewPage';
 import { useTranslation } from 'react-i18next';
@@ -26,6 +29,9 @@ import AdminMediaPage from '../../pages/admin/AdminMediaPage';
 import AdminBlogPage from '../../pages/admin/AdminBlogPage';
 import AdminSiteSettingsPage from '../../pages/admin/AdminSiteSettingsPage';
 import AdminDocumentsPage from '../../pages/admin/AdminDocumentsPage';
+import AdminCurrencyTransferPage from '../../pages/admin/AdminCurrencyTransferPage';
+import AdminExportPage from '../../pages/admin/AdminExportPage';
+import AdminCompanyVerificationPage from '../../pages/admin/AdminCompanyVerificationPage';
 
 const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('admin-overview');
@@ -73,6 +79,12 @@ const AdminDashboard: React.FC = () => {
         return <AdminOrdersPage />;
       case 'admin-documents':
         return <AdminDocumentsPage />;
+      case 'admin-currency-transfer':
+        return <AdminCurrencyTransferPage />;
+      case 'admin-export':
+        return <AdminExportPage />;
+      case 'admin-company-verification':
+        return <AdminCompanyVerificationPage />;
       default:
         return <AdminOverviewPage />;
     }
@@ -167,6 +179,24 @@ const AdminDashboard: React.FC = () => {
       id: "admin-documents",
       name: t("documents_management"),
       icon: DocumentTextIcon,
+      color: "text-green-600",
+    },
+    {
+      id: "admin-currency-transfer",
+      name: t("currency_transfer"),
+      icon: CurrencyDollarIcon,
+      color: "text-green-600",
+    },
+    {
+      id: "admin-export",
+      name: t("export"),
+      icon: ArrowUpTrayIcon,
+      color: "text-green-600",
+    },
+    {
+      id: "admin-company-verification",
+      name: t("company_verification"),
+      icon: DocumentCheckIcon,
       color: "text-green-600",
     },
   ];
