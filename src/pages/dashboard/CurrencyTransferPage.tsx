@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../contexts/AuthContext';
+import { CurrencyTransferService } from '../../services/currencyTransferService';
 import {
   CurrencyDollarIcon,
   DocumentTextIcon,
@@ -12,6 +14,7 @@ const CurrencyTransferPage: React.FC = () => {
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
   const isPersian = currentLanguage === 'fa' || currentLanguage === 'fa-IR';
+  const { user } = useAuth();
 
   const [formData, setFormData] = useState({
     transferType: '',
@@ -50,13 +53,53 @@ const CurrencyTransferPage: React.FC = () => {
       return;
     }
     
+    if (!user) {
+      alert('برای ثبت درخواست نقل و انتقال، ابتدا وارد حساب کاربری شوید.');
+      return;
+    }
+
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const { transfer, error } = await CurrencyTransferService.createTransfer(user.id, {
+        transfer_type: formData.transferType,
+        amount: Number(formData.amount || 0),
+        from_currency: formData.fromCurrency,
+        to_currency: formData.toCurrency,
+        purpose: formData.purpose,
+        beneficiary_name: formData.beneficiaryName,
+        beneficiary_account: formData.beneficiaryAccount,
+        beneficiary_bank: formData.beneficiaryBank,
+        additional_info: formData.additionalInfo || undefined,
+        customer_request: formData.customerRequest,
+      });
+
+      if (error || !transfer) {
+        console.error('Error creating currency transfer:', error);
+        alert('خطا در ثبت درخواست. لطفاً دوباره تلاش کنید.');
+        return;
+      }
+
       alert('درخواست نقل و انتقال ارز با موفقیت ثبت شد. تیم ما در اسرع وقت با شما تماس خواهد گرفت.');
+      // Optionally reset form
+      setFormData({
+        transferType: '',
+        amount: '',
+        fromCurrency: '',
+        toCurrency: '',
+        purpose: '',
+        beneficiaryName: '',
+        beneficiaryAccount: '',
+        beneficiaryBank: '',
+        additionalInfo: '',
+        customerRequest: ''
+      });
+    } catch (err) {
+      console.error('Unexpected error creating currency transfer:', err);
+      alert('خطای غیرمنتظره رخ داد. لطفاً دوباره تلاش کنید.');
+    } finally {
       setIsSubmitting(false);
-    }, 2000);
+    }
   };
 
   const transferTypes = [
