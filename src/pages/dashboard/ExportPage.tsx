@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExportService } from '../../services/exportService';
 import { useAuth } from '../../contexts/AuthContext';
@@ -13,12 +13,13 @@ const ExportPage: React.FC = () => {
     companyName: '',
     companyType: '',
     companyIntroduction: '',
-    productName: '',
+    productNames: [''],
     productDescription: '',
     additionalInfo: ''
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { user } = useAuth();
@@ -32,9 +33,16 @@ const ExportPage: React.FC = () => {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setSelectedFiles(Array.from(e.target.files));
+    const files = e.currentTarget.files;
+    if (files && files.length > 0) {
+      setSelectedFiles(prev => [...prev, ...Array.from(files)]);
+      // Reset input so the same file can be selected again if needed
+      e.currentTarget.value = '';
     }
+  };
+
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,13 +55,22 @@ const ExportPage: React.FC = () => {
         return;
       }
 
+      // Validate at least one product name
+      const cleanedProductNames = formData.productNames
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0);
+      if (cleanedProductNames.length === 0) {
+        alert('لطفاً حداقل یک نام محصول وارد کنید.');
+        return;
+      }
+
       // Create export request
       const { export: exportRequest, error: exportError } =
         await ExportService.createExportRequest(user.id, {
           company_name: formData.companyName,
           company_type: formData.companyType,
           company_introduction: formData.companyIntroduction,
-          product_name: formData.productName,
+          product_name: cleanedProductNames.join(', '),
           product_description: formData.productDescription,
           additional_info: formData.additionalInfo,
         });
@@ -87,7 +104,7 @@ const ExportPage: React.FC = () => {
         companyName: "",
         companyType: "",
         companyIntroduction: "",
-        productName: "",
+        productNames: [""],
         productDescription: "",
         additionalInfo: "",
       });
@@ -214,7 +231,7 @@ const ExportPage: React.FC = () => {
 
                       <div className="mt-4">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          معرفی شرکت *
+                          معرفی شرکت یا سایت شرکت *
                         </label>
                         <textarea
                           name="companyIntroduction"
@@ -237,17 +254,52 @@ const ExportPage: React.FC = () => {
                       <div className="space-y-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            نام محصول *
+                            نام محصولات (امکان افزودن چند محصول)
                           </label>
-                          <input
-                            type="text"
-                            name="productName"
-                            value={formData.productName}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            placeholder="نام محصول خود را وارد کنید"
-                          />
+                          <div className="space-y-2">
+                            {formData.productNames.map((name, idx) => (
+                              <div key={idx} className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  value={name}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    setFormData((prev) => {
+                                      const next = { ...prev, productNames: [...prev.productNames] } as typeof prev;
+                                      next.productNames[idx] = value;
+                                      return next;
+                                    });
+                                  }}
+                                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                  placeholder={`نام محصول ${idx + 1}`}
+                                />
+                                {formData.productNames.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setFormData((prev) => {
+                                        const nextNames = prev.productNames.filter((_, i) => i !== idx);
+                                        return { ...prev, productNames: nextNames.length ? nextNames : [''] };
+                                      });
+                                    }}
+                                    className="px-3 py-2 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
+                                  >
+                                    حذف
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                            <div>
+                              <button
+                                type="button"
+                                onClick={() => setFormData((prev) => ({ ...prev, productNames: [...prev.productNames, ''] }))}
+                                className="px-3 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50"
+                              >
+                                افزودن محصول
+                              </button>
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">حداقل یک نام محصول وارد شود</p>
                         </div>
 
                         <div>
@@ -261,8 +313,11 @@ const ExportPage: React.FC = () => {
                             required
                             rows={4}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            placeholder="توضیحات کامل محصول، مشخصات، مواد اولیه، کاربرد و ..."
+                            placeholder="توضیحات کامل محصول، مشخصات، مواد اولیه، کاربرد و ... همچنین نوع بسته‌بندی، ابعاد/وزن هر واحد، تعداد در هر کارتن و شرایط بسته‌بندی را مشخص کنید."
                           />
+                          <p className="text-xs text-gray-500 mt-1">
+                            لطفاً جزئیات بسته‌بندی (نوع بسته‌بندی، ابعاد/وزن، تعداد در هر کارتن، شرایط بسته‌بندی و سایر مشخصات فنی) را نیز ذکر کنید.
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -296,18 +351,27 @@ const ExportPage: React.FC = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          مدارک و فایل‌های مرتبط
+                          مدارک و فایل‌های مرتبط (امکان آپلود چند فایل)
                         </label>
                         <input
+                          ref={fileInputRef}
                           type="file"
                           multiple
-                          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                          accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
                           onChange={handleFileChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                          className="hidden"
                         />
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="px-3 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50"
+                        >
+                          + افزودن مدرک
+                        </button>
                         <p className="text-sm text-gray-500 mt-2">
-                          فرمت‌های مجاز: PDF, DOC, DOCX, JPG, PNG (حداکثر 10MB هر فایل)
+                          فرمت‌های مجاز: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (حداکثر 10MB هر فایل). در صورت داشتن فایل اکسل حاوی لیست محصولات و قیمت، آن را نیز آپلود کنید.
                         </p>
+                        <p className="text-xs text-gray-500 mt-1">می‌توانید با دکمه «+ افزودن مدرک» چند فایل را پیاپی اضافه کنید.</p>
 
                         {selectedFiles.length > 0 && (
                           <div className="mt-3">
@@ -316,7 +380,16 @@ const ExportPage: React.FC = () => {
                             </p>
                             <ul className="text-sm text-gray-600 space-y-1">
                               {selectedFiles.map((file, index) => (
-                                <li key={index}>• {file.name}</li>
+                                <li key={index} className="flex items-center justify-between">
+                                  <span>• {file.name}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeSelectedFile(index)}
+                                    className="ml-2 px-2 py-1 text-xs rounded-md border border-red-300 text-red-600 hover:bg-red-50"
+                                  >
+                                    حذف
+                                  </button>
+                                </li>
                               ))}
                             </ul>
                           </div>

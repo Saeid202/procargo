@@ -103,15 +103,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab }) => {
                   {user?.email || "No email"}
                 </p>
               </div>
-              <div className="flex items-center space-x-2 my-2">
-                <button
-                  className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-                  title="Profile Settings"
-                  onClick={() => navigate("/settings")}
-                >
-                  <CogIcon className="h-5 w-5" />
-                </button>
-              </div>
+              {/* Removed extra settings icon next to email */}
             </div>
           </div>
 

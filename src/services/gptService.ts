@@ -22,8 +22,7 @@ export interface ComplianceAnalysisResult {
 }
 
 export class GPTService {
-  private static readonly API_URL = 'https://api.deepseek.com/v1/chat/completions';
-  private static readonly API_KEY = 'sk-2531714d05d94a16a216aa80c984b41d';
+  private static readonly API_URL = '/deepseek/v1/chat/completions';
 
   static async analyzeCompliance(request: ComplianceAnalysisRequest): Promise<ComplianceAnalysisResult> {
     try {
@@ -59,7 +58,6 @@ export class GPTService {
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -98,7 +96,6 @@ export class GPTService {
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({

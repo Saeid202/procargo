@@ -44,10 +44,9 @@ export class LegalAIService {
   }> {
     try {
       console.log('=== MINIMAL API TEST ===');
-      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      const response = await fetch('/deepseek/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer sk-2531714d05d94a16a216aa80c984b41d`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -102,10 +101,9 @@ export class LegalAIService {
   }> {
     try {
       console.log('=== SIMPLE API TEST ===');
-      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      const response = await fetch('/deepseek/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer sk-2531714d05d94a16a216aa80c984b41d`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -159,8 +157,7 @@ export class LegalAIService {
   }> {
     try {
       console.log('Testing DeepSeek API connection...');
-      console.log('API Key:', 'sk-2531714d05d94a16a216aa80c984b41d');
-      console.log('API URL:', 'https://api.deepseek.com/v1/chat/completions');
+      console.log('API URL:', '/deepseek/v1/chat/completions');
       
       const requestBody = {
         model: 'deepseek-chat',
@@ -176,10 +173,9 @@ export class LegalAIService {
       
       console.log('Request body:', JSON.stringify(requestBody, null, 2));
       
-      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      const response = await fetch('/deepseek/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer sk-2531714d05d94a16a216aa80c984b41d`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestBody),
@@ -339,10 +335,9 @@ export class LegalAIService {
   private static async getAILegalResponse(message: string, config: any): Promise<LegalAIResponse> {
     try {
       console.log('Sending request to DeepSeek API...');
-      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      const response = await fetch('/deepseek/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer sk-2531714d05d94a16a216aa80c984b41d`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -957,10 +952,9 @@ Format your response as clear, actionable legal guidance.`
       
       console.log('Request body:', JSON.stringify(requestBody, null, 2));
       
-      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      const response = await fetch('/deepseek/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer sk-2531714d05d94a16a216aa80c984b41d`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestBody),
@@ -1013,10 +1007,9 @@ Format your response as clear, actionable legal guidance.`
   private static async getAILegalResponseWithContext(message: string, config: any, contextInfo: string): Promise<LegalAIResponse> {
     try {
       console.log('Sending request to DeepSeek API...');
-      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      const response = await fetch('/deepseek/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer sk-2531714d05d94a16a216aa80c984b41d`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({

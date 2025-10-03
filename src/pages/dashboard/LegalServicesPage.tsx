@@ -21,8 +21,8 @@ const LegalServicesPage: React.FC = () => {
   const legalServices = [
     {
       id: 'compliance',
-      title: 'الزامات قوانین و مقررات گمرک',
-      description: 'مدیریت منطبق با قوانین، مدارک گمرک و مقررات حمل و نقل',
+      title: 'الزامات قانونی و مقرراتی گمرک',
+      description: 'مدیریت الزامات قانونی و مقرراتی گمرک، مدارک و مقررات حمل‌ونقل',
       icon: DocumentCheckIcon,
       color: 'bg-orange-50 border-orange-200 text-orange-800',
       iconColor: 'text-orange-600'
@@ -59,7 +59,7 @@ const LegalServicesPage: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              خدمات حقوقی و الزامات قوانین و مقررات گمرک
+              خدمات حقوقی و الزامات قانونی و مقرراتی گمرک
             </h1>
             <p className="text-gray-600 text-lg">
               مجموعه کاملی از خدمات حقوقی و مشاوره برای تجارت بین‌المللی
@@ -72,7 +72,7 @@ const LegalServicesPage: React.FC = () => {
             </h2>
             <p className="text-blue-800 leading-relaxed">
               ما مجموعه کاملی از خدمات حقوقی و مشاوره را برای تجارت بین‌المللی ارائه می‌دهیم. 
-              از الزامات قوانین و مقررات گمرک گرفته تا ارتباط مستقیم با وکلای متخصص در چین، 
+              از الزامات قانونی و مقرراتی گمرک گرفته تا ارتباط مستقیم با وکلای متخصص در چین، 
               ما در تمام مراحل تجاری در کنار شما هستیم.
             </p>
           </div>

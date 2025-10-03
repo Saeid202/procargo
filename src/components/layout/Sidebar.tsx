@@ -83,17 +83,16 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      <nav className="p-4 space-y-2">
+      <nav className="p-4 space-y-3">
         {sidebarItems.map((item) => {
           const Icon = item.icon;
           return (
             <button
               key={item.id}
               onClick={() => onTabChange(item.id)}
-              className={`w-full h-10 flex items-center ${sidebarCollapsed ? "justify-center p-1" : "px-3"
-                } rounded-lg transition-all duration-200 ${activeTab === item.id
-                  ? "bg-cargo-50 text-cargo-700 border-r-2 border-cargo-600"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              className={`w-full ${sidebarCollapsed ? "justify-center p-2" : "px-3 py-2"} flex items-center rounded-lg transition-all duration-200 border shadow-sm ${activeTab === item.id
+                  ? "bg-cargo-50 text-cargo-700 border-cargo-300 hover:shadow focus:ring-2 focus:ring-cargo-200"
+                  : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:shadow"
                 }`}
             >
               {isPersian ? (

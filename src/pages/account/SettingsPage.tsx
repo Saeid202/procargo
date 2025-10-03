@@ -8,6 +8,7 @@ interface ProfileData {
   phone: string;
   companyName: string;
   businessType: string;
+  companyDescription: string;
   address: string;
   city: string;
   state: string;
@@ -32,6 +33,7 @@ const SettingsPage: React.FC = () => {
     phone: '',
     companyName: '',
     businessType: '',
+    companyDescription: '',
     address: '',
     city: '',
     state: '',
@@ -140,10 +142,12 @@ const SettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('settings')}</h1>
-        <p className="text-gray-600">{t('manage_your_account_settings_and_preferences')}</p>
+    <div className="px-4 pt-2 pb-8 w-full max-w-none">
+      <div className="mb-3">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">خوش آمدید</h1>
+        <p className="text-gray-700 leading-relaxed">
+          کاربر گرامی، با تکمیل پروفایل خود، هوش مصنوعی ما موقعیت‌های تجاری مرتبط با چین از جمله نمایشگاه‌های مرتبط با کار شما، فرصت‌های صادرات و واردات و موارد دیگر را به‌صورت هوشمندانه برای شما ارسال خواهد کرد. هر چقدر درباره تجارت خود بیشتر توضیح بدهید، ما بهتر می‌توانیم شما را راهنمایی کنیم.
+        </p>
       </div>
 
       {/* Success/Error Message */}
@@ -157,67 +161,11 @@ const SettingsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Profile Section */}
-      <div className="bg-white rounded-lg shadow p-6 mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('profile_information')}</h2>
-        
+      {/* Settings Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8 w-full">
         <form onSubmit={handleProfileUpdate} className="space-y-6">
-          {/* Personal Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('first_name')} *
-              </label>
-              <input
-                type="text"
-                value={profileData.firstName}
-                onChange={(e) => handleInputChange('firstName', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('last_name')} *
-              </label>
-              <input
-                type="text"
-                value={profileData.lastName}
-                onChange={(e) => handleInputChange('lastName', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('email')} *
-              </label>
-              <input
-                type="email"
-                value={profileData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('phone')}
-              </label>
-              <input
-                type="tel"
-                value={profileData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Business Information */}
-          <div className="border-t pt-6">
+          {/* Business Information (Restored) */}
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <h3 className="text-lg font-medium text-gray-900 mb-4">{t('business_information')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -228,7 +176,8 @@ const SettingsPage: React.FC = () => {
                   type="text"
                   value={profileData.companyName}
                   onChange={(e) => handleInputChange('companyName', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={t('company_name')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   required
                 />
               </div>
@@ -240,7 +189,7 @@ const SettingsPage: React.FC = () => {
                 <select
                   value={profileData.businessType}
                   onChange={(e) => handleInputChange('businessType', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">{t('select_business_type')}</option>
                   <option value="importer">{t('importer')}</option>
@@ -253,10 +202,25 @@ const SettingsPage: React.FC = () => {
                 </select>
               </div>
             </div>
+
+            {/* Company Description */}
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('description')}
+              </label>
+              <textarea
+                value={profileData.companyDescription || ''}
+                onChange={(e) => handleInputChange('companyDescription', e.target.value)}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder={t('additional_information')}
+              />
+            </div>
           </div>
+          
 
           {/* Address Information */}
-          <div className="border-t pt-6">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <h3 className="text-lg font-medium text-gray-900 mb-4">{t('address_information')}</h3>
             <div className="space-y-4">
               <div>
@@ -267,7 +231,8 @@ const SettingsPage: React.FC = () => {
                   type="text"
                   value={profileData.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={t('street_address')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
               
@@ -280,7 +245,8 @@ const SettingsPage: React.FC = () => {
                     type="text"
                     value={profileData.city}
                     onChange={(e) => handleInputChange('city', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder={t('city')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
                 
@@ -292,7 +258,8 @@ const SettingsPage: React.FC = () => {
                     type="text"
                     value={profileData.state}
                     onChange={(e) => handleInputChange('state', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder={t('state/province')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
                 
@@ -304,7 +271,8 @@ const SettingsPage: React.FC = () => {
                     type="text"
                     value={profileData.zipCode}
                     onChange={(e) => handleInputChange('zipCode', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder={t('zip/postal_code')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -317,14 +285,15 @@ const SettingsPage: React.FC = () => {
                   type="text"
                   value={profileData.country}
                   onChange={(e) => handleInputChange('country', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={t('country')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
             </div>
           </div>
 
           {/* Social Media */}
-          <div className="border-t pt-6">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <h3 className="text-lg font-medium text-gray-900 mb-4">{t('social_media_and_website')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -335,7 +304,7 @@ const SettingsPage: React.FC = () => {
                   type="url"
                   value={profileData.website}
                   onChange={(e) => handleInputChange('website', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="https://example.com"
                 />
               </div>
@@ -348,7 +317,7 @@ const SettingsPage: React.FC = () => {
                   type="url"
                   value={profileData.linkedin}
                   onChange={(e) => handleInputChange('linkedin', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="https://linkedin.com/in/username"
                 />
               </div>
@@ -356,7 +325,7 @@ const SettingsPage: React.FC = () => {
           </div>
 
           {/* Notifications */}
-          <div className="border-t pt-6">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <h3 className="text-lg font-medium text-gray-900 mb-4">{t('notification_preferences')}</h3>
             <div className="space-y-3">
               <label className="flex items-center">
@@ -392,7 +361,7 @@ const SettingsPage: React.FC = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="border-t pt-6 flex justify-between items-center">
+          <div className="mt-6 flex justify-between items-center">
             <button
               type="submit"
               disabled={saving}
