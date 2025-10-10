@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import DashboardLayout from '../layout/DashboardLayout';
-import OverviewPage from '../../pages/dashboard/OverviewPage';
-import OrdersPage from '../../pages/dashboard/OrdersPage';
-import ShipmentsPage from '../../pages/dashboard/ShipmentsPage';
-import CompliancePage from '../../pages/dashboard/CompliancePage';
-import LegalAssistancePage from '../../pages/dashboard/LegalAssistancePage';
-import SupportPage from '../../pages/dashboard/SupportPage';
-import SettingsPage from '../../pages/account/SettingsPage';
-import ExportPage from '../../pages/dashboard/ExportPage';
+import React, { useState } from "react";
+import DashboardLayout from "../layout/DashboardLayout";
+import OverviewPage from "../../pages/dashboard/OverviewPage";
+import OrdersPage from "../../pages/dashboard/OrdersPage";
+import ShipmentsPage from "../../pages/dashboard/ShipmentsPage";
+import CompliancePage from "../../pages/dashboard/CompliancePage";
+import LegalAssistancePage from "../../pages/dashboard/LegalAssistancePage";
+import SupportPage from "../../pages/dashboard/SupportPage";
+import SettingsPage from "../../pages/account/SettingsPage";
+import ExportPage from "../../pages/dashboard/ExportPage";
 import {
   HomeIcon,
   ShoppingCartIcon,
@@ -18,19 +18,19 @@ import {
   ScaleIcon,
   QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
-import LegalIssuePage from '../../pages/dashboard/LegalIssuePage';
-import CompanyVerificationPage from '../../pages/dashboard/CompanyVerificationPage';
-import LegalServicesPage from '../../pages/dashboard/LegalServicesPage';
-import CurrencyTransferPage from '../../pages/dashboard/CurrencyTransferPage';
-import { useTranslation } from 'react-i18next';
+import LegalIssuePage from "../../pages/dashboard/LegalIssuePage";
+import CompanyVerificationPage from "../../pages/dashboard/CompanyVerificationPage";
+import LegalServicesPage from "../../pages/dashboard/LegalServicesPage";
+import CurrencyTransferPage from "../../pages/dashboard/CurrencyTransferPage";
+import { useTranslation } from "react-i18next";
 
 const Dashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState("overview");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const { t, i18n } = useTranslation();
   const currentLanguage = i18n.language;
-  const isPersian = currentLanguage === 'fa' || currentLanguage === 'fa-IR';
+  const isPersian = currentLanguage === "fa" || currentLanguage === "fa-IR";
 
   // Tab change handler
   const handleTabChange = (tab: string) => {
@@ -45,31 +45,31 @@ const Dashboard: React.FC = () => {
   // Render the appropriate page content based on active tab
   const renderPageContent = () => {
     switch (activeTab) {
-      case 'overview':
+      case "overview":
         return <OverviewPage />;
-      case 'profile':
+      case "profile":
         return <SettingsPage />;
-      case 'orders':
+      case "orders":
         return <OrdersPage />;
-      case 'export':
+      case "export":
         return <ExportPage />;
-      case 'shipments':
+      case "shipments":
         return <ShipmentsPage />;
-      case 'compliance':
+      case "compliance":
         return <CompliancePage />;
-      case 'legal':
+      case "legal":
         return <LegalAssistancePage />;
-      case 'legal-issue':
+      case "legal-issue":
         return <LegalIssuePage />;
-      case 'company-verification':
+      case "company-verification":
         return <CompanyVerificationPage />;
-      case 'currency-transfer':
+      case "currency-transfer":
         return <CurrencyTransferPage />;
-      case 'legal-services':
+      case "legal-services":
         return <LegalServicesPage />;
-      case 'support':
+      case "support":
         return <SupportPage />;
-      case 'settings':
+      case "settings":
         return <SettingsPage />;
       default:
         return <OverviewPage />;
@@ -164,11 +164,38 @@ const Dashboard: React.FC = () => {
       icon: QuestionMarkCircleIcon,
       color: "text-gray-600",
     },
+    {
+      id: "compliance",
+      name: t("compliance"),
+      icon: QuestionMarkCircleIcon,
+      color: "text-gray-600",
+    },
+    {
+      id: "legal",
+      name: t("legal_assistance"),
+      icon: QuestionMarkCircleIcon,
+      color: "text-gray-600",
+    },
+    {
+      id: "legal-issue",
+      name: t("legal"),
+      icon: QuestionMarkCircleIcon,
+      color: "text-gray-600",
+    },
   ];
 
   // Combine items based on language
-  const sidebarItems = isPersian 
-    ? [baseSidebarItems[0], profileItem, baseSidebarItems[1], exportItem, ...restSidebarItems.slice(0, 1), legalServicesMainItem, ...legalServicesItems, ...restSidebarItems.slice(1)]
+  const sidebarItems = isPersian
+    ? [
+        baseSidebarItems[0],
+        profileItem,
+        baseSidebarItems[1],
+        exportItem,
+        ...restSidebarItems.slice(0, 1),
+        legalServicesMainItem,
+        ...legalServicesItems,
+        ...restSidebarItems.slice(1),
+      ]
     : [...baseSidebarItems, ...restSidebarItems];
 
   return (
