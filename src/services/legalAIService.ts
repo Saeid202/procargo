@@ -53,22 +53,40 @@ export class LegalAIService {
     return headers;
   }
 
-  private static detectLanguage(message: string): 'fa' | 'other' {
+  private static detectLanguage(message: string): 'fa' | 'en' | 'other' {
     try {
-      return /[\u0600-\u06FF]/.test(message) ? 'fa' : 'other';
-    } catch {
+      if (!message) {
+        return 'en';
+      }
+      if (/[\u0600-\u06FF]/.test(message)) {
+        return 'fa';
+      }
+      const asciiOnly = Array.from(message).every(char => char.charCodeAt(0) <= 0x7f);
+      if (asciiOnly) {
+        return 'en';
+      }
       return 'other';
+    } catch {
+      return 'en';
     }
   }
 
   private static buildLanguageDirective(message: string): string {
     const detected = this.detectLanguage(message);
-    if (detected === 'fa') {
-      return `LANGUAGE: Persian (Farsi)
-Please provide your entire response in Persian (Farsi), using clear legal terminology and localized examples when appropriate.`;
+    switch (detected) {
+      case 'fa':
+        return `LANGUAGE DIRECTIVE:
+Detected user message language: Persian (Farsi)
+Respond entirely in Persian (Farsi). Use localized legal terminology and examples. Do not switch to English unless the user explicitly requests it.`;
+      case 'en':
+        return `LANGUAGE DIRECTIVE:
+Detected user message language: English
+Respond entirely in English. Do not translate the answer into other languages unless the user explicitly asks for a translation.`;
+      default:
+        return `LANGUAGE DIRECTIVE:
+Detected user message language: Match the user's input language (non-English, non-Persian)
+Respond entirely in the same language as the user's latest message. Do not switch languages or translate unless the user explicitly asks.`;
     }
-    return `LANGUAGE: Match User
-Respond in the same language the user used (typically English). If you detect Persian (Farsi), switch your response to Persian.`;
   }
 
   /**
