@@ -28,7 +28,14 @@ export interface CaseData {
   defendant_name: string;
   subject: string;
   description: string;
-  status?: 'SUBMITTED' | 'IN_REVIEW' | 'NEED_MORE_INFO' | 'RESOlVED' | 'CLOSED' | 'REJECTED' | 'COMPLETED';
+  status?:
+    | "SUBMITTED"
+    | "IN_REVIEW"
+    | "NEED_MORE_INFO"
+    | "RESOlVED"
+    | "CLOSED"
+    | "REJECTED"
+    | "COMPLETED";
   created_at?: string;
   case_documents?: CaseDocument[];
 }
@@ -111,10 +118,18 @@ export class SupabaseService {
 
   static async updateProfile(userId: string, profileData: Partial<Profile>) {
     try {
-      const { data, error } = await supabase.from("profiles").update(profileData).eq("id", userId).select().single();
+      const { data, error } = await supabase
+        .from("profiles")
+        .update(profileData)
+        .eq("id", userId)
+        .select()
+        .single();
       return { profile: data, error: error };
     } catch (error: any) {
-      return { profile: null, error: error.message || "An error occurred while updating profile" };
+      return {
+        profile: null,
+        error: error.message || "An error occurred while updating profile",
+      };
     }
   }
 
@@ -280,7 +295,7 @@ export class SupabaseService {
   }
 
   static async updateOrder(
-    orderNumber: string, 
+    orderNumber: string,
     updateData: Partial<{
       status: string;
       priority: string;
@@ -306,28 +321,45 @@ export class SupabaseService {
 
       return { order: data, error: null };
     } catch (err: any) {
-      return { 
-        order: null, 
-        error: err.message || "Failed to update order" 
+      return {
+        order: null,
+        error: err.message || "Failed to update order",
       };
     }
   }
 
-  static async createOrderResponse(orderNumber: string, agentId: string, response: { response: string, price: number, delivery_date: string }) {
+  static async createOrderResponse(
+    orderNumber: string,
+    agentId: string,
+    response: { response: string; price: number; delivery_date: string }
+  ) {
     try {
-      const { data, error } = await supabase.from("order_response").insert({ order_number: orderNumber, agent_id: agentId, response: response.response, price: response.price, delivery_date: response.delivery_date }).select().single();
+      const { data, error } = await supabase
+        .from("order_response")
+        .insert({
+          order_number: orderNumber,
+          agent_id: agentId,
+          response: response.response,
+          price: response.price,
+          delivery_date: response.delivery_date,
+        })
+        .select()
+        .single();
       if (error) {
         return { orderResponse: null, error: error.message };
       }
       return { orderResponse: data, error: null };
     } catch (err: any) {
-      return { orderResponse: null, error: err.message || "Failed to create order response" };
+      return {
+        orderResponse: null,
+        error: err.message || "Failed to create order response",
+      };
     }
   }
 
   // Update supplier
   static async updateSupplier(
-    supplierId: string, 
+    supplierId: string,
     updateData: Partial<{
       product_name: string;
       quantity: number;
@@ -352,18 +384,15 @@ export class SupabaseService {
 
       return { supplier: data, error: null };
     } catch (err: any) {
-      return { 
-        supplier: null, 
-        error: err.message || "Failed to update supplier" 
+      return {
+        supplier: null,
+        error: err.message || "Failed to update supplier",
       };
     }
   }
 
   // Update supplier links
-  static async updateSupplierLinks(
-    supplierId: string, 
-    links: SupplierLink[]
-  ) {
+  static async updateSupplierLinks(supplierId: string, links: SupplierLink[]) {
     try {
       // First, delete existing links for this supplier
       const { error: deleteError } = await supabase
@@ -422,7 +451,7 @@ export class SupabaseService {
         .from("suppliers")
         .insert([
           {
-            order_number: orderNumber,
+            order_id: orderNumber,
             product_name: supplier.product_name,
             quantity: supplier.quantity,
             unit_type: supplier.unit_type,
@@ -563,7 +592,11 @@ export class SupabaseService {
       // Update ONLY the file_url for existing row
       const { data: caseDocument, error: caseDocumentError } = await supabase
         .from("case_documents")
-        .update({ file_url: publicUrl, file_name: document.name, file_type: document.type })
+        .update({
+          file_url: publicUrl,
+          file_name: document.name,
+          file_type: document.type,
+        })
         .match({ case_id: caseId, doc_type: doc_type });
 
       if (caseDocumentError) throw caseDocumentError;
