@@ -164,24 +164,6 @@ const Dashboard: React.FC = () => {
       icon: QuestionMarkCircleIcon,
       color: "text-gray-600",
     },
-    {
-      id: "compliance",
-      name: t("compliance"),
-      icon: QuestionMarkCircleIcon,
-      color: "text-gray-600",
-    },
-    {
-      id: "legal",
-      name: t("legal_assistance"),
-      icon: QuestionMarkCircleIcon,
-      color: "text-gray-600",
-    },
-    {
-      id: "legal-issue",
-      name: t("legal"),
-      icon: QuestionMarkCircleIcon,
-      color: "text-gray-600",
-    },
   ];
 
   // Combine items based on language

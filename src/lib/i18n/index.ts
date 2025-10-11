@@ -21,6 +21,9 @@ i18n
     interpolation: {
       escapeValue: false, // react already escapes
     },
+    react: {
+      bindI18nStore: "added removed",
+    },
   });
 
 // Load dynamic translations when language changes
