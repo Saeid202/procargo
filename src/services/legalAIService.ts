@@ -34,6 +34,43 @@ export interface LegalAIResponse {
 }
 
 export class LegalAIService {
+  private static deepSeekKeyWarningLogged = false;
+
+  private static buildDeepSeekHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    const rawApiKey = process.env.REACT_APP_DEEPSEEK_API_KEY;
+    const apiKey = rawApiKey?.trim();
+    if (!apiKey || apiKey.toLowerCase() === 'undefined' || apiKey.toLowerCase() === 'null') {
+      if (!this.deepSeekKeyWarningLogged) {
+        console.warn('DeepSeek API key is not configured. Set REACT_APP_DEEPSEEK_API_KEY to enable authorized requests.');
+        this.deepSeekKeyWarningLogged = true;
+      }
+      return headers;
+    }
+    headers['Authorization'] = `Bearer ${apiKey}`;
+    return headers;
+  }
+
+  private static detectLanguage(message: string): 'fa' | 'other' {
+    try {
+      return /[\u0600-\u06FF]/.test(message) ? 'fa' : 'other';
+    } catch {
+      return 'other';
+    }
+  }
+
+  private static buildLanguageDirective(message: string): string {
+    const detected = this.detectLanguage(message);
+    if (detected === 'fa') {
+      return `LANGUAGE: Persian (Farsi)
+Please provide your entire response in Persian (Farsi), using clear legal terminology and localized examples when appropriate.`;
+    }
+    return `LANGUAGE: Match User
+Respond in the same language the user used (typically English). If you detect Persian (Farsi), switch your response to Persian.`;
+  }
+
   /**
    * Minimal API test - just test the API call without any database operations
    */
@@ -46,9 +83,7 @@ export class LegalAIService {
       console.log('=== MINIMAL API TEST ===');
       const response = await fetch('/deepseek/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.buildDeepSeekHeaders(),
         body: JSON.stringify({
           model: 'deepseek-chat',
           messages: [
@@ -103,9 +138,7 @@ export class LegalAIService {
       console.log('=== SIMPLE API TEST ===');
       const response = await fetch('/deepseek/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.buildDeepSeekHeaders(),
         body: JSON.stringify({
           model: 'deepseek-chat',
           messages: [
@@ -175,9 +208,7 @@ export class LegalAIService {
       
       const response = await fetch('/deepseek/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.buildDeepSeekHeaders(),
         body: JSON.stringify(requestBody),
       });
 
@@ -337,9 +368,7 @@ export class LegalAIService {
       console.log('Sending request to DeepSeek API...');
       const response = await fetch('/deepseek/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.buildDeepSeekHeaders(),
         body: JSON.stringify({
           model: 'deepseek-chat',
           messages: [
@@ -371,6 +400,10 @@ RESPONSE GUIDELINES:
 - Suggest next steps and professional resources
 - Maintain a professional and helpful tone
 
+LANGUAGE POLICY:
+- Always respond in the same language as the user's latest question.
+- When the user writes in Persian (Farsi), respond entirely in Persian and localize legal terminology appropriately.
+
 ${config.customInstructions ? `ADDITIONAL INSTRUCTIONS: ${config.customInstructions}` : ''}`
             },
             {
@@ -384,7 +417,9 @@ Please provide a comprehensive legal response that includes:
 4. When to consult a qualified legal professional
 5. Any relevant legal disclaimers
 
-Format your response as clear, actionable legal guidance.`
+Format your response as clear, actionable legal guidance.
+
+${this.buildLanguageDirective(message)}`
             }
           ],
           max_tokens: config.maxTokens || 2000,
@@ -425,39 +460,82 @@ Format your response as clear, actionable legal guidance.`
     newSessionId?: string;
   } {
     const messageLower = message.toLowerCase();
+    const isPersian = this.detectLanguage(message) === 'fa';
     
     let response = '';
     let suggestions: string[] = [];
     let relatedTopics: string[] = [];
 
     if (messageLower.includes('export') || messageLower.includes('china')) {
-      response = 'For China exports, you\'ll need a Commercial Invoice, Packing List, Certificate of Origin (if applicable), and Export License for restricted items. The process typically takes 3-5 business days for documentation review.';
-      suggestions = ['Export Documentation Checklist', 'China Export Regulations', 'Certificate of Origin Requirements'];
-      relatedTopics = ['Export Procedures', 'Documentation', 'China Trade'];
+      if (isPersian) {
+        response = 'برای صادرات از چین، لازم است فاکتور تجاری، لیست بسته‌بندی، گواهی مبدأ (در صورت نیاز) و مجوز صادرات برای کالاهای محدود داشته باشید. بررسی و تأیید اسناد معمولاً ۳ تا ۵ روز کاری زمان می‌برد.';
+        suggestions = ['چک‌لیست مدارک صادرات', 'مقررات صادراتی چین', 'الزامات گواهی مبدأ'];
+        relatedTopics = ['رویه‌های صادرات', 'مدارک', 'تجارت با چین'];
+      } else {
+        response = 'For China exports, you\'ll need a Commercial Invoice, Packing List, Certificate of Origin (if applicable), and Export License for restricted items. The process typically takes 3-5 business days for documentation review.';
+        suggestions = ['Export Documentation Checklist', 'China Export Regulations', 'Certificate of Origin Requirements'];
+        relatedTopics = ['Export Procedures', 'Documentation', 'China Trade'];
+      }
     } else if (messageLower.includes('import') || messageLower.includes('canada')) {
-      response = 'Canada imports require a Bill of Lading, Commercial Invoice in English/French, Packing List, and Import Declaration (B3 Form). Customs clearance usually takes 1-3 business days.';
-      suggestions = ['Import Documentation', 'Canada Customs Procedures', 'B3 Form Requirements'];
-      relatedTopics = ['Import Procedures', 'Customs Clearance', 'Canada Trade'];
+      if (isPersian) {
+        response = 'برای واردات به کانادا باید بارنامه، فاکتور تجاری به زبان انگلیسی یا فرانسوی، لیست بسته‌بندی و اظهارنامه واردات (فرم B3) ارائه کنید. ترخیص گمرک معمولاً ۱ تا ۳ روز کاری زمان می‌برد.';
+        suggestions = ['مدارک واردات', 'رویه‌های گمرکی کانادا', 'الزامات فرم B3'];
+        relatedTopics = ['رویه‌های واردات', 'ترخیص گمرک', 'تجارت با کانادا'];
+      } else {
+        response = 'Canada imports require a Bill of Lading, Commercial Invoice in English/French, Packing List, and Import Declaration (B3 Form). Customs clearance usually takes 1-3 business days.';
+        suggestions = ['Import Documentation', 'Canada Customs Procedures', 'B3 Form Requirements'];
+        relatedTopics = ['Import Procedures', 'Customs Clearance', 'Canada Trade'];
+      }
     } else if (messageLower.includes('customs') || messageLower.includes('documentation')) {
-      response = 'Essential customs documents include: Commercial Invoice, Packing List, Bill of Lading, Certificate of Origin, and Customs Declaration. Always ensure documents are complete and accurate to avoid delays.';
-      suggestions = ['Documentation Checklist', 'Customs Requirements', 'Common Mistakes to Avoid'];
-      relatedTopics = ['Documentation', 'Customs', 'Compliance'];
+      if (isPersian) {
+        response = 'مدارک ضروری گمرکی شامل فاکتور تجاری، لیست بسته‌بندی، بارنامه، گواهی مبدأ و اظهارنامه گمرکی است. برای جلوگیری از تأخیر، حتماً مدارک را کامل و دقیق تکمیل کنید.';
+        suggestions = ['چک‌لیست مدارک', 'الزامات گمرکی', 'خطاهای رایج'];
+        relatedTopics = ['مدارک', 'گمرک', 'انطباق مقرراتی'];
+      } else {
+        response = 'Essential customs documents include: Commercial Invoice, Packing List, Bill of Lading, Certificate of Origin, and Customs Declaration. Always ensure documents are complete and accurate to avoid delays.';
+        suggestions = ['Documentation Checklist', 'Customs Requirements', 'Common Mistakes to Avoid'];
+        relatedTopics = ['Documentation', 'Customs', 'Compliance'];
+      }
     } else if (messageLower.includes('tariff') || messageLower.includes('duty')) {
-      response = 'Tariffs and duties vary by product classification (HS code), country of origin, and trade agreements. Use the Canada Border Services Agency (CBSA) tariff calculator for accurate rates. Preferential rates may apply under trade agreements.';
-      suggestions = ['HS Code Lookup', 'Tariff Calculator', 'Trade Agreement Benefits'];
-      relatedTopics = ['Tariffs', 'Duties', 'HS Codes', 'Trade Agreements'];
+      if (isPersian) {
+        response = 'تعرفه‌ها و عوارض بر اساس طبقه‌بندی کالا (کد HS)، کشور مبدأ و توافقنامه‌های تجاری متفاوت است. برای محاسبه دقیق، از ماشین‌حساب تعرفه آژانس خدمات مرزی کانادا (CBSA) استفاده کنید. در صورت وجود توافقنامه تجاری، می‌توانید از نرخ‌های ترجیحی بهره‌مند شوید.';
+        suggestions = ['جستجوی کد HS', 'ماشین‌حساب تعرفه', 'مزایای توافقنامه‌های تجاری'];
+        relatedTopics = ['تعرفه‌ها', 'عوارض', 'کدهای HS', 'توافقنامه‌های تجاری'];
+      } else {
+        response = 'Tariffs and duties vary by product classification (HS code), country of origin, and trade agreements. Use the Canada Border Services Agency (CBSA) tariff calculator for accurate rates. Preferential rates may apply under trade agreements.';
+        suggestions = ['HS Code Lookup', 'Tariff Calculator', 'Trade Agreement Benefits'];
+        relatedTopics = ['Tariffs', 'Duties', 'HS Codes', 'Trade Agreements'];
+      }
     } else if (messageLower.includes('hs code') || messageLower.includes('classification')) {
-      response = 'HS codes are 6-10 digit codes that classify products for customs purposes. Accurate classification is crucial for determining tariffs, restrictions, and requirements. Use the CBSA classification tool or consult with a customs broker.';
-      suggestions = ['HS Code Classification Tool', 'CBSA Resources', 'Customs Broker Consultation'];
-      relatedTopics = ['HS Codes', 'Product Classification', 'Customs'];
+      if (isPersian) {
+        response = 'کدهای HS شامل ۶ تا ۱۰ رقم هستند و برای طبقه‌بندی کالاها در گمرک استفاده می‌شوند. طبقه‌بندی دقیق برای تعیین تعرفه، محدودیت‌ها و الزامات حیاتی است. از ابزار طبقه‌بندی CBSA استفاده کنید یا با یک کارگزار گمرکی مشورت نمایید.';
+        suggestions = ['ابزار طبقه‌بندی HS', 'منابع CBSA', 'مشاوره با کارگزار گمرک'];
+        relatedTopics = ['کدهای HS', 'طبقه‌بندی کالا', 'گمرک'];
+      } else {
+        response = 'HS codes are 6-10 digit codes that classify products for customs purposes. Accurate classification is crucial for determining tariffs, restrictions, and requirements. Use the CBSA classification tool or consult with a customs broker.';
+        suggestions = ['HS Code Classification Tool', 'CBSA Resources', 'Customs Broker Consultation'];
+        relatedTopics = ['HS Codes', 'Product Classification', 'Customs'];
+      }
     } else if (messageLower.includes('restricted') || messageLower.includes('prohibited')) {
-      response = 'Many products have import/export restrictions or require special permits. Check the CBSA prohibited and restricted goods list, and consult with relevant regulatory agencies (Health Canada, CFIA, etc.) for specific requirements.';
-      suggestions = ['Prohibited Goods List', 'Restricted Items Guide', 'Permit Requirements'];
-      relatedTopics = ['Restrictions', 'Permits', 'Regulations'];
+      if (isPersian) {
+        response = 'بسیاری از کالاها دارای محدودیت واردات یا صادرات هستند یا نیاز به مجوز ویژه دارند. فهرست کالاهای ممنوع و محدود آژانس خدمات مرزی کانادا (CBSA) را بررسی کنید و برای الزامات خاص با سازمان‌های مربوطه مانند Health Canada یا CFIA هماهنگ شوید.';
+        suggestions = ['فهرست کالاهای ممنوع', 'راهنمای کالاهای محدود', 'الزامات اخذ مجوز'];
+        relatedTopics = ['محدودیت‌ها', 'مجوزها', 'مقررات'];
+      } else {
+        response = 'Many products have import/export restrictions or require special permits. Check the CBSA prohibited and restricted goods list, and consult with relevant regulatory agencies (Health Canada, CFIA, etc.) for specific requirements.';
+        suggestions = ['Prohibited Goods List', 'Restricted Items Guide', 'Permit Requirements'];
+        relatedTopics = ['Restrictions', 'Permits', 'Regulations'];
+      }
     } else {
-      response = 'I can help you with various aspects of international trade law and customs compliance. Please ask about specific topics like export/import procedures, documentation requirements, tariffs, HS codes, or regulatory compliance. For complex legal matters, I recommend consulting with a qualified trade lawyer.';
-      suggestions = ['Export Procedures', 'Import Requirements', 'Legal Consultation'];
-      relatedTopics = ['General Trade Law', 'Compliance', 'Legal Advice'];
+      if (isPersian) {
+        response = 'می‌توانم در زمینه‌های مختلف مربوط به حقوق تجارت بین‌الملل و انطباق گمرکی به شما کمک کنم. لطفاً درباره موضوعات مشخصی مانند رویه‌های صادرات یا واردات، الزامات مدارک، تعرفه‌ها، کدهای HS یا الزامات مقرراتی سؤال بپرسید. برای پرونده‌های پیچیده حقوقی پیشنهاد می‌کنم با یک وکیل متخصص در تجارت بین‌الملل مشورت کنید.';
+        suggestions = ['رویه‌های صادرات', 'الزامات واردات', 'مشاوره حقوقی'];
+        relatedTopics = ['حقوق تجارت بین‌الملل', 'انطباق', 'مشاوره حقوقی'];
+      } else {
+        response = 'I can help you with various aspects of international trade law and customs compliance. Please ask about specific topics like export/import procedures, documentation requirements, tariffs, HS codes, or regulatory compliance. For complex legal matters, I recommend consulting with a qualified trade lawyer.';
+        suggestions = ['Export Procedures', 'Import Requirements', 'Legal Consultation'];
+        relatedTopics = ['General Trade Law', 'Compliance', 'Legal Advice'];
+      }
     }
 
     return {
@@ -929,6 +1007,10 @@ RESPONSE GUIDELINES:
 - Maintain a professional and helpful tone
 - Use conversation context to provide more relevant and personalized responses
 
+LANGUAGE POLICY:
+- Always respond in the same language as the user's latest question.
+- When the user writes in Persian (Farsi), respond entirely in Persian and localize legal terminology appropriately.
+
 CONVERSATION CONTEXT:
 ${contextInfo}`
           },
@@ -943,7 +1025,9 @@ Please provide a comprehensive legal response that includes:
 4. When to consult a qualified legal professional
 5. Any relevant legal disclaimers
 
-Format your response as clear, actionable legal guidance.`
+Format your response as clear, actionable legal guidance.
+
+${this.buildLanguageDirective(message)}`
           }
         ],
         max_tokens: 2000,
@@ -954,9 +1038,7 @@ Format your response as clear, actionable legal guidance.`
       
       const response = await fetch('/deepseek/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.buildDeepSeekHeaders(),
         body: JSON.stringify(requestBody),
       });
 
@@ -1009,9 +1091,7 @@ Format your response as clear, actionable legal guidance.`
       console.log('Sending request to DeepSeek API...');
       const response = await fetch('/deepseek/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.buildDeepSeekHeaders(),
         body: JSON.stringify({
           model: 'deepseek-chat',
           messages: [
@@ -1044,6 +1124,10 @@ RESPONSE GUIDELINES:
 - Maintain a professional and helpful tone
 - Use conversation context to provide more relevant and personalized responses
 
+LANGUAGE POLICY:
+- Always respond in the same language as the user's latest question.
+- When the user writes in Persian (Farsi), respond entirely in Persian and localize legal terminology appropriately.
+
 ${config.customInstructions ? `ADDITIONAL INSTRUCTIONS: ${config.customInstructions}` : ''}
 
 CONVERSATION CONTEXT:
@@ -1060,7 +1144,9 @@ Please provide a comprehensive legal response that includes:
 4. When to consult a qualified legal professional
 5. Any relevant legal disclaimers
 
-Format your response as clear, actionable legal guidance.`
+Format your response as clear, actionable legal guidance.
+
+${this.buildLanguageDirective(message)}`
             }
           ],
           max_tokens: config.maxTokens || 2000,
