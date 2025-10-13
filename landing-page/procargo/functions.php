@@ -96,6 +96,54 @@ function procargo_output_i18n_attributes( $texts ) {
 }
 
 /**
+ * Retrieve Elementor templates for dropdown controls.
+ *
+ * @return array<int, string>
+ */
+function procargo_get_elementor_template_choices() {
+	$choices = array(
+		0 => __( 'Use default theme output', 'procargo' ),
+	);
+
+	if ( ! class_exists( '\Elementor\Plugin' ) ) {
+		return $choices;
+	}
+
+	$templates = get_posts(
+		array(
+			'post_type'      => 'elementor_library',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'orderby'        => 'title',
+			'order'          => 'ASC',
+		)
+	);
+
+	foreach ( $templates as $template ) {
+		/* @var WP_Post $template */
+		$choices[ $template->ID ] = $template->post_title ?: sprintf( __( 'Template %d', 'procargo' ), $template->ID );
+	}
+
+	return $choices;
+}
+
+/**
+ * Render an Elementor template by ID if Elementor is active.
+ *
+ * @param int $template_id Saved template post ID.
+ * @return string
+ */
+function procargo_render_elementor_template( $template_id ) {
+	$template_id = absint( $template_id );
+
+	if ( ! $template_id || ! class_exists( '\Elementor\Plugin' ) ) {
+		return '';
+	}
+
+	return \Elementor\Plugin::instance()->frontend->get_builder_content_for_display( $template_id, true );
+}
+
+/**
  * Retrieve the full list of default theme modifications.
  *
  * @return array<string, string>
@@ -331,6 +379,56 @@ function procargo_customize_register( $wp_customize ) {
 			'title'       => __( 'Procargo Landing Page', 'procargo' ),
 			'description' => __( 'Manage the content that appears on the Procargo landing page template.', 'procargo' ),
 			'priority'    => 160,
+		)
+	);
+
+	// Elementor templates section (optional).
+	$wp_customize->add_section(
+		'procargo_elementor_templates',
+		array(
+			'title'       => __( 'Elementor Integration', 'procargo' ),
+			'description' => __( 'If you have Elementor installed, you can select saved templates to replace the default header and footer.', 'procargo' ),
+			'panel'       => 'procargo_landing_panel',
+		)
+	);
+
+	$elementor_template_choices = procargo_get_elementor_template_choices();
+
+	$wp_customize->add_setting(
+		'procargo_elementor_header_template',
+		array(
+			'default'           => 0,
+			'sanitize_callback' => 'absint',
+		)
+	);
+
+	$wp_customize->add_control(
+		'procargo_elementor_header_template',
+		array(
+			'type'        => 'select',
+			'section'     => 'procargo_elementor_templates',
+			'label'       => __( 'Header Template', 'procargo' ),
+			'description' => __( 'Choose an Elementor saved template to output as the global header.', 'procargo' ),
+			'choices'     => $elementor_template_choices,
+		)
+	);
+
+	$wp_customize->add_setting(
+		'procargo_elementor_footer_template',
+		array(
+			'default'           => 0,
+			'sanitize_callback' => 'absint',
+		)
+	);
+
+	$wp_customize->add_control(
+		'procargo_elementor_footer_template',
+		array(
+			'type'        => 'select',
+			'section'     => 'procargo_elementor_templates',
+			'label'       => __( 'Footer Template', 'procargo' ),
+			'description' => __( 'Choose an Elementor saved template to output as the global footer.', 'procargo' ),
+			'choices'     => $elementor_template_choices,
 		)
 	);
 

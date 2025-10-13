@@ -6,35 +6,6 @@
  */
 
 defined( 'ABSPATH' ) || exit;
-
-$header_tagline_texts = procargo_get_translated_texts( 'header_tagline' );
-$procargo_nav_items   = array(
-	array(
-		'id'    => 'hero',
-		'href'  => '#procargo-hero',
-		'label' => procargo_get_translated_texts( 'nav_home_label' ),
-	),
-	array(
-		'id'    => 'services',
-		'href'  => '#procargo-services',
-		'label' => procargo_get_translated_texts( 'nav_services_label' ),
-	),
-	array(
-		'id'    => 'about',
-		'href'  => '#procargo-features',
-		'label' => procargo_get_translated_texts( 'nav_about_label' ),
-	),
-	array(
-		'id'    => 'contact',
-		'href'  => '#procargo-cta',
-		'label' => procargo_get_translated_texts( 'nav_contact_label' ),
-	),
-);
-$procargo_site_title      = get_bloginfo( 'name' );
-$procargo_logo_url        = get_theme_file_uri( 'assets/images/logo.jpg' );
-$procargo_contact_label   = procargo_get_translated_texts( 'nav_contact_label' );
-$procargo_contact_section = '#procargo-cta';
-$procargo_supported_languages = procargo_supported_languages();
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -45,6 +16,51 @@ $procargo_supported_languages = procargo_supported_languages();
 	</head>
 	<body <?php body_class(); ?>>
 		<?php wp_body_open(); ?>
+
+		<?php
+		$elementor_header_rendered = false;
+		$elementor_header_id       = get_theme_mod( 'procargo_elementor_header_template', 0 );
+
+		if ( $elementor_header_id ) {
+			$header_markup = procargo_render_elementor_template( $elementor_header_id );
+
+			if ( $header_markup ) {
+				$elementor_header_rendered = true;
+				echo '<div class="procargo-elementor-header">';
+				echo $header_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo '</div>';
+			}
+		}
+
+		if ( ! $elementor_header_rendered ) :
+			$procargo_nav_items   = array(
+				array(
+					'id'    => 'hero',
+					'href'  => '#procargo-hero',
+					'label' => procargo_get_translated_texts( 'nav_home_label' ),
+				),
+				array(
+					'id'    => 'services',
+					'href'  => '#procargo-services',
+					'label' => procargo_get_translated_texts( 'nav_services_label' ),
+				),
+				array(
+					'id'    => 'about',
+					'href'  => '#procargo-features',
+					'label' => procargo_get_translated_texts( 'nav_about_label' ),
+				),
+				array(
+					'id'    => 'contact',
+					'href'  => '#procargo-cta',
+					'label' => procargo_get_translated_texts( 'nav_contact_label' ),
+				),
+			);
+			$procargo_site_title      = get_bloginfo( 'name' );
+			$procargo_logo_url        = get_theme_file_uri( 'assets/images/logo.jpg' );
+			$procargo_contact_label   = procargo_get_translated_texts( 'nav_contact_label' );
+			$procargo_contact_section = '#procargo-cta';
+			$procargo_supported_languages = procargo_supported_languages();
+			?>
 
 		<header class="procargo-site-header" data-component="procargo-header">
 			<div class="procargo-site-header__inner">
@@ -156,3 +172,4 @@ $procargo_supported_languages = procargo_supported_languages();
 				</div>
 			</div>
 		</header>
+		<?php endif; ?>

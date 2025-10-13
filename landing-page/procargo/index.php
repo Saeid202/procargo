@@ -53,6 +53,20 @@ if ( have_posts() ) :
 		<main id="procargo-landing" class="procargo-landing" role="main">
 			<?php if ( $has_elementor_content || $is_elementor_editing ) : ?>
 				<?php the_content(); ?>
+			<?php elseif ( $elementor_instance ) : ?>
+				<section class="procargo-elementor-placeholder" aria-live="polite">
+					<div class="procargo-elementor-placeholder__inner">
+						<h2 class="procargo-elementor-placeholder__title"><?php esc_html_e( 'Design this page with Elementor', 'procargo' ); ?></h2>
+						<p class="procargo-elementor-placeholder__description">
+							<?php esc_html_e( 'Open the Elementor editor to build a fully editable layout. Once you publish your design, it will automatically replace this notice.', 'procargo' ); ?>
+						</p>
+						<?php if ( current_user_can( 'edit_post', get_the_ID() ) ) : ?>
+							<a class="procargo-elementor-placeholder__button" href="<?php echo esc_url( admin_url( sprintf( 'post.php?post=%d&action=elementor', get_the_ID() ) ) ); ?>">
+								<?php esc_html_e( 'Edit with Elementor', 'procargo' ); ?>
+							</a>
+						<?php endif; ?>
+					</div>
+				</section>
 			<?php else : ?>
 				<?php
 				$stats = array(
