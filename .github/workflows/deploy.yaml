@@ -19,7 +19,7 @@ jobs:
           node-version: '20'
 
       - name: 📥 Install dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: ⚙️ Build React project
         run: npm run build
