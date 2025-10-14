@@ -27,9 +27,9 @@ jobs:
       - name: 🚀 Deploy to CPanel via SSH
         uses: easingthemes/ssh-deploy@v2
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          remote-host: ${{ secrets.SSH_HOST }}
-          remote-user: ${{ secrets.SSH_USERNAME }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER: ${{ secrets.SSH_USERNAME }}
           source: 'build/'
           target: ${{ secrets.REMOTE_PATH }}
           args: "-avz --delete"
