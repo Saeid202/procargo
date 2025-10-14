@@ -1,0 +1,37 @@
+name: Deploy Procargo
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 📥 Install dependencies
+        run: npm install
+
+      - name: ⚙️ Build React project
+        run: npm run build
+
+      - name: 🚀 Deploy to CPanel via SSH
+        uses: cross-platform/ssh-deploy@v5
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+          source: 'build/'       
+          target: ${{ secrets.REMOTE_PATH }}
+          
+          wipe: true
