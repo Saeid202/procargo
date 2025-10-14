@@ -19,10 +19,10 @@ jobs:
           node-version: '23'
 
       - name: 📥 Install dependencies
-        run: npm install --legacy-peer-deps
+        run: yarn install
 
       - name: ⚙️ Build React project
-        run: npm run build
+        run: yarn build
 
       - name: 🚀 Deploy to CPanel via SSH
         uses: easingthemes/ssh-deploy@v2
