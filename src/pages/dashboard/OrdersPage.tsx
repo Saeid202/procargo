@@ -64,9 +64,7 @@ export interface OrderFormData {
 }
 
 const OrdersPage: React.FC = () => {
-  const { user, session } = useAuth();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [showForm, setShowForm] = useState(false);
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [activeSegment, setActiveSegment] = useState("I don't have a Supplier");
   const [otherRequestData, setOtherRequestData] = useState({
@@ -116,12 +114,6 @@ const OrdersPage: React.FC = () => {
 
   const { t } = useTranslation();
 
-  useEffect(() => {
-    if (user) {
-      loadOrders();
-    }
-  }, [user]);
-
   const loadOrders = async () => {
     try {
       setLoading(true);
@@ -144,7 +136,7 @@ const OrdersPage: React.FC = () => {
       ];
 
       console.log("Mock orders loaded successfully:", mockOrders);
-      setOrders(mockOrders);
+      // setOrders(mockOrders);
     } catch (error) {
       console.error("Exception loading mock orders:", error);
     } finally {
@@ -152,6 +144,11 @@ const OrdersPage: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    if (user) {
+      loadOrders();
+    }
+  }, [user, loadOrders]);
   const generateOrderNumber = () => {
     const date = new Date();
     const dateStr = date.toISOString().slice(0, 10).replace(/-/g, "");
@@ -531,7 +528,7 @@ const OrdersPage: React.FC = () => {
         ],
       });
 
-      setShowForm(false);
+      // setShowForm(false);
       alert("Order created successfully!");
     } catch (error) {
       console.error("Error creating order:", error);
@@ -859,7 +856,7 @@ const OrdersPage: React.FC = () => {
                         </div>
 
                         <div className="flex justify-between items-center mb-4">
-                          {formData.suppliers.length == 1 ? (
+                          {formData.suppliers.length === 1 ? (
                             <div className="bg-gray-100 h-8 w-10 absolute top-6 right-6 rtl:left-6 rtl:right-auto flex items-center justify-center rounded-xl">
                               <button
                                 onClick={() =>

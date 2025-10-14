@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { 
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import {
   EnvelopeIcon,
   PhoneIcon,
   MapPinIcon,
@@ -12,46 +12,50 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   CheckCircleIcon,
-} from '@heroicons/react/24/outline';
-import { useTranslation } from 'react-i18next';
-import Footer from '../../components/ui/Footer';
-import { ContactService } from '../../services/contactService';
-import { toast } from 'react-hot-toast';
+} from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
+import Footer from "../../components/ui/Footer";
+import { ContactService } from "../../services/contactService";
+import { toast } from "react-hot-toast";
 
 const ContactPage = () => {
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    company: '',
-    subject: '',
-    message: ''
+    fullName: "",
+    email: "",
+    phone: "",
+    company: "",
+    subject: "",
+    message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     // Simulate form submission
-    const { contactMessage, error } = await ContactService.createContactMessage({
+    const { error } = await ContactService.createContactMessage({
       full_name: formData.fullName,
       email: formData.email,
       phone: formData.phone,
       company: formData.company,
       subject: formData.subject,
-      message: formData.message
+      message: formData.message,
     });
 
     if (error) {
@@ -60,45 +64,45 @@ const ContactPage = () => {
       return;
     }
 
-    toast.success('Message sent successfully');
-    
+    toast.success("Message sent successfully");
+
     setIsSubmitting(false);
     setIsSubmitted(true);
     setFormData({
-      fullName: '',
-      email: '',
-      phone: '',
-      company: '',
-      subject: '',
-      message: ''
+      fullName: "",
+      email: "",
+      phone: "",
+      company: "",
+      subject: "",
+      message: "",
     });
   };
 
   const faqItems = [
     {
       question: t("what_services_do_you_offer"),
-      answer: t("what_services_answer")
+      answer: t("what_services_answer"),
     },
     {
       question: t("how_long_does_shipping_take"),
-      answer: t("how_long_answer")
+      answer: t("how_long_answer"),
     },
     {
       question: t("do_you_handle_customs_clearance"),
-      answer: t("customs_answer")
+      answer: t("customs_answer"),
     },
     {
       question: t("can_i_track_my_shipment"),
-      answer: t("tracking_answer")
+      answer: t("tracking_answer"),
     },
     {
       question: t("what_are_your_payment_terms"),
-      answer: t("payment_answer")
+      answer: t("payment_answer"),
     },
     {
       question: t("do_you_offer_insurance"),
-      answer: t("insurance_answer")
-    }
+      answer: t("insurance_answer"),
+    },
   ];
 
   return (
@@ -110,21 +114,30 @@ const ContactPage = () => {
             {/* Contact Form */}
             <div>
               <div className="mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">{t("contact_form_title")}</h2>
-                <p className="text-lg text-gray-600">{t("contact_form_subtitle")}</p>
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                  {t("contact_form_title")}
+                </h2>
+                <p className="text-lg text-gray-600">
+                  {t("contact_form_subtitle")}
+                </p>
               </div>
 
               {isSubmitted ? (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
                   <CheckCircleIcon className="w-16 h-16 text-green-600 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-green-800 mb-2">{t("message_sent")}</h3>
+                  <h3 className="text-xl font-semibold text-green-800 mb-2">
+                    {t("message_sent")}
+                  </h3>
                   <p className="text-green-700">{t("thank_you_message")}</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label
+                        htmlFor="fullName"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
                         {t("full_name")} *
                       </label>
                       <input
@@ -139,7 +152,10 @@ const ContactPage = () => {
                       />
                     </div>
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label
+                        htmlFor="email"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
                         {t("email_address")} *
                       </label>
                       <input
@@ -157,7 +173,10 @@ const ContactPage = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label
+                        htmlFor="phone"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
                         {t("phone_number")}
                       </label>
                       <input
@@ -171,7 +190,10 @@ const ContactPage = () => {
                       />
                     </div>
                     <div>
-                      <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label
+                        htmlFor="company"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
                         {t("company_name")}
                       </label>
                       <input
@@ -187,7 +209,10 @@ const ContactPage = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label
+                      htmlFor="subject"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
                       {t("subject")} *
                     </label>
                     <select
@@ -208,7 +233,10 @@ const ContactPage = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label
+                      htmlFor="message"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
                       {t("your_message")} *
                     </label>
                     <textarea
@@ -237,7 +265,9 @@ const ContactPage = () => {
             {/* Contact Information */}
             <div>
               <div className="mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">{t("contact_information")}</h2>
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                  {t("contact_information")}
+                </h2>
                 <p className="text-lg text-gray-600">{t("get_in_touch")}</p>
               </div>
 
@@ -248,7 +278,9 @@ const ContactPage = () => {
                     <MapPinIcon className="w-6 h-6 text-cargo-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("office_address")}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {t("office_address")}
+                    </h3>
                     <p className="text-gray-600">{t("office_address_value")}</p>
                   </div>
                 </div>
@@ -259,7 +291,9 @@ const ContactPage = () => {
                     <PhoneIcon className="w-6 h-6 text-cargo-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("phone")}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {t("phone")}
+                    </h3>
                     <p className="text-gray-600">{t("phone_value")}</p>
                   </div>
                 </div>
@@ -270,7 +304,9 @@ const ContactPage = () => {
                     <EnvelopeIcon className="w-6 h-6 text-cargo-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("email")}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {t("email")}
+                    </h3>
                     <p className="text-gray-600">{t("email_value")}</p>
                   </div>
                 </div>
@@ -281,7 +317,9 @@ const ContactPage = () => {
                     <ClockIcon className="w-6 h-6 text-cargo-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("business_hours")}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {t("business_hours")}
+                    </h3>
                     <p className="text-gray-600">{t("business_hours_value")}</p>
                   </div>
                 </div>
@@ -292,8 +330,12 @@ const ContactPage = () => {
                     <PhoneIcon className="w-6 h-6 text-red-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("emergency_contact")}</h3>
-                    <p className="text-gray-600">{t("emergency_contact_value")}</p>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {t("emergency_contact")}
+                    </h3>
+                    <p className="text-gray-600">
+                      {t("emergency_contact_value")}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -319,7 +361,9 @@ const ContactPage = () => {
               <div className="w-16 h-16 bg-cargo-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <DocumentTextIcon className="w-8 h-8 text-cargo-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("get_quote")}</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {t("get_quote")}
+              </h3>
               <p className="text-gray-600 text-sm">{t("get_quote_desc")}</p>
             </div>
 
@@ -327,23 +371,33 @@ const ContactPage = () => {
               <div className="w-16 h-16 bg-cargo-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <TruckIcon className="w-8 h-8 text-cargo-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("track_shipment")}</h3>
-              <p className="text-gray-600 text-sm">{t("track_shipment_desc")}</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {t("track_shipment")}
+              </h3>
+              <p className="text-gray-600 text-sm">
+                {t("track_shipment_desc")}
+              </p>
             </div>
 
             <div className="text-center">
               <div className="w-16 h-16 bg-cargo-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <ChatBubbleLeftRightIcon className="w-8 h-8 text-cargo-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("customer_support")}</h3>
-              <p className="text-gray-600 text-sm">{t("customer_support_desc")}</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {t("customer_support")}
+              </h3>
+              <p className="text-gray-600 text-sm">
+                {t("customer_support_desc")}
+              </p>
             </div>
 
             <div className="text-center">
               <div className="w-16 h-16 bg-cargo-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <UserGroupIcon className="w-8 h-8 text-cargo-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("partnership")}</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {t("partnership")}
+              </h3>
               <p className="text-gray-600 text-sm">{t("partnership_desc")}</p>
             </div>
           </div>
@@ -357,19 +411,22 @@ const ContactPage = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               {t("frequently_asked_questions")}
             </h2>
-            <p className="text-xl text-gray-600">
-              {t("faq_subtitle")}
-            </p>
+            <p className="text-xl text-gray-600">{t("faq_subtitle")}</p>
           </div>
 
           <div className="space-y-4">
             {faqItems.map((item, index) => (
-              <div key={index} className="bg-white border border-gray-200 rounded-lg shadow-sm">
+              <div
+                key={index}
+                className="bg-white border border-gray-200 rounded-lg shadow-sm"
+              >
                 <button
                   className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}
                 >
-                  <span className="text-lg font-medium text-gray-900">{item.question}</span>
+                  <span className="text-lg font-medium text-gray-900">
+                    {item.question}
+                  </span>
                   {openFaq === index ? (
                     <ChevronUpIcon className="w-5 h-5 text-cargo-600" />
                   ) : (
@@ -378,7 +435,9 @@ const ContactPage = () => {
                 </button>
                 {openFaq === index && (
                   <div className="px-6 pb-4">
-                    <p className="text-gray-600 leading-relaxed">{item.answer}</p>
+                    <p className="text-gray-600 leading-relaxed">
+                      {item.answer}
+                    </p>
                   </div>
                 )}
               </div>

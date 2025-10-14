@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { 
-  ChartBarIcon,
+import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import {
   UserGroupIcon,
   DocumentTextIcon,
   PhotoIcon,
@@ -12,11 +11,8 @@ import {
   CurrencyDollarIcon,
   ClockIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon,
-  PlusIcon,
-  EyeIcon
-} from '@heroicons/react/24/outline';
-import { supabase } from '../../lib/supabase';
+} from "@heroicons/react/24/outline";
+import { supabase } from "../../lib/supabase";
 
 interface DashboardStats {
   totalUsers: number;
@@ -47,7 +43,7 @@ const AdminOverviewPage: React.FC = () => {
     totalOrders: 0,
     totalSupportTickets: 0,
     totalContactMessages: 0,
-    recentActivity: []
+    recentActivity: [],
   });
   const [loading, setLoading] = useState(true);
 
@@ -58,25 +54,33 @@ const AdminOverviewPage: React.FC = () => {
   const loadDashboardStats = async () => {
     try {
       setLoading(true);
-      
+
       // Load all stats in parallel - using existing tables
       const [
         usersResult,
         quotationsResult,
         ordersResult,
         supportResult,
-        contactResult
+        contactResult,
       ] = await Promise.all([
-        supabase.from('users').select('id', { count: 'exact', head: true }),
-        supabase.from('quotation_requests').select('id', { count: 'exact', head: true }),
-        supabase.from('orders').select('id', { count: 'exact', head: true }),
-        supabase.from('support_requests').select('id', { count: 'exact', head: true }),
-        supabase.from('contact_messages').select('id', { count: 'exact', head: true })
+        supabase.from("users").select("id", { count: "exact", head: true }),
+        supabase
+          .from("quotation_requests")
+          .select("id", { count: "exact", head: true }),
+        supabase.from("orders").select("id", { count: "exact", head: true }),
+        supabase
+          .from("support_requests")
+          .select("id", { count: "exact", head: true }),
+        supabase
+          .from("contact_messages")
+          .select("id", { count: "exact", head: true }),
       ]);
 
       // Load pages count from the new table
-      const pagesResult = await supabase.from('page_contents').select('id', { count: 'exact', head: true });
-      
+      const pagesResult = await supabase
+        .from("page_contents")
+        .select("id", { count: "exact", head: true });
+
       setStats({
         totalUsers: usersResult.count || 0,
         totalPages: pagesResult.count || 0,
@@ -88,30 +92,30 @@ const AdminOverviewPage: React.FC = () => {
         totalContactMessages: contactResult.count || 0,
         recentActivity: [
           {
-            id: '1',
-            type: 'page',
-            description: 'Updated About Us page',
+            id: "1",
+            type: "page",
+            description: "Updated About Us page",
             timestamp: new Date().toISOString(),
-            user: 'Admin'
+            user: "Admin",
           },
           {
-            id: '2',
-            type: 'media',
-            description: 'Uploaded new company logo',
+            id: "2",
+            type: "media",
+            description: "Uploaded new company logo",
             timestamp: new Date(Date.now() - 3600000).toISOString(),
-            user: 'Admin'
+            user: "Admin",
           },
           {
-            id: '3',
-            type: 'blog',
-            description: 'Published new blog post',
+            id: "3",
+            type: "blog",
+            description: "Published new blog post",
             timestamp: new Date(Date.now() - 7200000).toISOString(),
-            user: 'Admin'
-          }
-        ]
+            user: "Admin",
+          },
+        ],
       });
     } catch (error) {
-      console.error('Error loading dashboard stats:', error);
+      console.error("Error loading dashboard stats:", error);
     } finally {
       setLoading(false);
     }
@@ -122,66 +126,66 @@ const AdminOverviewPage: React.FC = () => {
       title: t("total_users"),
       value: stats.totalUsers,
       icon: UserGroupIcon,
-      color: 'bg-blue-500',
-      change: '+12%',
-      changeType: 'positive'
+      color: "bg-blue-500",
+      change: "+12%",
+      changeType: "positive",
     },
     {
       title: t("pages"),
       value: stats.totalPages,
       icon: DocumentTextIcon,
-      color: 'bg-green-500',
-      change: '+3',
-      changeType: 'positive'
+      color: "bg-green-500",
+      change: "+3",
+      changeType: "positive",
     },
     {
       title: t("media_files"),
       value: stats.totalMediaFiles,
       icon: PhotoIcon,
-      color: 'bg-purple-500',
-      change: '+8',
-      changeType: 'positive'
+      color: "bg-purple-500",
+      change: "+8",
+      changeType: "positive",
     },
     {
       title: t("blog_posts"),
       value: stats.totalBlogPosts,
       icon: GlobeAltIcon,
-      color: 'bg-indigo-500',
-      change: '+2',
-      changeType: 'positive'
+      color: "bg-indigo-500",
+      change: "+2",
+      changeType: "positive",
     },
     {
       title: t("quotations"),
       value: stats.totalQuotations,
       icon: CurrencyDollarIcon,
-      color: 'bg-yellow-500',
-      change: '+5',
-      changeType: 'positive'
+      color: "bg-yellow-500",
+      change: "+5",
+      changeType: "positive",
     },
     {
       title: t("orders"),
       value: stats.totalOrders,
       icon: TruckIcon,
-      color: 'bg-red-500',
-      change: '+15',
-      changeType: 'positive'
+      color: "bg-red-500",
+      change: "+15",
+      changeType: "positive",
     },
     {
       title: t("support_tickets"),
       value: stats.totalSupportTickets,
       icon: ChatBubbleLeftRightIcon,
-      color: 'bg-orange-500',
-      change: '+3',
-      changeType: 'positive'
+      color: "bg-orange-500",
+      change: "+3",
+      changeType: "positive",
     },
     {
       title: t("contact_messages"),
       value: stats.totalContactMessages,
       icon: ChatBubbleLeftRightIcon,
-      color: 'bg-teal-500',
-      change: '+7',
-      changeType: 'positive'
-    }
+      color: "bg-teal-500",
+      change: "+7",
+      changeType: "positive",
+    },
   ];
 
   if (loading) {
@@ -198,8 +202,12 @@ const AdminOverviewPage: React.FC = () => {
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t("admin_dashboard")}</h1>
-            <p className="text-gray-600 mt-1">{t("welcome_to_your_comprehensive_content_management_system")}</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {t("admin_dashboard")}
+            </h1>
+            <p className="text-gray-600 mt-1">
+              {t("welcome_to_your_comprehensive_content_management_system")}
+            </p>
           </div>
           <div className="text-sm text-gray-500">
             {t("last_updated")}: {new Date().toLocaleString()}
@@ -210,12 +218,23 @@ const AdminOverviewPage: React.FC = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statCards.map((stat, index) => (
-          <div key={index} className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+          <div
+            key={index}
+            className="bg-white border border-gray-200 rounded-xl shadow-sm p-6"
+          >
             <div className="flex items-center justify-between">
-    <div>
-                <p className="text-sm font-medium text-gray-600">{stat.title}</p>
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  {stat.title}
+                </p>
                 <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                <p className={`text-sm ${stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'}`}>
+                <p
+                  className={`text-sm ${
+                    stat.changeType === "positive"
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
+                >
                   {stat.change} {t("from_last_month")}
                 </p>
               </div>
@@ -229,7 +248,9 @@ const AdminOverviewPage: React.FC = () => {
 
       {/* Quick Actions */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t("quick_actions")}</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          {t("quick_actions")}
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <button className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <DocumentTextIcon className="h-5 w-5 text-blue-600 mr-3" />
@@ -252,20 +273,37 @@ const AdminOverviewPage: React.FC = () => {
 
       {/* Recent Activity */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t("recent_activity")}</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          {t("recent_activity")}
+        </h2>
         <div className="space-y-3">
           {stats.recentActivity.length > 0 ? (
             stats.recentActivity.map((activity) => (
-              <div key={activity.id} className="flex items-center p-3 bg-gray-50 rounded-lg">
+              <div
+                key={activity.id}
+                className="flex items-center p-3 bg-gray-50 rounded-lg"
+              >
                 <div className="flex-shrink-0">
-                  {activity.type === 'page' && <DocumentTextIcon className="h-5 w-5 text-blue-600" />}
-                  {activity.type === 'media' && <PhotoIcon className="h-5 w-5 text-purple-600" />}
-                  {activity.type === 'blog' && <GlobeAltIcon className="h-5 w-5 text-indigo-600" />}
-                  {activity.type === 'user' && <UserGroupIcon className="h-5 w-5 text-green-600" />}
+                  {activity.type === "page" && (
+                    <DocumentTextIcon className="h-5 w-5 text-blue-600" />
+                  )}
+                  {activity.type === "media" && (
+                    <PhotoIcon className="h-5 w-5 text-purple-600" />
+                  )}
+                  {activity.type === "blog" && (
+                    <GlobeAltIcon className="h-5 w-5 text-indigo-600" />
+                  )}
+                  {activity.type === "user" && (
+                    <UserGroupIcon className="h-5 w-5 text-green-600" />
+                  )}
                 </div>
                 <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium text-gray-900">{activity.description}</p>
-                  <p className="text-xs text-gray-500">{new Date(activity.timestamp).toLocaleString()}</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {activity.description}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {new Date(activity.timestamp).toLocaleString()}
+                  </p>
                 </div>
               </div>
             ))
@@ -280,19 +318,25 @@ const AdminOverviewPage: React.FC = () => {
 
       {/* System Status */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t("system_status")}</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          {t("system_status")}
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="flex items-center p-3 bg-green-50 rounded-lg">
             <CheckCircleIcon className="h-5 w-5 text-green-600 mr-3" />
             <div>
-              <p className="text-sm font-medium text-green-900">{t("database")}</p>
+              <p className="text-sm font-medium text-green-900">
+                {t("database")}
+              </p>
               <p className="text-xs text-green-700">Online</p>
             </div>
           </div>
           <div className="flex items-center p-3 bg-green-50 rounded-lg">
             <CheckCircleIcon className="h-5 w-5 text-green-600 mr-3" />
             <div>
-              <p className="text-sm font-medium text-green-900">{t("storage")}</p>
+              <p className="text-sm font-medium text-green-900">
+                {t("storage")}
+              </p>
               <p className="text-xs text-green-700">Online</p>
             </div>
           </div>

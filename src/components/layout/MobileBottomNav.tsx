@@ -5,7 +5,6 @@ import {
   EllipsisHorizontalIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { useTranslation } from "react-i18next";
 
 interface MobileBottomNavProps {
   activeTab: string;
@@ -30,21 +29,20 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   showUserProfile,
   showSettings = true
 }) => {
-  const { t } = useTranslation();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const [showOverflowMenu, setShowOverflowMenu] = useState(false);
 
-  const handleLogout = async () => {
-    const confirmed = window.confirm("Are you sure you want to logout?");
-    if (!confirmed) return;
+  // const handleLogout = async () => {
+  //   const confirmed = window.confirm("Are you sure you want to logout?");
+  //   if (!confirmed) return;
 
-    try {
-      await signOut();
-      window.location.href = "/login";
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
-  };
+  //   try {
+  //     await signOut();
+  //     window.location.href = "/login";
+  //   } catch (error) {
+  //     console.error("Logout error:", error);
+  //   }
+  // };
 
   const mainNavItems = sidebarItems.filter(item =>
     item.id !== "settings" && item.id !== "profile"

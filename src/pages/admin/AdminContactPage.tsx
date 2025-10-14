@@ -8,7 +8,6 @@ import {
   BuildingOfficeIcon,
   ClockIcon,
   EyeIcon,
-  TrashIcon,
 } from '@heroicons/react/24/outline';
 
 const AdminContactPage: React.FC = () => {

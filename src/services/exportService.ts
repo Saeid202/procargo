@@ -36,9 +36,12 @@ export interface CreateExportRequestData {
 }
 
 export class ExportService {
-  static async createExportRequest(userId: string, data: CreateExportRequestData): Promise<{ export: ExportRequest | null; error?: string }> {
+  static async createExportRequest(
+    userId: string,
+    data: CreateExportRequestData
+  ): Promise<{ export: ExportRequest | null; error?: string }> {
     try {
-        const { data: exportRequest, error } = await supabase
+      const { data: exportRequest, error } = await supabase
         .from("export_requests")
         .insert({
           user_id: userId,
@@ -59,8 +62,11 @@ export class ExportService {
 
       return { export: exportRequest };
     } catch (error) {
-        console.error("Error creating export request:", error);
-        return { export: null, error: error instanceof Error ? error.message : "Unknown error" };
+      console.error("Error creating export request:", error);
+      return {
+        export: null,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
     }
   }
 
@@ -71,8 +77,10 @@ export class ExportService {
   ): Promise<{ fileRecord: ExportRequestFile | null; error?: string }> {
     try {
       // Upload to Supabase Storage
-      const filePath = `${userId}/${exportRequestId}/${Date.now()}_${file.name}`;
-      const { data: storageData, error: storageError } = await supabase.storage
+      const filePath = `${userId}/${exportRequestId}/${Date.now()}_${
+        file.name
+      }`;
+      const { error: storageError } = await supabase.storage
         .from("export_files")
         .upload(filePath, file);
 
@@ -103,7 +111,10 @@ export class ExportService {
       return { fileRecord };
     } catch (err) {
       console.error("Unexpected error uploading file:", err);
-      return { fileRecord: null, error: err instanceof Error ? err.message : "Unknown error" };
+      return {
+        fileRecord: null,
+        error: err instanceof Error ? err.message : "Unknown error",
+      };
     }
   }
 
@@ -119,13 +130,19 @@ export class ExportService {
 
       if (error) {
         console.error("Error fetching export requests:", error);
-        return { exports: [], error: `Failed to fetch exports: ${error.message}` };
+        return {
+          exports: [],
+          error: `Failed to fetch exports: ${error.message}`,
+        };
       }
 
       return { exports: data || [] };
     } catch (error) {
       console.error("Error fetching export requests:", error);
-      return { exports: [], error: error instanceof Error ? error.message : "Unknown error" };
+      return {
+        exports: [],
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
     }
   }
 
@@ -148,13 +165,18 @@ export class ExportService {
       return { files: data || [] };
     } catch (error) {
       console.error("Error fetching export files:", error);
-      return { files: [], error: error instanceof Error ? error.message : "Unknown error" };
+      return {
+        files: [],
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
     }
   }
 
   static getFilePublicUrl(filePath: string): string | null {
     try {
-      const { data } = supabase.storage.from("export_files").getPublicUrl(filePath);
+      const { data } = supabase.storage
+        .from("export_files")
+        .getPublicUrl(filePath);
       return data?.publicUrl || null;
     } catch (error) {
       console.error("Error getting public URL:", error);

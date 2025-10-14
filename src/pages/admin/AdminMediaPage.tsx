@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
-import { ContentManagementService, MediaFile } from '../../services/contentManagementService';
-import { toast } from 'react-hot-toast';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  ContentManagementService,
+  MediaFile,
+} from "../../services/contentManagementService";
+import { toast } from "react-hot-toast";
 import {
   PlusIcon,
   TrashIcon,
@@ -10,26 +12,23 @@ import {
   DocumentIcon,
   CloudArrowUpIcon,
   MagnifyingGlassIcon,
-  FunnelIcon,
-  CalendarIcon,
-  UserIcon,
-  XCircleIcon
-} from '@heroicons/react/24/outline';
+  XCircleIcon,
+} from "@heroicons/react/24/outline";
 
 const AdminMediaPage: React.FC = () => {
-  const { t } = useTranslation();
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'image' | 'document'>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState<"all" | "image" | "document">(
+    "all"
+  );
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [uploadFormData, setUploadFormData] = useState({
-    altText: '',
-    caption: ''
+    altText: "",
+    caption: "",
   });
 
   useEffect(() => {
@@ -38,7 +37,8 @@ const AdminMediaPage: React.FC = () => {
 
   const loadMediaFiles = async () => {
     setLoading(true);
-    const { files: data, error } = await ContentManagementService.getMediaFiles();
+    const { files: data, error } =
+      await ContentManagementService.getMediaFiles();
     if (error) {
       toast.error(error);
     } else {
@@ -48,40 +48,47 @@ const AdminMediaPage: React.FC = () => {
   };
 
   const handleFileUpload = async (files: FileList) => {
-    setUploading(true);
-    const uploadPromises = Array.from(files).map(file => 
-      ContentManagementService.uploadMediaFile(file, 'current-user-id', uploadFormData.altText, uploadFormData.caption)
+    // setUploading(true);
+    const uploadPromises = Array.from(files).map((file) =>
+      ContentManagementService.uploadMediaFile(
+        file,
+        "current-user-id",
+        uploadFormData.altText,
+        uploadFormData.caption
+      )
     );
 
     try {
       const results = await Promise.all(uploadPromises);
-      const successfulUploads = results.filter(result => result.file);
-      const failedUploads = results.filter(result => result.error);
+      const successfulUploads = results.filter((result) => result.file);
+      const failedUploads = results.filter((result) => result.error);
 
       if (successfulUploads.length > 0) {
-        toast.success(`${successfulUploads.length} file(s) uploaded successfully`);
+        toast.success(
+          `${successfulUploads.length} file(s) uploaded successfully`
+        );
         loadMediaFiles();
         setShowUploadModal(false);
-        setUploadFormData({ altText: '', caption: '' });
+        setUploadFormData({ altText: "", caption: "" });
       }
 
       if (failedUploads.length > 0) {
-        failedUploads.forEach(result => toast.error(result.error || 'Upload failed'));
+        failedUploads.forEach((result) =>
+          toast.error(result.error || "Upload failed")
+        );
       }
     } catch (error) {
-      toast.error('Upload failed. Please try again.');
-    } finally {
-      setUploading(false);
+      toast.error("Upload failed. Please try again.");
     }
   };
 
   const handleDeleteFile = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this file?')) {
-      const { success, error } = await ContentManagementService.deleteMediaFile(id);
+    if (window.confirm("Are you sure you want to delete this file?")) {
+      const { error } = await ContentManagementService.deleteMediaFile(id);
       if (error) {
         toast.error(error);
       } else {
-        toast.success('File deleted successfully');
+        toast.success("File deleted successfully");
         loadMediaFiles();
       }
     }
@@ -89,55 +96,62 @@ const AdminMediaPage: React.FC = () => {
 
   const handleBulkDelete = async () => {
     if (selectedFiles.length === 0) return;
-    
-    if (window.confirm(`Are you sure you want to delete ${selectedFiles.length} file(s)?`)) {
-      const deletePromises = selectedFiles.map(id => ContentManagementService.deleteMediaFile(id));
-      
+
+    if (
+      window.confirm(
+        `Are you sure you want to delete ${selectedFiles.length} file(s)?`
+      )
+    ) {
+      const deletePromises = selectedFiles.map((id) =>
+        ContentManagementService.deleteMediaFile(id)
+      );
+
       try {
         await Promise.all(deletePromises);
         toast.success(`${selectedFiles.length} file(s) deleted successfully`);
         setSelectedFiles([]);
         loadMediaFiles();
       } catch (error) {
-        toast.error('Some files could not be deleted');
+        toast.error("Some files could not be deleted");
       }
     }
   };
 
   const handleSelectFile = (id: string) => {
-    setSelectedFiles(prev => 
-      prev.includes(id) 
-        ? prev.filter(fileId => fileId !== id)
-        : [...prev, id]
+    setSelectedFiles((prev) =>
+      prev.includes(id) ? prev.filter((fileId) => fileId !== id) : [...prev, id]
     );
   };
 
-  const handleSelectAll = () => {
-    if (selectedFiles.length === filteredFiles.length) {
-      setSelectedFiles([]);
-    } else {
-      setSelectedFiles(filteredFiles.map(file => file.id));
-    }
-  };
+  // const handleSelectAll = () => {
+  //   if (selectedFiles.length === filteredFiles.length) {
+  //     setSelectedFiles([]);
+  //   } else {
+  //     setSelectedFiles(filteredFiles.map(file => file.id));
+  //   }
+  // };
 
-  const filteredFiles = mediaFiles.filter(file => {
-    const matchesSearch = file.file_name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === 'all' || 
-                       (filterType === 'image' && file.file_type.startsWith('image/')) ||
-                       (filterType === 'document' && !file.file_type.startsWith('image/'));
+  const filteredFiles = mediaFiles.filter((file) => {
+    const matchesSearch = file.file_name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesType =
+      filterType === "all" ||
+      (filterType === "image" && file.file_type.startsWith("image/")) ||
+      (filterType === "document" && !file.file_type.startsWith("image/"));
     return matchesSearch && matchesType;
   });
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const getFileIcon = (fileType: string) => {
-    if (fileType.startsWith('image/')) {
+    if (fileType.startsWith("image/")) {
       return PhotoIcon;
     }
     return DocumentIcon;
@@ -158,7 +172,9 @@ const AdminMediaPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Media Library</h1>
-            <p className="text-gray-600 mt-1">Manage your website's media files</p>
+            <p className="text-gray-600 mt-1">
+              Manage your website's media files
+            </p>
           </div>
           <div className="flex space-x-3">
             <input
@@ -166,7 +182,9 @@ const AdminMediaPage: React.FC = () => {
               type="file"
               multiple
               accept="image/*,.pdf,.doc,.docx,.txt"
-              onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+              onChange={(e) =>
+                e.target.files && handleFileUpload(e.target.files)
+              }
               className="hidden"
             />
             <button
@@ -244,8 +262,12 @@ const AdminMediaPage: React.FC = () => {
         {mediaFiles.length === 0 ? (
           <div className="text-center py-12">
             <PhotoIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No media files</h3>
-            <p className="mt-1 text-sm text-gray-500">Upload your first media file to get started.</p>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">
+              No media files
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Upload your first media file to get started.
+            </p>
             <button
               onClick={() => fileInputRef.current?.click()}
               className="mt-4 bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
@@ -257,10 +279,13 @@ const AdminMediaPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
             {filteredFiles.map((file) => {
               const FileIcon = getFileIcon(file.file_type);
-              const isImage = file.file_type.startsWith('image/');
-              
+              const isImage = file.file_type.startsWith("image/");
+
               return (
-                <div key={file.id} className="relative group border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+                <div
+                  key={file.id}
+                  className="relative group border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                >
                   <div className="aspect-square bg-gray-100 flex items-center justify-center">
                     {isImage ? (
                       <img
@@ -272,7 +297,7 @@ const AdminMediaPage: React.FC = () => {
                       <FileIcon className="h-12 w-12 text-gray-400" />
                     )}
                   </div>
-                  
+
                   {/* Selection Checkbox */}
                   <div className="absolute top-2 left-2">
                     <input
@@ -287,7 +312,7 @@ const AdminMediaPage: React.FC = () => {
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => window.open(file.file_url, '_blank')}
+                        onClick={() => window.open(file.file_url, "_blank")}
                         className="p-2 bg-white rounded-full text-gray-700 hover:bg-gray-100 transition-colors"
                         title="View File"
                       >
@@ -305,7 +330,10 @@ const AdminMediaPage: React.FC = () => {
 
                   {/* File Info */}
                   <div className="p-3">
-                    <p className="text-sm font-medium text-gray-900 truncate" title={file.file_name}>
+                    <p
+                      className="text-sm font-medium text-gray-900 truncate"
+                      title={file.file_name}
+                    >
                       {file.file_name}
                     </p>
                     <p className="text-xs text-gray-500">
@@ -315,7 +343,10 @@ const AdminMediaPage: React.FC = () => {
                       {new Date(file.created_at).toLocaleDateString()}
                     </p>
                     {file.alt_text && (
-                      <p className="text-xs text-gray-600 mt-1 truncate" title={file.alt_text}>
+                      <p
+                        className="text-xs text-gray-600 mt-1 truncate"
+                        title={file.alt_text}
+                      >
                         Alt: {file.alt_text}
                       </p>
                     )}
@@ -333,7 +364,9 @@ const AdminMediaPage: React.FC = () => {
           <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Upload Media Files</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Upload Media Files
+                </h3>
                 <button
                   onClick={() => setShowUploadModal(false)}
                   className="text-gray-400 hover:text-gray-600"
@@ -344,32 +377,50 @@ const AdminMediaPage: React.FC = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Files</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Files
+                  </label>
                   <input
                     type="file"
                     multiple
                     accept="image/*,.pdf,.doc,.docx,.txt"
-                    onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+                    onChange={(e) =>
+                      e.target.files && handleFileUpload(e.target.files)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Alt Text (for images)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Alt Text (for images)
+                  </label>
                   <input
                     type="text"
                     value={uploadFormData.altText}
-                    onChange={(e) => setUploadFormData(prev => ({ ...prev, altText: e.target.value }))}
+                    onChange={(e) =>
+                      setUploadFormData((prev) => ({
+                        ...prev,
+                        altText: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                     placeholder="Describe the image for accessibility"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Caption</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Caption
+                  </label>
                   <textarea
                     value={uploadFormData.caption}
-                    onChange={(e) => setUploadFormData(prev => ({ ...prev, caption: e.target.value }))}
+                    onChange={(e) =>
+                      setUploadFormData((prev) => ({
+                        ...prev,
+                        caption: e.target.value,
+                      }))
+                    }
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                     placeholder="Optional caption for the file"

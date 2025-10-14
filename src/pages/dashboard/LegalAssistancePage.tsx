@@ -155,11 +155,10 @@ const LegalAssistancePage: React.FC = () => {
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [sessionId, setSessionId] = useState<string | undefined>();
+  const [_, setSessionId] = useState<string | undefined>();
   const [chatSessions, setChatSessions] = useState<LegalChatSession[]>([]);
   const [activeSession, setActiveSession] = useState<string | null>(null);
   const [showSessionSidebar, setShowSessionSidebar] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
 
   // Load chat sessions and history on component mount
   useEffect(() => {
@@ -199,13 +198,6 @@ const LegalAssistancePage: React.FC = () => {
     }
   }, [user]);
 
-  // Load messages when active session changes
-  useEffect(() => {
-    if (activeSession && user) {
-      loadChatHistory();
-    }
-  }, [activeSession, user]);
-
   const loadChatSessions = async () => {
     if (!user) return;
 
@@ -223,7 +215,6 @@ const LegalAssistancePage: React.FC = () => {
       console.error("Error loading chat sessions:", error);
     }
   };
-
   const loadChatHistory = async () => {
     if (!user || !activeSession) return;
 
@@ -282,6 +273,13 @@ const LegalAssistancePage: React.FC = () => {
       ]);
     }
   };
+
+  // Load messages when active session changes
+  useEffect(() => {
+    if (activeSession && user) {
+      loadChatHistory();
+    }
+  }, [activeSession, user, loadChatHistory]);
 
   const createNewSession = async () => {
     if (!user) return;
@@ -378,56 +376,6 @@ const LegalAssistancePage: React.FC = () => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
-    }
-  };
-
-  const testAPIManually = async () => {
-    console.log("=== MANUAL API TEST ===");
-    try {
-      const result = await LegalAIService.testAPIConnection();
-      console.log("Manual API test result:", result);
-      alert(
-        `API Test Result: ${result.success ? "SUCCESS" : "FAILED"}\n${
-          result.error || "No error"
-        }`
-      );
-    } catch (error) {
-      console.error("Manual API test error:", error);
-      alert(`API Test Error: ${error}`);
-    }
-  };
-
-  const testSimpleAPI = async () => {
-    console.log("=== SIMPLE API TEST ===");
-    try {
-      const result = await LegalAIService.testSimpleAPI();
-      console.log("Simple API test result:", result);
-      alert(
-        `Simple API Test: ${result.success ? "SUCCESS" : "FAILED"}\nResponse: ${
-          result.response || "No response"
-        }\nError: ${result.error || "No error"}`
-      );
-    } catch (error) {
-      console.error("Simple API test error:", error);
-      alert(`Simple API Test Error: ${error}`);
-    }
-  };
-
-  const testMinimalAPI = async () => {
-    console.log("=== MINIMAL API TEST ===");
-    try {
-      const result = await LegalAIService.testMinimalAPI();
-      console.log("Minimal API test result:", result);
-      alert(
-        `Minimal API Test: ${
-          result.success ? "SUCCESS" : "FAILED"
-        }\nResponse: ${result.response || "No response"}\nError: ${
-          result.error || "No error"
-        }`
-      );
-    } catch (error) {
-      console.error("Minimal API test error:", error);
-      alert(`Minimal API Test Error: ${error}`);
     }
   };
 

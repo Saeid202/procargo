@@ -184,7 +184,9 @@ const SignUpPage: React.FC = () => {
             {t("create_your_account")}
           </h1>
           <p className="text-gray-600">
-            {t("join_thousands_of_businesses_shipping_between_china_and_canada")}
+            {t(
+              "join_thousands_of_businesses_shipping_between_china_and_canada"
+            )}
           </p>
         </div>
 
@@ -283,7 +285,9 @@ const SignUpPage: React.FC = () => {
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-transparent transition-colors ${
                   errors.phone ? "border-red-300" : "border-gray-300"
                 }`}
-                placeholder={t("plus_one_five_five_five_one_two_three_four_five_six_seven")}
+                placeholder={t(
+                  "plus_one_five_five_five_one_two_three_four_five_six_seven"
+                )}
               />
               {errors.phone && (
                 <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
@@ -411,11 +415,11 @@ const SignUpPage: React.FC = () => {
                 <div className="ml-3 text-sm">
                   <label htmlFor="agreeToTerms" className="text-gray-700">
                     I agree to the{" "}
-                    <a href="#" className="text-cargo-600 hover:text-cargo-500">
+                    <a className="text-cargo-600 hover:text-cargo-500">
                       {t("terms_of_service")}
                     </a>{" "}
                     and{" "}
-                    <a href="#" className="text-cargo-600 hover:text-cargo-500">
+                    <a className="text-cargo-600 hover:text-cargo-500">
                       {t("privacy_policy")}
                     </a>{" "}
                     *

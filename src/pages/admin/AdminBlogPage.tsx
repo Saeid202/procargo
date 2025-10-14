@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { ContentManagementService, BlogPost } from '../../services/contentManagementService';
-import { toast } from 'react-hot-toast';
+import React, { useState, useEffect } from "react";
+import {
+  ContentManagementService,
+  BlogPost,
+} from "../../services/contentManagementService";
+import { toast } from "react-hot-toast";
 import {
   PlusIcon,
   PencilIcon,
@@ -10,30 +12,29 @@ import {
   GlobeAltIcon,
   CalendarIcon,
   UserIcon,
-  CheckCircleIcon,
   XCircleIcon,
   MagnifyingGlassIcon,
-  DocumentTextIcon
-} from '@heroicons/react/24/outline';
+} from "@heroicons/react/24/outline";
 
 const AdminBlogPage: React.FC = () => {
-  const { t } = useTranslation();
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'draft'>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState<
+    "all" | "published" | "draft"
+  >("all");
 
   const [formData, setFormData] = useState({
-    title: '',
-    slug: '',
-    content: '',
-    excerpt: '',
-    meta_title: '',
-    meta_description: '',
-    featured_image_url: '',
-    is_published: false
+    title: "",
+    slug: "",
+    content: "",
+    excerpt: "",
+    meta_title: "",
+    meta_description: "",
+    featured_image_url: "",
+    is_published: false,
   });
 
   useEffect(() => {
@@ -42,7 +43,8 @@ const AdminBlogPage: React.FC = () => {
 
   const loadBlogPosts = async () => {
     setLoading(true);
-    const { posts: data, error } = await ContentManagementService.getBlogPosts();
+    const { posts: data, error } =
+      await ContentManagementService.getBlogPosts();
     if (error) {
       toast.error(error);
     } else {
@@ -53,32 +55,35 @@ const AdminBlogPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       if (editingPost) {
-        const { success, error } = await ContentManagementService.updateBlogPost(editingPost.id, formData);
+        const { error } = await ContentManagementService.updateBlogPost(
+          editingPost.id,
+          formData
+        );
         if (error) {
           toast.error(error);
         } else {
-          toast.success('Blog post updated successfully');
+          toast.success("Blog post updated successfully");
           loadBlogPosts();
           handleCloseModal();
         }
       } else {
-        const { post, error } = await ContentManagementService.createBlogPost({
+        const { error } = await ContentManagementService.createBlogPost({
           ...formData,
-          author_id: 'current-user-id' // You'll need to get this from auth context
+          author_id: "current-user-id", // You'll need to get this from auth context
         });
         if (error) {
           toast.error(error);
         } else {
-          toast.success('Blog post created successfully');
+          toast.success("Blog post created successfully");
           loadBlogPosts();
           handleCloseModal();
         }
       }
     } catch (error) {
-      toast.error('An error occurred. Please try again.');
+      toast.error("An error occurred. Please try again.");
     }
   };
 
@@ -89,21 +94,21 @@ const AdminBlogPage: React.FC = () => {
       slug: post.slug,
       content: post.content,
       excerpt: post.excerpt,
-      meta_title: post.meta_title || '',
-      meta_description: post.meta_description || '',
-      featured_image_url: post.featured_image_url || '',
-      is_published: post.is_published
+      meta_title: post.meta_title || "",
+      meta_description: post.meta_description || "",
+      featured_image_url: post.featured_image_url || "",
+      is_published: post.is_published,
     });
     setShowModal(true);
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this blog post?')) {
-      const { success, error } = await ContentManagementService.deleteBlogPost(id);
+    if (window.confirm("Are you sure you want to delete this blog post?")) {
+      const { error } = await ContentManagementService.deleteBlogPost(id);
       if (error) {
         toast.error(error);
       } else {
-        toast.success('Blog post deleted successfully');
+        toast.success("Blog post deleted successfully");
         loadBlogPosts();
       }
     }
@@ -113,24 +118,26 @@ const AdminBlogPage: React.FC = () => {
     setShowModal(false);
     setEditingPost(null);
     setFormData({
-      title: '',
-      slug: '',
-      content: '',
-      excerpt: '',
-      meta_title: '',
-      meta_description: '',
-      featured_image_url: '',
-      is_published: false
+      title: "",
+      slug: "",
+      content: "",
+      excerpt: "",
+      meta_title: "",
+      meta_description: "",
+      featured_image_url: "",
+      is_published: false,
     });
   };
 
-  const filteredPosts = blogPosts.filter(post => {
-    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || 
-                         (filterStatus === 'published' && post.is_published) ||
-                         (filterStatus === 'draft' && !post.is_published);
+  const filteredPosts = blogPosts.filter((post) => {
+    const matchesSearch =
+      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      filterStatus === "all" ||
+      (filterStatus === "published" && post.is_published) ||
+      (filterStatus === "draft" && !post.is_published);
     return matchesSearch && matchesStatus;
   });
 
@@ -148,8 +155,12 @@ const AdminBlogPage: React.FC = () => {
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Blog Management</h1>
-            <p className="text-gray-600 mt-1">Create and manage your blog posts</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Blog Management
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Create and manage your blog posts
+            </p>
           </div>
           <button
             onClick={() => setShowModal(true)}
@@ -193,8 +204,12 @@ const AdminBlogPage: React.FC = () => {
         {blogPosts.length === 0 ? (
           <div className="text-center py-12">
             <GlobeAltIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No blog posts</h3>
-            <p className="mt-1 text-sm text-gray-500">Get started by creating your first blog post.</p>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">
+              No blog posts
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Get started by creating your first blog post.
+            </p>
             <button
               onClick={() => setShowModal(true)}
               className="mt-4 bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
@@ -248,12 +263,14 @@ const AdminBlogPage: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        post.is_published 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {post.is_published ? 'Published' : 'Draft'}
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          post.is_published
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {post.is_published ? "Published" : "Draft"}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -271,7 +288,9 @@ const AdminBlogPage: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
+                          onClick={() =>
+                            window.open(`/blog/${post.slug}`, "_blank")
+                          }
                           className="text-blue-600 hover:text-blue-900"
                           title="View Post"
                         >
@@ -308,7 +327,7 @@ const AdminBlogPage: React.FC = () => {
             <div className="mt-3">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  {editingPost ? 'Edit Blog Post' : 'Create New Blog Post'}
+                  {editingPost ? "Edit Blog Post" : "Create New Blog Post"}
                 </h3>
                 <button
                   onClick={handleCloseModal}
@@ -321,21 +340,35 @@ const AdminBlogPage: React.FC = () => {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Post Title</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Post Title
+                    </label>
                     <input
                       type="text"
                       value={formData.title}
-                      onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          title: e.target.value,
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Post Slug</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Post Slug
+                    </label>
                     <input
                       type="text"
                       value={formData.slug}
-                      onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          slug: e.target.value,
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                       placeholder="my-awesome-post"
                       required
@@ -344,10 +377,17 @@ const AdminBlogPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Excerpt</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Excerpt
+                  </label>
                   <textarea
                     value={formData.excerpt}
-                    onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        excerpt: e.target.value,
+                      }))
+                    }
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                     placeholder="Brief description of your post..."
@@ -356,10 +396,17 @@ const AdminBlogPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Post Content</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Post Content
+                  </label>
                   <textarea
                     value={formData.content}
-                    onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        content: e.target.value,
+                      }))
+                    }
                     rows={12}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                     placeholder="Write your blog post content here..."
@@ -369,30 +416,51 @@ const AdminBlogPage: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Meta Title</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Meta Title
+                    </label>
                     <input
                       type="text"
                       value={formData.meta_title}
-                      onChange={(e) => setFormData(prev => ({ ...prev, meta_title: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          meta_title: e.target.value,
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Featured Image URL</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Featured Image URL
+                    </label>
                     <input
                       type="url"
                       value={formData.featured_image_url}
-                      onChange={(e) => setFormData(prev => ({ ...prev, featured_image_url: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          featured_image_url: e.target.value,
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Meta Description</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Meta Description
+                  </label>
                   <textarea
                     value={formData.meta_description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, meta_description: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        meta_description: e.target.value,
+                      }))
+                    }
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                   />
@@ -403,10 +471,18 @@ const AdminBlogPage: React.FC = () => {
                     type="checkbox"
                     id="is_published"
                     checked={formData.is_published}
-                    onChange={(e) => setFormData(prev => ({ ...prev, is_published: e.target.checked }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        is_published: e.target.checked,
+                      }))
+                    }
                     className="h-4 w-4 text-cargo-600 focus:ring-cargo-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="is_published" className="ml-2 block text-sm text-gray-900">
+                  <label
+                    htmlFor="is_published"
+                    className="ml-2 block text-sm text-gray-900"
+                  >
                     Publish this post
                   </label>
                 </div>
@@ -423,7 +499,7 @@ const AdminBlogPage: React.FC = () => {
                     type="submit"
                     className="px-4 py-2 bg-cargo-600 hover:bg-cargo-700 text-white rounded-lg font-medium transition-colors"
                   >
-                    {editingPost ? 'Update Post' : 'Create Post'}
+                    {editingPost ? "Update Post" : "Create Post"}
                   </button>
                 </div>
               </form>

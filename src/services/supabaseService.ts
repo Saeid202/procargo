@@ -95,7 +95,7 @@ export class SupabaseService {
             email: profileData.email,
             //TODO: We should create this email account and confirm it for real agent.
             role:
-              profileData.email == "agent@procargo.com"
+              profileData.email === "agent@procargo.com"
                 ? RolesEnum.AGENT
                 : RolesEnum.USER,
           },

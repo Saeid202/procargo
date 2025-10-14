@@ -9,19 +9,13 @@ import {
   ChatBubbleLeftRightIcon,
   TruckIcon,
   CogIcon,
-  ArrowPathIcon,
-  QuestionMarkCircleIcon,
-  PhotoIcon,
-  PencilSquareIcon,
   ChevronRightIcon,
   ChevronDownIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
-  InformationCircleIcon,
   LightBulbIcon,
   CommandLineIcon,
   ShieldCheckIcon,
-  ClockIcon,
   StarIcon,
   AcademicCapIcon,
   RocketLaunchIcon
@@ -295,23 +289,23 @@ const AdminDocumentsPage: React.FC = () => {
     setSelectedSubsection(subsectionId);
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800 border-red-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'low': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
+  // const getPriorityColor = (priority: string) => {
+  //   switch (priority) {
+  //     case 'high': return 'bg-red-100 text-red-800 border-red-200';
+  //     case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+  //     case 'low': return 'bg-green-100 text-green-800 border-green-200';
+  //     default: return 'bg-gray-100 text-gray-800 border-gray-200';
+  //   }
+  // };
 
-  const getPriorityIcon = (priority: string) => {
-    switch (priority) {
-      case 'high': return ExclamationTriangleIcon;
-      case 'medium': return ClockIcon;
-      case 'low': return CheckCircleIcon;
-      default: return InformationCircleIcon;
-    }
-  };
+  // const getPriorityIcon = (priority: string) => {
+  //   switch (priority) {
+  //     case 'high': return ExclamationTriangleIcon;
+  //     case 'medium': return ClockIcon;
+  //     case 'low': return CheckCircleIcon;
+  //     default: return InformationCircleIcon;
+  //   }
+  // };
 
   return (
     <div className="space-y-6">
@@ -381,7 +375,7 @@ const AdminDocumentsPage: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('documentation_sections')}</h3>
             <div className="space-y-2">
               {filteredSections.map((section) => {
-                const PriorityIcon = getPriorityIcon(section.priority);
+                // const PriorityIcon = getPriorityIcon(section.priority);
                 const SectionIcon = section.icon;
                 const isExpanded = expandedSection === section.id;
                 

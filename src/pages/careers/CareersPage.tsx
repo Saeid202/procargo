@@ -11,20 +11,17 @@ import {
   StarIcon,
   AcademicCapIcon,
   ChartBarIcon,
-  ChevronDownIcon,
   ChevronUpIcon,
   CheckCircleIcon,
   MapPinIcon,
   PhoneIcon,
   EnvelopeIcon,
   DocumentTextIcon,
-  ArrowRightIcon,
-  PlayIcon,
+
   BuildingOfficeIcon,
   UsersIcon,
   GlobeAltIcon,
-  CogIcon,
-  SparklesIcon,
+
   HandRaisedIcon,
 } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
@@ -32,7 +29,6 @@ import Footer from '../../components/ui/Footer';
 
 const CareersPage = () => {
   const { t } = useTranslation();
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [selectedJob, setSelectedJob] = useState<number | null>(null);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
 

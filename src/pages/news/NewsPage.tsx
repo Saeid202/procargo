@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { 
-  NewspaperIcon,
   CalendarIcon,
   UserIcon,
   ClockIcon,
@@ -111,7 +109,7 @@ const NewsPage = () => {
   ];
 
   const featuredArticle = newsArticles.find(article => article.featured);
-  const regularArticles = newsArticles.filter(article => !article.featured);
+  // const regularArticles = newsArticles.filter(article => !article.featured);
 
   const handleBookmark = (articleId: number) => {
     setBookmarkedArticles(prev => 

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { 
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import {
   TruckIcon,
   PaperAirplaneIcon,
   ShieldCheckIcon,
@@ -10,16 +10,10 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   CheckCircleIcon,
-  DocumentTextIcon,
-  MapPinIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  ChartBarIcon,
   UserGroupIcon,
-  CogIcon,
-} from '@heroicons/react/24/outline';
-import { useTranslation } from 'react-i18next';
-import Footer from '../../components/ui/Footer';
+} from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
+import Footer from "../../components/ui/Footer";
 
 const ServicesPage = () => {
   const { t } = useTranslation();
@@ -30,65 +24,80 @@ const ServicesPage = () => {
       icon: TruckIcon,
       title: t("sea_freight"),
       description: t("sea_freight_desc"),
-      features: ["FCL & LCL Options", "Cost-Effective", "Large Shipments", "Global Coverage"]
+      features: [
+        "FCL & LCL Options",
+        "Cost-Effective",
+        "Large Shipments",
+        "Global Coverage",
+      ],
     },
     {
       icon: PaperAirplaneIcon,
       title: t("air_freight"),
       description: t("air_freight_desc"),
-      features: ["Express Delivery", "Time-Sensitive", "Urgent Shipments", "Fast Transit"]
+      features: [
+        "Express Delivery",
+        "Time-Sensitive",
+        "Urgent Shipments",
+        "Fast Transit",
+      ],
     },
     {
       icon: ShieldCheckIcon,
       title: t("customs_compliance"),
       description: t("customs_compliance_desc"),
-      features: ["Expert Clearance", "Compliance", "Documentation", "Border Crossing"]
-    }
+      features: [
+        "Expert Clearance",
+        "Compliance",
+        "Documentation",
+        "Border Crossing",
+      ],
+    },
   ];
 
   const features = [
     {
       icon: ClockIcon,
       title: t("fast_transit"),
-      description: t("fast_transit_desc")
+      description: t("fast_transit_desc"),
     },
     {
       icon: GlobeAltIcon,
       title: t("global_network"),
-      description: t("global_network_desc")
+      description: t("global_network_desc"),
     },
     {
       icon: CurrencyDollarIcon,
       title: t("competitive_pricing"),
-      description: t("competitive_pricing_desc")
-    }
+      description: t("competitive_pricing_desc"),
+    },
   ];
 
   const faqItems = [
     {
       question: t("what_services_do_you_offer"),
-      answer: t("what_services_answer")
+      answer: t("what_services_answer"),
     },
     {
       question: t("how_long_does_shipping_take"),
-      answer: t("how_long_answer")
+      answer: t("how_long_answer"),
     },
     {
       question: t("do_you_handle_customs_clearance"),
-      answer: t("customs_answer")
+      answer: t("customs_answer"),
     },
     {
       question: t("can_i_track_my_shipment"),
-      answer: t("tracking_answer")
+      answer: t("tracking_answer"),
     },
     {
       question: t("what_are_your_payment_terms"),
-      answer: t("payment_answer")
+      answer: t("payment_answer"),
     },
     {
       question: t("do_you_offer_insurance"),
-      answer: t("insurance_answer")
-    }
+      answer: t("insurance_answer"),
+    },
   ];
 
   return (
@@ -107,15 +116,25 @@ const ServicesPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {mainServices.map((service, index) => (
-              <div key={index} className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+              <div
+                key={index}
+                className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+              >
                 <div className="w-16 h-16 bg-cargo-100 rounded-lg flex items-center justify-center mb-6">
                   <service.icon className="w-8 h-8 text-cargo-600" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">{service.title}</h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">{service.description}</p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                  {service.title}
+                </h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  {service.description}
+                </p>
                 <ul className="space-y-2">
                   {service.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-center text-sm text-gray-600">
+                    <li
+                      key={featureIndex}
+                      className="flex items-center text-sm text-gray-600"
+                    >
                       <CheckCircleIcon className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
                       {feature}
                     </li>
@@ -145,8 +164,12 @@ const ServicesPage = () => {
                 <div className="w-16 h-16 bg-cargo-100 rounded-lg flex items-center justify-center mx-auto mb-6">
                   <feature.icon className="w-8 h-8 text-cargo-600" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>
@@ -170,29 +193,39 @@ const ServicesPage = () => {
               <div className="w-20 h-20 bg-cargo-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <TruckIcon className="w-10 h-10 text-cargo-600" />
               </div>
-              <div className="text-4xl font-bold text-cargo-600 mb-2">10,000+</div>
-              <div className="text-lg text-gray-600">{t("successful_shipments")}</div>
+              <div className="text-4xl font-bold text-cargo-600 mb-2">
+                10,000+
+              </div>
+              <div className="text-lg text-gray-600">
+                {t("successful_shipments")}
+              </div>
             </div>
             <div className="text-center">
               <div className="w-20 h-20 bg-cargo-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <ClockIcon className="w-10 h-10 text-cargo-600" />
               </div>
               <div className="text-4xl font-bold text-cargo-600 mb-2">98%</div>
-              <div className="text-lg text-gray-600">{t("on_time_delivery")}</div>
+              <div className="text-lg text-gray-600">
+                {t("on_time_delivery")}
+              </div>
             </div>
             <div className="text-center">
               <div className="w-20 h-20 bg-cargo-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <UserGroupIcon className="w-10 h-10 text-cargo-600" />
               </div>
               <div className="text-4xl font-bold text-cargo-600 mb-2">500+</div>
-              <div className="text-lg text-gray-600">{t("happy_customers")}</div>
+              <div className="text-lg text-gray-600">
+                {t("happy_customers")}
+              </div>
             </div>
             <div className="text-center">
               <div className="w-20 h-20 bg-cargo-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <GlobeAltIcon className="w-10 h-10 text-cargo-600" />
               </div>
               <div className="text-4xl font-bold text-cargo-600 mb-2">15+</div>
-              <div className="text-lg text-gray-600">{t("countries_served")}</div>
+              <div className="text-lg text-gray-600">
+                {t("countries_served")}
+              </div>
             </div>
           </div>
         </div>
@@ -231,19 +264,22 @@ const ServicesPage = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               {t("frequently_asked_questions")}
             </h2>
-            <p className="text-xl text-gray-600">
-              {t("faq_subtitle")}
-            </p>
+            <p className="text-xl text-gray-600">{t("faq_subtitle")}</p>
           </div>
 
           <div className="space-y-4">
             {faqItems.map((item, index) => (
-              <div key={index} className="bg-white border border-gray-200 rounded-lg shadow-sm">
+              <div
+                key={index}
+                className="bg-white border border-gray-200 rounded-lg shadow-sm"
+              >
                 <button
                   className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}
                 >
-                  <span className="text-lg font-medium text-gray-900">{item.question}</span>
+                  <span className="text-lg font-medium text-gray-900">
+                    {item.question}
+                  </span>
                   {openFaq === index ? (
                     <ChevronUpIcon className="w-5 h-5 text-cargo-600" />
                   ) : (
@@ -252,7 +288,9 @@ const ServicesPage = () => {
                 </button>
                 {openFaq === index && (
                   <div className="px-6 pb-4">
-                    <p className="text-gray-600 leading-relaxed">{item.answer}</p>
+                    <p className="text-gray-600 leading-relaxed">
+                      {item.answer}
+                    </p>
                   </div>
                 )}
               </div>

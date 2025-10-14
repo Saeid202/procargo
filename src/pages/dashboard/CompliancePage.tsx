@@ -1,42 +1,35 @@
-import React, { useState } from 'react';
-import { 
+import React, { useState } from "react";
+import {
   ShieldCheckIcon,
   DocumentTextIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  PlusIcon,
   InformationCircleIcon,
   PhotoIcon,
-  GlobeAltIcon,
-  FlagIcon,
-  XMarkIcon
-} from '@heroicons/react/24/outline';
-import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../contexts/AuthContext';
-import { ImageUploadService } from '../../services/imageUploadService';
-import { GPTService } from '../../services/gptService';
-import { ComplianceService } from '../../services/complianceService';
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "../../contexts/AuthContext";
+import { ImageUploadService } from "../../services/imageUploadService";
+import { ComplianceService } from "../../services/complianceService";
 
 const CompliancePage: React.FC = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('new-analysis');
+  const [activeTab, setActiveTab] = useState("new-analysis");
   const [formData, setFormData] = useState({
-    productName: '',
-    productCategory: '',
-    productDescription: '',
-    originCountry: '',
-    destinationCountry: '',
-    productImage: undefined as File | undefined
+    productName: "",
+    productCategory: "",
+    productDescription: "",
+    originCountry: "",
+    destinationCountry: "",
+    productImage: undefined as File | undefined,
   });
-  
+
   // New states for image handling
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [savedAnalysis, setSavedAnalysis] = useState<any>(null);
-  
+
   // States for Compliance Reports
   const [userAnalyses, setUserAnalyses] = useState<any[]>([]);
   const [loadingAnalyses, setLoadingAnalyses] = useState(false);
@@ -46,17 +39,17 @@ const CompliancePage: React.FC = () => {
   // Load user analyses when Compliance Reports tab is active
   const loadUserAnalyses = async () => {
     if (!user) return;
-    
+
     setLoadingAnalyses(true);
     try {
       const result = await ComplianceService.getUserAnalyses(user.id);
       if (result.error) {
-        console.error('Failed to load analyses:', result.error);
+        console.error("Failed to load analyses:", result.error);
       } else {
         setUserAnalyses(result.analyses);
       }
     } catch (error) {
-      console.error('Error loading analyses:', error);
+      console.error("Error loading analyses:", error);
     } finally {
       setLoadingAnalyses(false);
     }
@@ -64,39 +57,39 @@ const CompliancePage: React.FC = () => {
 
   // Load analyses when Compliance Reports tab becomes active
   React.useEffect(() => {
-    if (activeTab === 'compliance-reports' && user) {
+    if (activeTab === "compliance-reports" && user) {
       loadUserAnalyses();
     }
-  }, [activeTab, user]);
+  }, [activeTab, user, loadUserAnalyses]);
 
   const productCategories = [
-    'Electronics',
-    'Textiles & Apparel',
-    'Machinery & Equipment',
-    'Chemicals',
-    'Food & Beverages',
-    'Automotive',
-    'Pharmaceuticals',
-    'Construction Materials',
-    'Agricultural Products',
-    'Other'
+    "Electronics",
+    "Textiles & Apparel",
+    "Machinery & Equipment",
+    "Chemicals",
+    "Food & Beverages",
+    "Automotive",
+    "Pharmaceuticals",
+    "Construction Materials",
+    "Agricultural Products",
+    "Other",
   ];
 
   const countries = [
-    'China',
-    'Canada',
-    'United States',
-    'Germany',
-    'Japan',
-    'United Kingdom',
-    'France',
-    'Australia',
-    'Brazil',
-    'India'
+    "China",
+    "Canada",
+    "United States",
+    "Germany",
+    "Japan",
+    "United Kingdom",
+    "France",
+    "Australia",
+    "Brazil",
+    "India",
   ];
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,16 +98,16 @@ const CompliancePage: React.FC = () => {
       // Validate image
       const validation = ImageUploadService.validateImage(file);
       if (!validation.isValid) {
-        setImageError(validation.error || 'Invalid image');
+        setImageError(validation.error || "Invalid image");
         return;
       }
 
       // Clear previous errors
       setImageError(null);
-      
+
       // Update form data
-      setFormData(prev => ({ ...prev, productImage: file }));
-      
+      setFormData((prev) => ({ ...prev, productImage: file }));
+
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -125,16 +118,16 @@ const CompliancePage: React.FC = () => {
   };
 
   const removeImage = () => {
-    setFormData(prev => ({ ...prev, productImage: undefined }));
+    setFormData((prev) => ({ ...prev, productImage: undefined }));
     setImagePreview(null);
     setImageError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) {
-      setImageError('Please log in to submit analysis');
+      setImageError("Please log in to submit analysis");
       return;
     }
 
@@ -145,7 +138,7 @@ const CompliancePage: React.FC = () => {
     try {
       // Use ComplianceService to handle the complete flow
       const result = await ComplianceService.createAnalysis(user.id, formData);
-      
+
       if (result.error) {
         setImageError(result.error);
         return;
@@ -161,18 +154,17 @@ const CompliancePage: React.FC = () => {
           documentation: result.analysis.documentation,
           estimatedProcessingTime: result.analysis.estimatedProcessingTime,
           confidence: result.analysis.confidence,
-          analysis: result.analysis.analysis
+          analysis: result.analysis.analysis,
         });
-        
+
         // Navigate to Compliance Reports tab after successful analysis
-        setActiveTab('compliance-reports');
+        setActiveTab("compliance-reports");
         // Refresh the analyses list
         loadUserAnalyses();
       }
-      
     } catch (error) {
-      console.error('Analysis failed:', error);
-      setImageError('Analysis failed. Please try again.');
+      console.error("Analysis failed:", error);
+      setImageError("Analysis failed. Please try again.");
     } finally {
       setIsUploading(false);
     }
@@ -180,12 +172,12 @@ const CompliancePage: React.FC = () => {
 
   const resetForm = () => {
     setFormData({
-      productName: '',
-      productCategory: '',
-      productDescription: '',
-      originCountry: '',
-      destinationCountry: '',
-      productImage: undefined
+      productName: "",
+      productCategory: "",
+      productDescription: "",
+      originCountry: "",
+      destinationCountry: "",
+      productImage: undefined,
     });
     setImagePreview(null);
     setImageError(null);
@@ -202,7 +194,9 @@ const CompliancePage: React.FC = () => {
             <InformationCircleIcon className="h-8 w-8 text-blue-600" />
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">{t("ai_analysis_information")}</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">
+              {t("ai_analysis_information")}
+            </h2>
             <p className="text-gray-700 text-lg leading-relaxed">
               {t("ai_analysis_information_description")}
             </p>
@@ -215,21 +209,21 @@ const CompliancePage: React.FC = () => {
         <div className="border-b border-gray-200">
           <nav className="flex space-x-8 px-6">
             <button
-              onClick={() => setActiveTab('new-analysis')}
+              onClick={() => setActiveTab("new-analysis")}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'new-analysis'
-                  ? 'border-cargo-500 text-cargo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                activeTab === "new-analysis"
+                  ? "border-cargo-500 text-cargo-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
               {t("new_analysis")}
             </button>
             <button
-              onClick={() => setActiveTab('compliance-reports')}
+              onClick={() => setActiveTab("compliance-reports")}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'compliance-reports'
-                  ? 'border-cargo-500 text-cargo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                activeTab === "compliance-reports"
+                  ? "border-cargo-500 text-cargo-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
               {t("compliance_reports")}
@@ -238,11 +232,15 @@ const CompliancePage: React.FC = () => {
         </div>
 
         <div className="p-6">
-          {activeTab === 'new-analysis' ? (
+          {activeTab === "new-analysis" ? (
             <div>
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("product_compliance_analysis")}</h3>
-                <p className="text-gray-600">{t("product_compliance_analysis_description")}</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {t("product_compliance_analysis")}
+                </h3>
+                <p className="text-gray-600">
+                  {t("product_compliance_analysis_description")}
+                </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -251,8 +249,10 @@ const CompliancePage: React.FC = () => {
                   <div className="space-y-6">
                     {/* Enhanced Product Image Upload */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">{t("product_image")}</label>
-                      
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t("product_image")}
+                      </label>
+
                       {!imagePreview ? (
                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-cargo-400 transition-colors">
                           <input
@@ -262,12 +262,17 @@ const CompliancePage: React.FC = () => {
                             className="hidden"
                             id="product-image"
                           />
-                          <label htmlFor="product-image" className="cursor-pointer">
+                          <label
+                            htmlFor="product-image"
+                            className="cursor-pointer"
+                          >
                             <PhotoIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                             <p className="text-sm text-gray-600">
                               {t("click_to_upload_or_drag_and_drop")}
                             </p>
-                            <p className="text-xs text-gray-500">JPG, PNG up to 10MB</p>
+                            <p className="text-xs text-gray-500">
+                              JPG, PNG up to 10MB
+                            </p>
                           </label>
                         </div>
                       ) : (
@@ -288,17 +293,23 @@ const CompliancePage: React.FC = () => {
                       )}
 
                       {imageError && (
-                        <p className="text-red-500 text-sm mt-2">{imageError}</p>
+                        <p className="text-red-500 text-sm mt-2">
+                          {imageError}
+                        </p>
                       )}
                     </div>
 
                     {/* Product Name */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">{t("product_name")}</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t("product_name")}
+                      </label>
                       <input
                         type="text"
                         value={formData.productName}
-                        onChange={(e) => handleInputChange('productName', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("productName", e.target.value)
+                        }
                         placeholder={t("product_name_placeholder")}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                       />
@@ -306,25 +317,38 @@ const CompliancePage: React.FC = () => {
 
                     {/* Product Category */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">{t("product_category")}</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t("product_category")}
+                      </label>
                       <select
                         value={formData.productCategory}
-                        onChange={(e) => handleInputChange('productCategory', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("productCategory", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                       >
                         <option value="">{t("select_category")}</option>
-                        {productCategories.map(category => (
-                          <option key={category} value={category}>{category}</option>
+                        {productCategories.map((category) => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
                         ))}
                       </select>
                     </div>
 
                     {/* Product Description */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">{t("product_description")}</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t("product_description")}
+                      </label>
                       <textarea
                         value={formData.productDescription}
-                        onChange={(e) => handleInputChange('productDescription', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "productDescription",
+                            e.target.value
+                          )
+                        }
                         rows={4}
                         placeholder={t("product_description_placeholder")}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
@@ -337,35 +361,50 @@ const CompliancePage: React.FC = () => {
                     {/* Country Selection */}
                     <div className="grid grid-cols-1 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">{t("country_of_origin")}</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {t("country_of_origin")}
+                        </label>
                         <select
                           value={formData.originCountry}
-                          onChange={(e) => handleInputChange('originCountry', e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange("originCountry", e.target.value)
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                         >
                           <option value="">{t("select_origin_country")}</option>
-                          {countries.map(country => (
-                            <option key={country} value={country}>{country}</option>
+                          {countries.map((country) => (
+                            <option key={country} value={country}>
+                              {country}
+                            </option>
                           ))}
                         </select>
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">{t("destination_country")}</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {t("destination_country")}
+                        </label>
                         <select
                           value={formData.destinationCountry}
-                          onChange={(e) => handleInputChange('destinationCountry', e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange(
+                              "destinationCountry",
+                              e.target.value
+                            )
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                         >
-                          <option value="">{t("select_destination_country")}</option>
-                          {countries.map(country => (
-                            <option key={country} value={country}>{country}</option>
+                          <option value="">
+                            {t("select_destination_country")}
+                          </option>
+                          {countries.map((country) => (
+                            <option key={country} value={country}>
+                              {country}
+                            </option>
                           ))}
                         </select>
                       </div>
                     </div>
-
-
                   </div>
                 </div>
 
@@ -395,7 +434,9 @@ const CompliancePage: React.FC = () => {
               {analysisResult && (
                 <div className="mt-8 bg-green-50 border border-green-200 rounded-lg p-6">
                   <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-lg font-semibold text-green-900">Analysis Results</h3>
+                    <h3 className="text-lg font-semibold text-green-900">
+                      Analysis Results
+                    </h3>
                     <button
                       onClick={resetForm}
                       className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
@@ -405,42 +446,67 @@ const CompliancePage: React.FC = () => {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <p><strong>HS Code:</strong> {analysisResult.hsCode}</p>
-                      <p><strong>Tariff Rate:</strong> {analysisResult.tariffRate}%</p>
-                      <p><strong>Confidence:</strong> {(analysisResult.confidence * 100).toFixed(1)}%</p>
+                      <p>
+                        <strong>HS Code:</strong> {analysisResult.hsCode}
+                      </p>
+                      <p>
+                        <strong>Tariff Rate:</strong>{" "}
+                        {analysisResult.tariffRate}%
+                      </p>
+                      <p>
+                        <strong>Confidence:</strong>{" "}
+                        {(analysisResult.confidence * 100).toFixed(1)}%
+                      </p>
                     </div>
                     <div>
-                      <p><strong>Processing Time:</strong> {analysisResult.estimatedProcessingTime}</p>
+                      <p>
+                        <strong>Processing Time:</strong>{" "}
+                        {analysisResult.estimatedProcessingTime}
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div className="mt-4">
-                    <h4 className="font-semibold text-green-900 mb-2">Requirements:</h4>
+                    <h4 className="font-semibold text-green-900 mb-2">
+                      Requirements:
+                    </h4>
                     <ul className="list-disc list-inside text-sm text-green-800">
-                      {analysisResult.requirements.map((req: string, index: number) => (
-                        <li key={index}>{req}</li>
-                      ))}
+                      {analysisResult.requirements.map(
+                        (req: string, index: number) => (
+                          <li key={index}>{req}</li>
+                        )
+                      )}
                     </ul>
                   </div>
 
                   <div className="mt-4">
-                    <h4 className="font-semibold text-green-900 mb-2">Required Documentation:</h4>
+                    <h4 className="font-semibold text-green-900 mb-2">
+                      Required Documentation:
+                    </h4>
                     <ul className="list-disc list-inside text-sm text-green-800">
-                      {analysisResult.documentation.map((doc: string, index: number) => (
-                        <li key={index}>{doc}</li>
-                      ))}
+                      {analysisResult.documentation.map(
+                        (doc: string, index: number) => (
+                          <li key={index}>{doc}</li>
+                        )
+                      )}
                     </ul>
                   </div>
 
                   <div className="mt-4">
-                    <h4 className="font-semibold text-green-900 mb-2">Analysis:</h4>
-                    <p className="text-sm text-green-800">{analysisResult.analysis}</p>
+                    <h4 className="font-semibold text-green-900 mb-2">
+                      Analysis:
+                    </h4>
+                    <p className="text-sm text-green-800">
+                      {analysisResult.analysis}
+                    </p>
                   </div>
 
                   {savedAnalysis && (
                     <div className="mt-4 p-3 bg-green-100 rounded-lg">
                       <p className="text-sm text-green-800">
-                        <strong>Analysis saved!</strong> Your compliance analysis has been stored and can be viewed in the Compliance Reports tab.
+                        <strong>Analysis saved!</strong> Your compliance
+                        analysis has been stored and can be viewed in the
+                        Compliance Reports tab.
                       </p>
                     </div>
                   )}
@@ -450,65 +516,96 @@ const CompliancePage: React.FC = () => {
           ) : (
             <div>
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("compliance_reports")}</h3>
-                <p className="text-gray-600">{t("compliance_reports_description")}</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {t("compliance_reports")}
+                </h3>
+                <p className="text-gray-600">
+                  {t("compliance_reports_description")}
+                </p>
               </div>
 
               {/* Compliance Reports List */}
               {loadingAnalyses ? (
                 <div className="text-center py-12">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cargo-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600">Loading your compliance reports...</p>
+                  <p className="text-gray-600">
+                    Loading your compliance reports...
+                  </p>
                 </div>
               ) : userAnalyses.length > 0 ? (
                 <div className="space-y-4">
                   {userAnalyses.map((analysis) => (
-                    <div key={analysis.id} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                    <div
+                      key={analysis.id}
+                      className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
+                    >
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <h4 className="text-lg font-semibold text-gray-900">{analysis.productName}</h4>
-                          <p className="text-sm text-gray-600">{analysis.productCategory} • {analysis.originCountry} → {analysis.destinationCountry}</p>
+                          <h4 className="text-lg font-semibold text-gray-900">
+                            {analysis.productName}
+                          </h4>
+                          <p className="text-sm text-gray-600">
+                            {analysis.productCategory} •{" "}
+                            {analysis.originCountry} →{" "}
+                            {analysis.destinationCountry}
+                          </p>
                           <p className="text-xs text-gray-500 mt-1">
-                            {new Date(analysis.createdAt).toLocaleDateString()} at {new Date(analysis.createdAt).toLocaleTimeString()}
+                            {new Date(analysis.createdAt).toLocaleDateString()}{" "}
+                            at{" "}
+                            {new Date(analysis.createdAt).toLocaleTimeString()}
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            analysis.status === 'completed' 
-                              ? 'bg-green-100 text-green-800' 
-                              : analysis.status === 'processing'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : analysis.status === 'failed'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              analysis.status === "completed"
+                                ? "bg-green-100 text-green-800"
+                                : analysis.status === "processing"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : analysis.status === "failed"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
                             {analysis.status}
                           </span>
                         </div>
                       </div>
 
-                      {analysis.status === 'completed' && (
+                      {analysis.status === "completed" && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                           <div className="bg-blue-50 p-3 rounded-lg">
-                            <p className="text-sm font-medium text-blue-900">HS Code</p>
-                            <p className="text-lg font-bold text-blue-700">{analysis.hsCode}</p>
+                            <p className="text-sm font-medium text-blue-900">
+                              HS Code
+                            </p>
+                            <p className="text-lg font-bold text-blue-700">
+                              {analysis.hsCode}
+                            </p>
                           </div>
                           <div className="bg-green-50 p-3 rounded-lg">
-                            <p className="text-sm font-medium text-green-900">Tariff Rate</p>
-                            <p className="text-lg font-bold text-green-700">{analysis.tariffRate}%</p>
+                            <p className="text-sm font-medium text-green-900">
+                              Tariff Rate
+                            </p>
+                            <p className="text-lg font-bold text-green-700">
+                              {analysis.tariffRate}%
+                            </p>
                           </div>
                           <div className="bg-purple-50 p-3 rounded-lg">
-                            <p className="text-sm font-medium text-purple-900">Confidence</p>
-                            <p className="text-lg font-bold text-purple-700">{(analysis.confidence * 100).toFixed(1)}%</p>
+                            <p className="text-sm font-medium text-purple-900">
+                              Confidence
+                            </p>
+                            <p className="text-lg font-bold text-purple-700">
+                              {(analysis.confidence * 100).toFixed(1)}%
+                            </p>
                           </div>
                         </div>
                       )}
 
                       {analysis.productImageUrl && (
                         <div className="mb-4">
-                          <img 
-                            src={analysis.productImageUrl} 
-                            alt="Product" 
+                          <img
+                            src={analysis.productImageUrl}
+                            alt="Product"
                             className="w-24 h-24 object-cover rounded-lg border border-gray-200"
                           />
                         </div>
@@ -524,11 +621,12 @@ const CompliancePage: React.FC = () => {
                               requirements: analysis.requirements,
                               restrictions: analysis.restrictions,
                               documentation: analysis.documentation,
-                              estimatedProcessingTime: analysis.estimatedProcessingTime,
+                              estimatedProcessingTime:
+                                analysis.estimatedProcessingTime,
                               confidence: analysis.confidence,
-                              analysis: analysis.analysis
+                              analysis: analysis.analysis,
                             });
-                            setActiveTab('new-analysis');
+                            setActiveTab("new-analysis");
                           }}
                           className="text-cargo-600 hover:text-cargo-700 font-medium text-sm"
                         >
@@ -537,8 +635,14 @@ const CompliancePage: React.FC = () => {
                         <button
                           onClick={() => {
                             // Delete analysis
-                            if (window.confirm('Are you sure you want to delete this analysis?')) {
-                              ComplianceService.deleteAnalysis(analysis.id).then(() => {
+                            if (
+                              window.confirm(
+                                "Are you sure you want to delete this analysis?"
+                              )
+                            ) {
+                              ComplianceService.deleteAnalysis(
+                                analysis.id
+                              ).then(() => {
                                 loadUserAnalyses(); // Reload the list
                               });
                             }
@@ -554,10 +658,16 @@ const CompliancePage: React.FC = () => {
               ) : (
                 <div className="text-center py-12">
                   <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">{t("no_reports_yet")}</h3>
-                  <p className="text-gray-500 mb-4">{t("start_your_first_compliance_analysis_to_generate_reports")}</p>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    {t("no_reports_yet")}
+                  </h3>
+                  <p className="text-gray-500 mb-4">
+                    {t(
+                      "start_your_first_compliance_analysis_to_generate_reports"
+                    )}
+                  </p>
                   <button
-                    onClick={() => setActiveTab('new-analysis')}
+                    onClick={() => setActiveTab("new-analysis")}
                     className="bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                   >
                     {t("start_new_analysis")}

@@ -3,15 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { CurrencyTransferRequest, CurrencyTransferService } from '../../services/currencyTransferService'
 import { 
   EyeIcon,
-  ClockIcon,
-  CheckCircleIcon,
   XMarkIcon,
   ArrowPathIcon,
   CurrencyDollarIcon
 } from '@heroicons/react/24/outline'
 
 const AdminCurrencyTransferPage: React.FC = () => {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(true)
   const [transfers, setTransfers] = useState<CurrencyTransferRequest[]>([])
   const [filterStatus, setFilterStatus] = useState<string>('all')

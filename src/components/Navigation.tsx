@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
-import Logo from './Logo';
-import LanguageDropdown from '../lib/i18n/LanguageDropdown';
-import { useTranslation } from 'react-i18next';
-import { useAuth } from '../contexts/AuthContext';
-import { RolesEnum } from '../abstractions/enums/roles.enum';
+import React, { useEffect, useState } from "react";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import Logo from "./Logo";
+import LanguageDropdown from "../lib/i18n/LanguageDropdown";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "../contexts/AuthContext";
 
 const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,13 +24,13 @@ const Navigation: React.FC = () => {
         document.documentElement.dir = "ltr";
       }
     }
-  }, [searchParams]);
+  }, [searchParams, i18n]);
 
   const navigation = [
-    { name: t('home'), href: '/' },
-    { name: t('services'), href: '/services' },
-    { name: t('about'), href: '/about' },
-    { name: t('contact'), href: '/contact' },
+    { name: t("home"), href: "/" },
+    { name: t("services"), href: "/services" },
+    { name: t("about"), href: "/about" },
+    { name: t("contact"), href: "/contact" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -43,7 +42,9 @@ const Navigation: React.FC = () => {
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
               <Logo />
-              <span className="ms-2 text-xl font-bold text-gray-900">CargoBridge</span>
+              <span className="ms-2 text-xl font-bold text-gray-900">
+                CargoBridge
+              </span>
             </Link>
           </div>
 
@@ -53,42 +54,41 @@ const Navigation: React.FC = () => {
               <a
                 key={item.name}
                 href={item.href}
-                className={`text-gray-700 hover:text-cargo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive(item.href) ? 'text-cargo-600' : ''
-                  }`}
+                className={`text-gray-700 hover:text-cargo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive(item.href) ? "text-cargo-600" : ""
+                }`}
               >
                 {item.name}
               </a>
             ))}
-            {
-              loading ? (<div className='w-[105px] h-1' ></div>) : (
-                user ? (
-                  <>
-                    {/* <Link
+            {loading ? (
+              <div className="w-[105px] h-1"></div>
+            ) : user ? (
+              <>
+                {/* <Link
                       to={`/dashboard/${user.role == RolesEnum.USER ? '' : user.role?.toLowerCase()}`}
                       className="bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
                     >
                       {t('dashboard')}
                     </Link> */}
-                    <div className='w-[105px] h-1'></div>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      to="/login"
-                      className="text-gray-700 hover:text-cargo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                    >
-                      {t('login')}
-                    </Link>
-                    <Link
-                      to="/signup"
-                      className="bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                    >
-                      {t('sign_up')}
-                    </Link>
-                  </>
-                )
-              )
-            }
+                <div className="w-[105px] h-1"></div>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="text-gray-700 hover:text-cargo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  {t("login")}
+                </Link>
+                <Link
+                  to="/signup"
+                  className="bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  {t("sign_up")}
+                </Link>
+              </>
+            )}
             <LanguageDropdown />
           </div>
 
@@ -117,47 +117,44 @@ const Navigation: React.FC = () => {
               <a
                 key={item.name}
                 href={item.href}
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive(item.href)
-                  ? 'text-cargo-600 bg-cargo-50'
-                  : 'text-gray-700 hover:text-cargo-600 hover:bg-gray-50'
-                  }`}
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  isActive(item.href)
+                    ? "text-cargo-600 bg-cargo-50"
+                    : "text-gray-700 hover:text-cargo-600 hover:bg-gray-50"
+                }`}
                 onClick={() => setIsOpen(false)}
               >
                 {item.name}
               </a>
             ))}
-            {
-              loading ? null : (
-                user ? (
-                  <>
-                    {/* <Link
+            {loading ? null : user ? (
+              <>
+                {/* <Link
                       to={`/dashboard/${user.role == RolesEnum.USER ? '' : user.role?.toLowerCase()}`}
                       className="block px-3 py-2 rounded-md text-base font-medium bg-cargo-600 text-white hover:bg-cargo-700 transition-colors"
                       onClick={() => setIsOpen(false)}
                     >
                       {t('dashboard')}
                     </Link> */}
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      to="/login"
-                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-cargo-600 hover:bg-gray-50 transition-colors"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      to="/signup"
-                      className="block px-3 py-2 rounded-md text-base font-medium bg-cargo-600 text-white hover:bg-cargo-700 transition-colors"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      Sign Up
-                    </Link>
-                  </>
-                )
-              )
-            }
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-cargo-600 hover:bg-gray-50 transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/signup"
+                  className="block px-3 py-2 rounded-md text-base font-medium bg-cargo-600 text-white hover:bg-cargo-700 transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
             <LanguageDropdown className="w-full !mt-4" />
           </div>
         </div>

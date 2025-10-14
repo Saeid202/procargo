@@ -199,7 +199,6 @@ const LoginPage: React.FC = () => {
               </div>
               <div className="text-sm">
                 <a
-                  href="#"
                   className="text-cargo-600 hover:text-cargo-500 font-medium"
                 >
                   {t("login_forgot_password")}

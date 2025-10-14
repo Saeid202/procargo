@@ -1,31 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { QuotationService, QuotationRequest } from '../../services/quotationService';
-import { supabase } from '../../lib/supabase';
-import { 
-  EyeIcon, 
-  PencilIcon, 
-  TrashIcon, 
-  CheckIcon, 
-  XMarkIcon,
-  ClockIcon,
-  CurrencyDollarIcon,
-  TruckIcon
-} from '@heroicons/react/24/outline';
-import { useTranslation } from 'react-i18next';
+import React, { useState, useEffect } from "react";
+import {
+  QuotationService,
+  QuotationRequest,
+} from "../../services/quotationService";
+import { supabase } from "../../lib/supabase";
+import { EyeIcon, XMarkIcon, TruckIcon } from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
 
 export default function AdminQuotationPage() {
-  const { user } = useAuth();
   const [quotations, setQuotations] = useState<QuotationRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedQuotation, setSelectedQuotation] = useState<QuotationRequest | null>(null);
+  const [selectedQuotation, setSelectedQuotation] =
+    useState<QuotationRequest | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [editingStatus, setEditingStatus] = useState(false);
   const [formData, setFormData] = useState({
-    status: 'pending' as QuotationRequest['status'],
-    agent_notes: '',
-    quoted_price: '',
-    estimated_delivery_days: ''
+    status: "pending" as QuotationRequest["status"],
+    agent_notes: "",
+    quoted_price: "",
+    estimated_delivery_days: "",
   });
 
   const { t } = useTranslation();
@@ -40,18 +32,18 @@ export default function AdminQuotationPage() {
       // For admin, we need to get all quotations
       // This would require a new method in QuotationService
       const { data, error } = await supabase
-        .from('quotation_requests')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from("quotation_requests")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) {
-        console.error('Error loading quotations:', error);
+        console.error("Error loading quotations:", error);
         return;
       }
 
       setQuotations(data || []);
     } catch (error) {
-      console.error('Error loading quotations:', error);
+      console.error("Error loading quotations:", error);
     } finally {
       setLoading(false);
     }
@@ -61,9 +53,10 @@ export default function AdminQuotationPage() {
     setSelectedQuotation(quotation);
     setFormData({
       status: quotation.status,
-      agent_notes: quotation.agent_notes || '',
-      quoted_price: quotation.quoted_price?.toString() || '',
-      estimated_delivery_days: quotation.estimated_delivery_days?.toString() || ''
+      agent_notes: quotation.agent_notes || "",
+      quoted_price: quotation.quoted_price?.toString() || "",
+      estimated_delivery_days:
+        quotation.estimated_delivery_days?.toString() || "",
     });
     setShowModal(true);
   };
@@ -75,8 +68,12 @@ export default function AdminQuotationPage() {
       const updateData = {
         status: formData.status,
         agent_notes: formData.agent_notes || undefined,
-        quoted_price: formData.quoted_price ? parseFloat(formData.quoted_price) : undefined,
-        estimated_delivery_days: formData.estimated_delivery_days ? parseInt(formData.estimated_delivery_days) : undefined
+        quoted_price: formData.quoted_price
+          ? parseFloat(formData.quoted_price)
+          : undefined,
+        estimated_delivery_days: formData.estimated_delivery_days
+          ? parseInt(formData.estimated_delivery_days)
+          : undefined,
       };
 
       const { success, error } = await QuotationService.updateQuotationStatus(
@@ -91,34 +88,40 @@ export default function AdminQuotationPage() {
         await loadQuotations();
         setShowModal(false);
         setSelectedQuotation(null);
-        alert('Quotation status updated successfully!');
+        alert("Quotation status updated successfully!");
       } else {
         alert(`Error updating quotation: ${error}`);
       }
     } catch (error) {
-      console.error('Error updating quotation:', error);
-      alert('Error updating quotation. Please try again.');
+      console.error("Error updating quotation:", error);
+      alert("Error updating quotation. Please try again.");
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'in_progress': return 'bg-blue-100 text-blue-800';
-      case 'quoted': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      case 'completed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "in_progress":
+        return "bg-blue-100 text-blue-800";
+      case "quoted":
+        return "bg-green-100 text-green-800";
+      case "rejected":
+        return "bg-red-100 text-red-800";
+      case "completed":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -136,8 +139,12 @@ export default function AdminQuotationPage() {
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t("quotation_management")}</h1>
-            <p className="text-gray-600 mt-1">{t("manage_customer_quotation_requests_and_provide_quotes")}</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {t("quotation_management")}
+            </h1>
+            <p className="text-gray-600 mt-1">
+              {t("manage_customer_quotation_requests_and_provide_quotes")}
+            </p>
           </div>
           <div className="text-sm text-gray-500">
             {t("total_requests")}: {quotations.length}
@@ -148,14 +155,20 @@ export default function AdminQuotationPage() {
       {/* Quotations List */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-lg font-semibold text-gray-900">{t("all_quotation_requests")}</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            {t("all_quotation_requests")}
+          </h2>
         </div>
-        
+
         {quotations.length === 0 ? (
           <div className="text-center py-12">
             <TruckIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">{t("no_quotation_requests")}</h3>
-            <p className="mt-1 text-sm text-gray-500">{t("no_quotation_requests_have_been_submitted_yet")}</p>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">
+              {t("no_quotation_requests")}
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {t("no_quotation_requests_have_been_submitted_yet")}
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -196,8 +209,12 @@ export default function AdminQuotationPage() {
                       {quotation.quantity}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(quotation.status)}`}>
-                        {quotation.status.replace('_', ' ').toUpperCase()}
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                          quotation.status
+                        )}`}
+                      >
+                        {quotation.status.replace("_", " ").toUpperCase()}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -241,60 +258,92 @@ export default function AdminQuotationPage() {
               <div className="mt-4 space-y-6">
                 {/* Product Information */}
                 <div>
-                  <h4 className="text-md font-semibold text-gray-900 mb-3">{t("product_information")}</h4>
+                  <h4 className="text-md font-semibold text-gray-900 mb-3">
+                    {t("product_information")}
+                  </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">{t("product_name")}</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedQuotation.product_name}</p>
+                      <label className="block text-sm font-medium text-gray-700">
+                        {t("product_name")}
+                      </label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {selectedQuotation.product_name}
+                      </p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">{t("quantity")}</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedQuotation.quantity}</p>
+                      <label className="block text-sm font-medium text-gray-700">
+                        {t("quantity")}
+                      </label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {selectedQuotation.quantity}
+                      </p>
                     </div>
                   </div>
                   <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700">{t("description")}</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedQuotation.description}</p>
+                    <label className="block text-sm font-medium text-gray-700">
+                      {t("description")}
+                    </label>
+                    <p className="mt-1 text-sm text-gray-900">
+                      {selectedQuotation.description}
+                    </p>
                   </div>
                 </div>
 
                 {/* Reference Links */}
-                {selectedQuotation.reference_links && selectedQuotation.reference_links.length > 0 && (
-                  <div>
-                    <h4 className="text-md font-semibold text-gray-900 mb-3">{t("reference_links")}</h4>
-                    <div className="space-y-2">
-
-                      {selectedQuotation.reference_links.map((link: string, index: number) => (
-                        <div key={index} className="flex items-center">
-                          <a
-                            href={link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-cargo-600 hover:text-cargo-800 text-sm truncate"
-                          >
-                            {link}
-                          </a>
-                        </div>
-                      ))}
+                {selectedQuotation.reference_links &&
+                  selectedQuotation.reference_links.length > 0 && (
+                    <div>
+                      <h4 className="text-md font-semibold text-gray-900 mb-3">
+                        {t("reference_links")}
+                      </h4>
+                      <div className="space-y-2">
+                        {selectedQuotation.reference_links.map(
+                          (link: string, index: number) => (
+                            <div key={index} className="flex items-center">
+                              <a
+                                href={link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-cargo-600 hover:text-cargo-800 text-sm truncate"
+                              >
+                                {link}
+                              </a>
+                            </div>
+                          )
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Needs Explanation */}
                 <div>
-                  <h4 className="text-md font-semibold text-gray-900 mb-3">{t("customer_needs")}</h4>
-                  <p className="text-sm text-gray-900">{selectedQuotation.explanation_of_needs}</p>
+                  <h4 className="text-md font-semibold text-gray-900 mb-3">
+                    {t("customer_needs")}
+                  </h4>
+                  <p className="text-sm text-gray-900">
+                    {selectedQuotation.explanation_of_needs}
+                  </p>
                 </div>
 
                 {/* Admin Actions */}
                 <div>
-                  <h4 className="text-md font-semibold text-gray-900 mb-3">{t("admin_actions")}</h4>
+                  <h4 className="text-md font-semibold text-gray-900 mb-3">
+                    {t("admin_actions")}
+                  </h4>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">{t("status")}</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t("status")}
+                      </label>
                       <select
                         value={formData.status}
-                        onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as QuotationRequest['status'] }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            status: e.target
+                              .value as QuotationRequest["status"],
+                          }))
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                       >
                         <option value="pending">{t("pending")}</option>
@@ -306,34 +355,57 @@ export default function AdminQuotationPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">{t("agent_notes")}</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t("agent_notes")}
+                      </label>
                       <textarea
                         value={formData.agent_notes}
-                        onChange={(e) => setFormData(prev => ({ ...prev, agent_notes: e.target.value }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            agent_notes: e.target.value,
+                          }))
+                        }
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
-                        placeholder={t("add_notes_about_this_quotation_request")}
+                        placeholder={t(
+                          "add_notes_about_this_quotation_request"
+                        )}
                       />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">{t("quoted_price")} (CAD)</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {t("quoted_price")} (CAD)
+                        </label>
                         <input
                           type="number"
                           step="0.01"
                           value={formData.quoted_price}
-                          onChange={(e) => setFormData(prev => ({ ...prev, quoted_price: e.target.value }))}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              quoted_price: e.target.value,
+                            }))
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                           placeholder="0.00"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">{t("estimated_delivery")} ({t("days")})</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {t("estimated_delivery")} ({t("days")})
+                        </label>
                         <input
                           type="number"
                           value={formData.estimated_delivery_days}
-                          onChange={(e) => setFormData(prev => ({ ...prev, estimated_delivery_days: e.target.value }))}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              estimated_delivery_days: e.target.value,
+                            }))
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
                           placeholder="0"
                         />

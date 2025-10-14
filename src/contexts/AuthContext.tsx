@@ -81,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               firstName: meta.first_name || "",
               lastName: meta.last_name || "",
               companyName: meta.company_name || "",
-              role: meta.role || 'USER',
+              role: meta.role || "USER",
             };
             setUser(userData);
             setSession({ user: userData });
@@ -94,7 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 company_name: meta.company_name || "",
                 email: currentSession.user.email || null,
               });
-            } catch { }
+            } catch {}
           }
         }
       } catch (error) {
@@ -165,7 +165,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.log("Starting real Supabase signup process...");
 
       // Create user with Supabase Auth and send email confirmation link
-      const { user, error: signUpError } = await SupabaseService.signUp(
+      const { error: signUpError } = await SupabaseService.signUp(
         email,
         password,
         {

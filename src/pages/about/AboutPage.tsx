@@ -5,11 +5,8 @@ import {
   GlobeAltIcon, 
   ShieldCheckIcon, 
   ClockIcon,
-  MapPinIcon,
   CurrencyDollarIcon,
   UserGroupIcon,
-  CheckCircleIcon,
-  StarIcon,
   BuildingOfficeIcon,
   HeartIcon,
   LightBulbIcon

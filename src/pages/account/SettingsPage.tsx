@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useTranslation } from 'react-i18next';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 interface ProfileData {
   firstName: string;
   lastName: string;
@@ -27,106 +27,104 @@ interface ProfileData {
 const SettingsPage: React.FC = () => {
   const { user, signOut } = useAuth();
   const [profileData, setProfileData] = useState<ProfileData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    companyName: '',
-    businessType: '',
-    companyDescription: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: '',
-    website: '',
-    linkedin: '',
-    twitter: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    companyName: "",
+    businessType: "",
+    companyDescription: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "",
+    website: "",
+    linkedin: "",
+    twitter: "",
     notifications: {
       email: true,
       sms: false,
-      push: true
-    }
+      push: true,
+    },
   });
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   const { t } = useTranslation();
 
-  // Load profile data from localStorage on component mount
-  useEffect(() => {
-    loadProfileData();
-  }, []);
-
   const loadProfileData = () => {
     try {
-      const savedProfile = localStorage.getItem('cargo_profile');
+      const savedProfile = localStorage.getItem("cargo_profile");
       if (savedProfile) {
         const parsedProfile = JSON.parse(savedProfile);
         setProfileData(parsedProfile);
-        console.log('👤 Loaded profile from localStorage:', parsedProfile);
+        console.log("👤 Loaded profile from localStorage:", parsedProfile);
       } else if (user) {
         // Set default values from user metadata
         const defaultProfile: ProfileData = {
           ...profileData,
-          firstName: user.firstName || '',
-          lastName: user.lastName || '',
-          email: user.email || '',
-          companyName: user.companyName || ''
+          firstName: user.firstName || "",
+          lastName: user.lastName || "",
+          email: user.email || "",
+          companyName: user.companyName || "",
         };
         setProfileData(defaultProfile);
       }
     } catch (error) {
-      console.error('❌ Error loading profile:', error);
+      console.error("❌ Error loading profile:", error);
     }
   };
+  // Load profile data from localStorage on component mount
+  useEffect(() => {
+    loadProfileData();
+  }, [loadProfileData]);
 
   const handleInputChange = (field: string, value: any) => {
-    if (field.includes('.')) {
-      const [parent, child] = field.split('.');
-      setProfileData(prev => {
+    if (field.includes(".")) {
+      const [parent, child] = field.split(".");
+      setProfileData((prev) => {
         const parentValue = prev[parent as keyof ProfileData];
-        if (typeof parentValue === 'object' && parentValue !== null) {
+        if (typeof parentValue === "object" && parentValue !== null) {
           return {
             ...prev,
             [parent]: {
               ...parentValue,
-              [child]: value
-            }
+              [child]: value,
+            },
           };
         }
         return prev;
       });
     } else {
-      setProfileData(prev => ({
+      setProfileData((prev) => ({
         ...prev,
-        [field]: value
+        [field]: value,
       }));
     }
   };
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setSaving(true);
-      setMessage('');
-      
+      setMessage("");
+
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Save to localStorage
-      localStorage.setItem('cargo_profile', JSON.stringify(profileData));
-      
-      setMessage('Profile updated successfully!');
-      console.log('✅ Profile saved to localStorage:', profileData);
-      
+      localStorage.setItem("cargo_profile", JSON.stringify(profileData));
+
+      setMessage("Profile updated successfully!");
+      console.log("✅ Profile saved to localStorage:", profileData);
+
       // Clear message after 3 seconds
-      setTimeout(() => setMessage(''), 3000);
-      
+      setTimeout(() => setMessage(""), 3000);
     } catch (error) {
-      console.error('❌ Error updating profile:', error);
-      setMessage('Error updating profile. Please try again.');
+      console.error("❌ Error updating profile:", error);
+      setMessage("Error updating profile. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -135,9 +133,9 @@ const SettingsPage: React.FC = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
-      console.log('✅ User signed out successfully');
+      console.log("✅ User signed out successfully");
     } catch (error) {
-      console.error('❌ Error signing out:', error);
+      console.error("❌ Error signing out:", error);
     }
   };
 
@@ -146,17 +144,23 @@ const SettingsPage: React.FC = () => {
       <div className="mb-3">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">خوش آمدید</h1>
         <p className="text-gray-700 leading-relaxed">
-          کاربر گرامی، با تکمیل پروفایل خود، هوش مصنوعی ما موقعیت‌های تجاری مرتبط با چین از جمله نمایشگاه‌های مرتبط با کار شما، فرصت‌های صادرات و واردات و موارد دیگر را به‌صورت هوشمندانه برای شما ارسال خواهد کرد. هر چقدر درباره تجارت خود بیشتر توضیح بدهید، ما بهتر می‌توانیم شما را راهنمایی کنیم.
+          کاربر گرامی، با تکمیل پروفایل خود، هوش مصنوعی ما موقعیت‌های تجاری
+          مرتبط با چین از جمله نمایشگاه‌های مرتبط با کار شما، فرصت‌های صادرات و
+          واردات و موارد دیگر را به‌صورت هوشمندانه برای شما ارسال خواهد کرد. هر
+          چقدر درباره تجارت خود بیشتر توضیح بدهید، ما بهتر می‌توانیم شما را
+          راهنمایی کنیم.
         </p>
       </div>
 
       {/* Success/Error Message */}
       {message && (
-        <div className={`mb-6 p-4 rounded-lg ${
-          message.includes('Error') 
-            ? 'bg-red-50 text-red-700 border border-red-200' 
-            : 'bg-green-50 text-green-700 border border-green-200'
-        }`}>
+        <div
+          className={`mb-6 p-4 rounded-lg ${
+            message.includes("Error")
+              ? "bg-red-50 text-red-700 border border-red-200"
+              : "bg-green-50 text-green-700 border border-green-200"
+          }`}
+        >
           {message}
         </div>
       )}
@@ -166,39 +170,45 @@ const SettingsPage: React.FC = () => {
         <form onSubmit={handleProfileUpdate} className="space-y-6">
           {/* Business Information (Restored) */}
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('business_information')}</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              {t("business_information")}
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('company_name')} *
+                  {t("company_name")} *
                 </label>
                 <input
                   type="text"
                   value={profileData.companyName}
-                  onChange={(e) => handleInputChange('companyName', e.target.value)}
-                  placeholder={t('company_name')}
+                  onChange={(e) =>
+                    handleInputChange("companyName", e.target.value)
+                  }
+                  placeholder={t("company_name")}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   required
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('business_type')}
+                  {t("business_type")}
                 </label>
                 <select
                   value={profileData.businessType}
-                  onChange={(e) => handleInputChange('businessType', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("businessType", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">{t('select_business_type')}</option>
-                  <option value="importer">{t('importer')}</option>
-                  <option value="exporter">{t('exporter')}</option>
-                  <option value="both">{t('both')}</option>
-                  <option value="logistics">{t('logistics_provider')}</option>
-                  <option value="manufacturer">{t('manufacturer')}</option>
-                  <option value="distributor">{t('distributor')}</option>
-                  <option value="other">{t('other')}</option>
+                  <option value="">{t("select_business_type")}</option>
+                  <option value="importer">{t("importer")}</option>
+                  <option value="exporter">{t("exporter")}</option>
+                  <option value="both">{t("both")}</option>
+                  <option value="logistics">{t("logistics_provider")}</option>
+                  <option value="manufacturer">{t("manufacturer")}</option>
+                  <option value="distributor">{t("distributor")}</option>
+                  <option value="other">{t("other")}</option>
                 </select>
               </div>
             </div>
@@ -206,86 +216,91 @@ const SettingsPage: React.FC = () => {
             {/* Company Description */}
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('description')}
+                {t("description")}
               </label>
               <textarea
-                value={profileData.companyDescription || ''}
-                onChange={(e) => handleInputChange('companyDescription', e.target.value)}
+                value={profileData.companyDescription || ""}
+                onChange={(e) =>
+                  handleInputChange("companyDescription", e.target.value)
+                }
                 rows={4}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder={t('additional_information')}
+                placeholder={t("additional_information")}
               />
             </div>
           </div>
-          
 
           {/* Address Information */}
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('address_information')}</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              {t("address_information")}
+            </h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('street_address')}
+                  {t("street_address")}
                 </label>
                 <input
                   type="text"
                   value={profileData.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                  placeholder={t('street_address')}
+                  onChange={(e) => handleInputChange("address", e.target.value)}
+                  placeholder={t("street_address")}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('city')}
+                    {t("city")}
                   </label>
                   <input
                     type="text"
                     value={profileData.city}
-                    onChange={(e) => handleInputChange('city', e.target.value)}
-                    placeholder={t('city')}
+                    onChange={(e) => handleInputChange("city", e.target.value)}
+                    placeholder={t("city")}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('state/province')}
+                    {t("state/province")}
                   </label>
                   <input
                     type="text"
                     value={profileData.state}
-                    onChange={(e) => handleInputChange('state', e.target.value)}
-                    placeholder={t('state/province')}
+                    onChange={(e) => handleInputChange("state", e.target.value)}
+                    placeholder={t("state/province")}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('zip/postal_code')}
+                    {t("zip/postal_code")}
                   </label>
                   <input
                     type="text"
                     value={profileData.zipCode}
-                    onChange={(e) => handleInputChange('zipCode', e.target.value)}
-                    placeholder={t('zip/postal_code')}
+                    onChange={(e) =>
+                      handleInputChange("zipCode", e.target.value)
+                    }
+                    placeholder={t("zip/postal_code")}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('country')}
+                  {t("country")}
                 </label>
                 <input
                   type="text"
                   value={profileData.country}
-                  onChange={(e) => handleInputChange('country', e.target.value)}
-                  placeholder={t('country')}
+                  onChange={(e) => handleInputChange("country", e.target.value)}
+                  placeholder={t("country")}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -294,29 +309,33 @@ const SettingsPage: React.FC = () => {
 
           {/* Social Media */}
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('social_media_and_website')}</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              {t("social_media_and_website")}
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('website')}
+                  {t("website")}
                 </label>
                 <input
                   type="url"
                   value={profileData.website}
-                  onChange={(e) => handleInputChange('website', e.target.value)}
+                  onChange={(e) => handleInputChange("website", e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="https://example.com"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('linkedin')}
+                  {t("linkedin")}
                 </label>
                 <input
                   type="url"
                   value={profileData.linkedin}
-                  onChange={(e) => handleInputChange('linkedin', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("linkedin", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="https://linkedin.com/in/username"
                 />
@@ -326,36 +345,50 @@ const SettingsPage: React.FC = () => {
 
           {/* Notifications */}
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('notification_preferences')}</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              {t("notification_preferences")}
+            </h3>
             <div className="space-y-3">
               <label className="flex items-center">
                 <input
                   type="checkbox"
                   checked={profileData.notifications.email}
-                  onChange={(e) => handleInputChange('notifications.email', e.target.checked)}
+                  onChange={(e) =>
+                    handleInputChange("notifications.email", e.target.checked)
+                  }
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <span className="ml-2 text-sm text-gray-700">{t('email_notifications')}</span>
+                <span className="ml-2 text-sm text-gray-700">
+                  {t("email_notifications")}
+                </span>
               </label>
-              
+
               <label className="flex items-center">
                 <input
                   type="checkbox"
                   checked={profileData.notifications.sms}
-                  onChange={(e) => handleInputChange('notifications.sms', e.target.checked)}
+                  onChange={(e) =>
+                    handleInputChange("notifications.sms", e.target.checked)
+                  }
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <span className="ml-2 text-sm text-gray-700">{t('sms_notifications')}</span>
+                <span className="ml-2 text-sm text-gray-700">
+                  {t("sms_notifications")}
+                </span>
               </label>
-              
+
               <label className="flex items-center">
                 <input
                   type="checkbox"
                   checked={profileData.notifications.push}
-                  onChange={(e) => handleInputChange('notifications.push', e.target.checked)}
+                  onChange={(e) =>
+                    handleInputChange("notifications.push", e.target.checked)
+                  }
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <span className="ml-2 text-sm text-gray-700">{t('push_notifications')}</span>
+                <span className="ml-2 text-sm text-gray-700">
+                  {t("push_notifications")}
+                </span>
               </label>
             </div>
           </div>
@@ -367,15 +400,15 @@ const SettingsPage: React.FC = () => {
               disabled={saving}
               className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
-              {saving ? t('saving') : t('save_changes')}
+              {saving ? t("saving") : t("save_changes")}
             </button>
-            
+
             <button
               type="button"
               onClick={handleSignOut}
               className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors"
             >
-              {t('sign_out')}
+              {t("sign_out")}
             </button>
           </div>
         </form>
