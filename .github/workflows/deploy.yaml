@@ -25,13 +25,11 @@ jobs:
         run: npm run build
 
       - name: 🚀 Deploy to CPanel via SSH
-        uses: cross-platform/ssh-deploy@v5
+        uses: easingthemes/ssh-deploy@v2
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-          source: 'build/'       
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          remote-host: ${{ secrets.SSH_HOST }}
+          remote-user: ${{ secrets.SSH_USERNAME }}
+          source: 'build/'
           target: ${{ secrets.REMOTE_PATH }}
-          
-          wipe: true
+          args: "-avz --delete"
