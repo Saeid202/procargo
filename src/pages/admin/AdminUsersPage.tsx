@@ -52,11 +52,11 @@ const AdminUsersPage: React.FC = () => {
   useEffect(() => {
     loadUsers();
     loadStats();
-  }, [loadUsers, loadStats]);
+  }, []);
 
   useEffect(() => {
     loadUsers();
-  }, [filters, loadUsers]);
+  }, [filters]);
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);

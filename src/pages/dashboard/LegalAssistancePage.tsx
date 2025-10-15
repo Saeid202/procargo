@@ -279,7 +279,7 @@ const LegalAssistancePage: React.FC = () => {
     if (activeSession && user) {
       loadChatHistory();
     }
-  }, [activeSession, user, loadChatHistory]);
+  }, [activeSession, user]);
 
   const createNewSession = async () => {
     if (!user) return;

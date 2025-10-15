@@ -60,7 +60,7 @@ const CompliancePage: React.FC = () => {
     if (activeTab === "compliance-reports" && user) {
       loadUserAnalyses();
     }
-  }, [activeTab, user, loadUserAnalyses]);
+  }, [activeTab, user]);
 
   const productCategories = [
     "Electronics",

@@ -78,7 +78,7 @@ const SettingsPage: React.FC = () => {
   // Load profile data from localStorage on component mount
   useEffect(() => {
     loadProfileData();
-  }, [loadProfileData]);
+  }, []);
 
   const handleInputChange = (field: string, value: any) => {
     if (field.includes(".")) {

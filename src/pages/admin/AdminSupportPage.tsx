@@ -74,7 +74,7 @@ const AdminSupportPage = () => {
   };
   useEffect(() => {
     fetchTickets();
-  }, [filters, fetchTickets]);
+  }, [filters]);
 
   const calculateStats = (ticketData: SupportTicket[]) => {
     setStats({

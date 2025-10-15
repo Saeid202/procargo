@@ -48,11 +48,11 @@ const TranslationManagementPage: React.FC = () => {
   useEffect(() => {
     loadTranslations();
     loadGroups();
-  }, [loadTranslations, loadGroups]);
+  }, []);
 
   useEffect(() => {
     loadTranslations();
-  }, [filters, loadTranslations]);
+  }, [filters]);
 
   const handleEditTranslation = (translation: Translation) => {
     setSelectedTranslation(translation);

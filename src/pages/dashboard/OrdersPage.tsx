@@ -148,7 +148,7 @@ const OrdersPage: React.FC = () => {
     if (user) {
       loadOrders();
     }
-  }, [user, loadOrders]);
+  }, [user]);
   const generateOrderNumber = () => {
     const date = new Date();
     const dateStr = date.toISOString().slice(0, 10).replace(/-/g, "");

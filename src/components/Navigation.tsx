@@ -24,7 +24,7 @@ const Navigation: React.FC = () => {
         document.documentElement.dir = "ltr";
       }
     }
-  }, [searchParams, i18n]);
+  }, [searchParams]);
 
   const navigation = [
     { name: t("home"), href: "/" },
