@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { SupabaseService } from "../../services/supabaseService";
-
+import { useTranslation } from "react-i18next";
+ 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
   const [message, setMessage] = useState("Verifying your email...");
   const [error, setError] = useState("");
-
+  const [searchParams] = useSearchParams();
+  const { i18n } = useTranslation();
+  const getLang = () => searchParams.get("language") || (i18n.language?.startsWith("fa") ? "fa" : "en");
+ 
   useEffect(() => {
     const handleCallback = async () => {
       try {
@@ -78,7 +82,7 @@ const AuthCallback: React.FC = () => {
         }
 
         setMessage("Email verified! Redirecting to dashboard...");
-        setTimeout(() => navigate("/dashboard"), 1500);
+        setTimeout(() => navigate(`/dashboard?language=${getLang()}`), 1500);
       } catch (err: any) {
         setError(err?.message || "Unexpected error during verification");
         setMessage("");
@@ -90,7 +94,7 @@ const AuthCallback: React.FC = () => {
 
   useEffect(() => {
     setTimeout(() => {
-      window.location.href = "/login";
+      window.location.href = `/login?language=${getLang()}`;
     }, 3000);
   }, []);
 

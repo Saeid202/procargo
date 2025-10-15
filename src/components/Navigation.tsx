@@ -14,17 +14,12 @@ const Navigation: React.FC = () => {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    if (!!searchParams.get("language")) {
-      i18n.changeLanguage(searchParams.get("language") || "en");
-      if (searchParams.get("language") === "fa") {
-        localStorage.setItem("i18nextLng", "fa");
-        document.documentElement.dir = "rtl";
-      } else {
-        localStorage.setItem("i18nextLng", "en");
-        document.documentElement.dir = "ltr";
-      }
+    const lang = searchParams.get("language");
+    if (lang) {
+      i18n.changeLanguage(lang);
+      document.documentElement.dir = lang.startsWith("fa") ? "rtl" : "ltr";
     }
-  }, [searchParams]);
+  }, [searchParams, i18n]);
 
   const navigation = [
     { name: t("home"), href: "/" },
@@ -33,6 +28,10 @@ const Navigation: React.FC = () => {
     { name: t("contact"), href: "/contact" },
   ];
 
+  // Ensure all navigation preserves current language in URL
+  const langParam = searchParams.get("language") || (i18n.language?.startsWith("fa") ? "fa" : "en");
+  const withLang = (href: string) => `${href}${href.includes("?") ? "&" : "?"}language=${langParam}`;
+
   const isActive = (path: string) => location.pathname === path;
 
   return (
@@ -40,7 +39,7 @@ const Navigation: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center">
+            <Link to={withLang("/")} className="flex-shrink-0 flex items-center">
               <Logo />
               <span className="ms-2 text-xl font-bold text-gray-900">
                 CargoBridge
@@ -51,15 +50,13 @@ const Navigation: React.FC = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navigation.map((item) => (
-              <a
+              <Link
                 key={item.name}
-                href={item.href}
-                className={`text-gray-700 hover:text-cargo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive(item.href) ? "text-cargo-600" : ""
-                }`}
+                to={withLang(item.href)}
+                className={`text-gray-700 hover:text-cargo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive(item.href) ? "text-cargo-600" : ""}`}
               >
                 {item.name}
-              </a>
+              </Link>
             ))}
             {loading ? (
               <div className="w-[105px] h-1"></div>
@@ -76,13 +73,13 @@ const Navigation: React.FC = () => {
             ) : (
               <>
                 <Link
-                  to="/login"
+                  to={withLang("/login")}
                   className="text-gray-700 hover:text-cargo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   {t("login")}
                 </Link>
                 <Link
-                  to="/signup"
+                  to={withLang("/signup")}
                   className="bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   {t("sign_up")}
@@ -114,18 +111,14 @@ const Navigation: React.FC = () => {
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
             {navigation.map((item) => (
-              <a
+              <Link
                 key={item.name}
-                href={item.href}
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive(item.href)
-                    ? "text-cargo-600 bg-cargo-50"
-                    : "text-gray-700 hover:text-cargo-600 hover:bg-gray-50"
-                }`}
+                to={withLang(item.href)}
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive(item.href) ? "text-cargo-600 bg-cargo-50" : "text-gray-700 hover:text-cargo-600 hover:bg-gray-50"}`}
                 onClick={() => setIsOpen(false)}
               >
                 {item.name}
-              </a>
+              </Link>
             ))}
             {loading ? null : user ? (
               <>
@@ -140,14 +133,14 @@ const Navigation: React.FC = () => {
             ) : (
               <>
                 <Link
-                  to="/login"
+                  to={withLang("/login")}
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-cargo-600 hover:bg-gray-50 transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
                   Login
                 </Link>
                 <Link
-                  to="/signup"
+                  to={withLang("/signup")}
                   className="block px-3 py-2 rounded-md text-base font-medium bg-cargo-600 text-white hover:bg-cargo-700 transition-colors"
                   onClick={() => setIsOpen(false)}
                 >

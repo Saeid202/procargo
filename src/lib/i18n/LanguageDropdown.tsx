@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { cn } from "../../utils/cn";
 
 interface IProps {
@@ -8,6 +9,7 @@ interface IProps {
 
 const LanguageDropdown: React.FC<IProps> = ({ className }) => {
   const { i18n } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     if (i18n.language === "fa") {
@@ -20,7 +22,13 @@ const LanguageDropdown: React.FC<IProps> = ({ className }) => {
   return (
     <select
       value={i18n.language}
-      onChange={(e) => i18n.changeLanguage(e.target.value)}
+      onChange={(e) => {
+        const lng = e.target.value;
+        i18n.changeLanguage(lng);
+        const params = new URLSearchParams(searchParams);
+        params.set("language", lng);
+        setSearchParams(params);
+      }}
       className={cn("p-2 border rounded outline-none bg-white",className)}
     >
       <option value="en">🇺🇸 English</option>

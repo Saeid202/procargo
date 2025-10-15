@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-
+import { useSearchParams } from "react-router-dom";
+ 
 interface IProps {
   className?: string;
 }
@@ -8,6 +9,7 @@ interface IProps {
 const FlagLanguageDropdown: React.FC<IProps> = ({ className }) => {
   const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const normalized = (lng: string) => (lng?.startsWith("fa") ? "fa" : "en");
   const current = normalized(i18n.language);
@@ -18,18 +20,12 @@ const FlagLanguageDropdown: React.FC<IProps> = ({ className }) => {
     fa: "🇮🇷",
   };
 
-  useEffect(() => {
-    if (current === "fa") {
-      document.documentElement.dir = "rtl";
-      localStorage.setItem("i18nextLng", "fa");
-    } else {
-      document.documentElement.dir = "ltr";
-      localStorage.setItem("i18nextLng", "en");
-    }
-  }, [current]);
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
+    const params = new URLSearchParams(searchParams);
+    params.set("language", lng);
+    setSearchParams(params);
     setOpen(false);
   };
 

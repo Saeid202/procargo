@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTranslation } from "react-i18next";
@@ -17,7 +17,10 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [searchParams] = useSearchParams();
+  const langParam = searchParams.get("language") || (i18n.language?.startsWith("fa") ? "fa" : "en");
+  const withLang = (href: string) => `${href}${href.includes("?") ? "&" : "?"}language=${langParam}`;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -81,8 +84,8 @@ const LoginPage: React.FC = () => {
           setErrors({ submit: error || "An error occurred during login" });
         }
       } else {
-        // Success! Redirect to dashboard
-        navigate("/dashboard");
+        // Success! Redirect to dashboard (preserve language)
+        navigate(withLang("/dashboard"));
       }
     } catch (error: any) {
       console.error("Login error:", error);
@@ -99,7 +102,7 @@ const LoginPage: React.FC = () => {
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center mb-6">
+          <Link to={withLang("/")} className="inline-flex items-center mb-6">
             <div className="w-10 h-10 bg-cargo-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-xl">C</span>
             </div>
@@ -287,7 +290,7 @@ const LoginPage: React.FC = () => {
             <p className="text-sm text-gray-600">
               {t("login_dont_have_account")}
               <Link
-                to="/signup"
+                to={withLang("/signup")}
                 className="text-cargo-600 hover:text-cargo-500 font-medium"
               >
                 {t("login_sign_up_here")}

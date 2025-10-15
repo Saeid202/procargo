@@ -18,6 +18,13 @@ i18n
       fa: { translation: fa },
     },
     fallbackLng: "en",
+    // Router-driven language: detect via querystring "?language=fa|en"
+    // Disable caches to avoid localStorage/cookie persistence
+    detection: {
+      order: ["querystring"],
+      lookupQuerystring: "language",
+      caches: [],
+    },
     interpolation: {
       escapeValue: false, // react already escapes
     },
@@ -29,10 +36,13 @@ i18n
 // Load dynamic translations when language changes
 i18n.on('languageChanged', (lng) => {
   dynamicLoader.loadLanguage(lng);
+  // Update document direction based on language
+  document.documentElement.dir = lng?.startsWith('fa') ? 'rtl' : 'ltr';
 });
 
-// Load initial language
+// Load initial language and set direction
 dynamicLoader.loadLanguage(i18n.language);
+document.documentElement.dir = i18n.language?.startsWith('fa') ? 'rtl' : 'ltr';
 
 export default i18n;
 export { dynamicLoader };
