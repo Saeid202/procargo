@@ -23,6 +23,8 @@ jobs:
 
       - name: ⚙️ Build React project
         run: yarn build
+        env:
+          PUBLIC_URL: .
 
       - name: 🚀 Deploy to cPanel via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
