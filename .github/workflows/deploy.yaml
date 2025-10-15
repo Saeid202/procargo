@@ -1,4 +1,4 @@
-name: Deploy Procargo
+name: Deploy Procargo 
 
 on:
   push:
