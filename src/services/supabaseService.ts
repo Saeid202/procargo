@@ -21,6 +21,7 @@ export interface AuthResponse {
 }
 
 export interface CaseData {
+  id?:string
   user_id: string;
   assigned_to: string | null;
   plaintiff_type: string;
@@ -551,6 +552,34 @@ export class SupabaseService {
       return { case: data, error: null };
     } catch (error: any) {
       return { case: null, error: error.message || "Failed to create case" };
+    }
+  }
+  static async createCaseResponse(
+    caseId: string,
+    lawyerId: string,
+    response: { response: string; price: number; delivery_date: string }
+  ) {
+    try {
+      const { data, error } = await supabase
+        .from("case_response")
+        .insert({
+          case_id: caseId,
+          lawyer_id: lawyerId,
+          response: response.response,
+          price: response.price,
+          delivery_date: response.delivery_date,
+        })
+        .select()
+        .single();
+      if (error) {
+        return { orderResponse: null, error: error.message };
+      }
+      return { orderResponse: data, error: null };
+    } catch (err: any) {
+      return {
+        orderResponse: null,
+        error: err.message || "Failed to create case response",
+      };
     }
   }
 

@@ -17,7 +17,7 @@ import CareersPage from "./pages/careers/CareersPage";
 import NewsPage from "./pages/news/NewsPage";
 import "./lib/i18n";
 import NotFound from "./pages/not-found/NotFound";
-import { ToastContainer } from "react-toastify";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
@@ -70,7 +70,7 @@ function App() {
 
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <ToastContainer />
+          <Toaster />
         </div>
       </Router>
     </AuthProvider>
