@@ -6,6 +6,7 @@ import Loading from "../../components/ui/Loading";
 import { SupabaseService } from "../../services/supabaseService";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTranslation } from "react-i18next";
+import toast from "react-hot-toast";
 
 export interface DocumentFiles {
   contract: File[];
@@ -99,6 +100,7 @@ const LegalIssuePage = () => {
       if (caseError) throw new Error(caseError);
 
       for (const contractFile of documnetFiles.contract) {
+        if (contractFile.size === 0) break;
         const { error: documentsError } =
           await SupabaseService.createCaseDocuments((savedCase as any)?.id, {
             case_id: (savedCase as any)?.id,
@@ -113,10 +115,12 @@ const LegalIssuePage = () => {
           );
         if (uploadedDocumentsError) {
           alert("Failed to upload contract file");
+          break;
         }
       }
 
       for (const performaFile of documnetFiles.proforma) {
+        if (performaFile.size === 0) break;
         const { error: documentsError } =
           await SupabaseService.createCaseDocuments((savedCase as any)?.id, {
             case_id: (savedCase as any)?.id,
@@ -131,10 +135,12 @@ const LegalIssuePage = () => {
           );
         if (uploadedDocumentsError) {
           alert("Failed to upload proforma file");
+          break;
         }
       }
 
       for (const receiptFile of documnetFiles.receipt) {
+        if (receiptFile.size === 0) break;
         const { error: documentsError } =
           await SupabaseService.createCaseDocuments((savedCase as any)?.id, {
             case_id: (savedCase as any)?.id,
@@ -149,10 +155,12 @@ const LegalIssuePage = () => {
           );
         if (uploadedDocumentsError) {
           alert("Failed to upload receipt file");
+          break;
         }
       }
 
       for (const shippingFile of documnetFiles.shipping) {
+        if (shippingFile.size === 0) break;
         const { error: documentsError } =
           await SupabaseService.createCaseDocuments((savedCase as any)?.id, {
             case_id: (savedCase as any)?.id,
@@ -167,10 +175,13 @@ const LegalIssuePage = () => {
           );
         if (uploadedDocumentsError) {
           alert("Failed to upload shipping file");
+          break;
         }
       }
 
       for (const otherFile of documnetFiles.other) {
+        if (otherFile.size === 0) break;
+
         const { error: documentsError } =
           await SupabaseService.createCaseDocuments((savedCase as any)?.id, {
             case_id: (savedCase as any)?.id,
@@ -185,7 +196,9 @@ const LegalIssuePage = () => {
           );
         if (uploadedDocumentsError) {
           alert("Failed to upload other file");
+          break;
         }
+        toast("Issues submitted successfully!");
       }
     } catch (error) {
       console.log(error);
