@@ -39,9 +39,15 @@ const AgentOrdersPage: React.FC = () => {
   const [exportRequests, setExportRequests] = useState<ExportRequest[]>([]);
   const [exportFilterStatus, setExportFilterStatus] = useState<string>("all");
   const [exportSearchTerm, setExportSearchTerm] = useState<string>("");
-  const [exportFilesMap, setExportFilesMap] = useState<Record<string, ExportRequestFile[]>>({});
-  const [exportStatusUpdate, setExportStatusUpdate] = useState<Record<string, NonNullable<ExportRequest["status"]>>>({});
-  const [exportAdminNotesUpdate, setExportAdminNotesUpdate] = useState<Record<string, string>>({});
+  const [exportFilesMap, setExportFilesMap] = useState<
+    Record<string, ExportRequestFile[]>
+  >({});
+  const [exportStatusUpdate, setExportStatusUpdate] = useState<
+    Record<string, NonNullable<ExportRequest["status"]>>
+  >({});
+  const [exportAdminNotesUpdate, setExportAdminNotesUpdate] = useState<
+    Record<string, string>
+  >({});
 
   // Currency transfers state
   const [currencyLoading, setCurrencyLoading] = useState<boolean>(false);
@@ -51,8 +57,12 @@ const AgentOrdersPage: React.FC = () => {
   const [currencyFilterStatus, setCurrencyFilterStatus] =
     useState<string>("all");
   const [currencySearchTerm, setCurrencySearchTerm] = useState<string>("");
-  const [selectedCurrencyTransfer, setSelectedCurrencyTransfer] =
-    useState<CurrencyTransferRequest | null>(null);
+  const [transferStatusUpdate, setTransferStatusUpdate] = useState<
+    Record<string, NonNullable<CurrencyTransferRequest["status"]>>
+  >({});
+  const [transferAdminNotesUpdate, setTransferAdminNotesUpdate] = useState<
+    Record<string, string>
+  >({});
 
   const { t } = useTranslation();
 
@@ -166,7 +176,9 @@ const AgentOrdersPage: React.FC = () => {
 
   const openExportDetails = async (req: ExportRequest) => {
     try {
-      const { files, error } = await ExportService.getExportRequestFiles(req.id);
+      const { files, error } = await ExportService.getExportRequestFiles(
+        req.id
+      );
       if (error) {
         console.error("Error loading files:", error);
         setExportFilesMap((prev) => ({ ...prev, [req.id]: [] }));
@@ -180,10 +192,17 @@ const AgentOrdersPage: React.FC = () => {
       setExportStatusUpdate((prev) =>
         prev[req.id]
           ? prev
-          : { ...prev, [req.id]: (req.status || "pending") as NonNullable<ExportRequest["status"]> }
+          : {
+              ...prev,
+              [req.id]: (req.status || "pending") as NonNullable<
+                ExportRequest["status"]
+              >,
+            }
       );
       setExportAdminNotesUpdate((prev) =>
-        prev[req.id] !== undefined ? prev : { ...prev, [req.id]: req.admin_notes || "" }
+        prev[req.id] !== undefined
+          ? prev
+          : { ...prev, [req.id]: req.admin_notes || "" }
       );
     }
   };
@@ -201,9 +220,15 @@ const AgentOrdersPage: React.FC = () => {
 
   const handleExportStatusSave = async (req: ExportRequest) => {
     try {
-      const newStatus = (exportStatusUpdate[req.id] || req.status || "pending") as NonNullable<ExportRequest["status"]>;
+      const newStatus = (exportStatusUpdate[req.id] ||
+        req.status ||
+        "pending") as NonNullable<ExportRequest["status"]>;
       const notes = exportAdminNotesUpdate[req.id] ?? req.admin_notes ?? "";
-      const { success, error } = await ExportService.updateExportStatus(req.id, newStatus, notes || undefined);
+      const { success, error } = await ExportService.updateExportStatus(
+        req.id,
+        newStatus,
+        notes || undefined
+      );
       if (success) {
         toast.success("Export status updated successfully");
         await loadExportRequests();
@@ -247,8 +272,56 @@ const AgentOrdersPage: React.FC = () => {
     });
   }, [currencyTransfers, currencyFilterStatus, currencySearchTerm]);
 
-  const openCurrencyDetails = (tr: CurrencyTransferRequest) => {
-    setSelectedCurrencyTransfer(tr);
+  const toggleCurrencyDetails = async (
+    rowId: string,
+    tr: CurrencyTransferRequest
+  ) => {
+    const el = document.getElementById(`${rowId}-details`);
+    if (el) {
+      const willOpen = el.classList.contains("hidden");
+      el.classList.toggle("hidden");
+      if (willOpen) {
+        setTransferStatusUpdate((prev) =>
+          prev[tr.id]
+            ? prev
+            : {
+                ...prev,
+                [tr.id]: (tr.status || "pending") as NonNullable<
+                  CurrencyTransferRequest["status"]
+                >,
+              }
+        );
+        setTransferAdminNotesUpdate((prev) =>
+          prev[tr.id] !== undefined
+            ? prev
+            : { ...prev, [tr.id]: tr.admin_notes || "" }
+        );
+      }
+    }
+  };
+
+  const handleTransferStatusSave = async (tr: CurrencyTransferRequest) => {
+    try {
+      const newStatus = (transferStatusUpdate[tr.id] ||
+        tr.status ||
+        "pending") as NonNullable<CurrencyTransferRequest["status"]>;
+      const notes = transferAdminNotesUpdate[tr.id] ?? tr.admin_notes ?? "";
+      const { success, error } =
+        await CurrencyTransferService.updateTransferStatus(
+          tr.id,
+          newStatus,
+          notes || undefined
+        );
+      if (success) {
+        toast.success("Currency transfer updated successfully");
+        await loadCurrencyTransfers();
+      } else {
+        toast.error(error || "Failed to update currency transfer");
+      }
+    } catch (e) {
+      console.error("Exception updating currency transfer:", e);
+      toast.error("Exception updating currency transfer");
+    }
   };
 
   const getCurrencyStatusBadge = (status?: string) => {
@@ -878,50 +951,97 @@ const AgentOrdersPage: React.FC = () => {
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {r.created_at ? new Date(r.created_at).toLocaleString() : "-"}
+                            {r.created_at
+                              ? new Date(r.created_at).toLocaleString()
+                              : "-"}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <button
-                              onClick={() => toggleExportDetails(`export${index}`, r)}
+                              onClick={() =>
+                                toggleExportDetails(`export${index}`, r)
+                              }
                               className="text-blue-600 hover:text-blue-900 mr-3"
                             >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M19 9l-7 7-7-7"
+                                />
                               </svg>
                             </button>
                           </td>
                         </tr>
-                        <tr id={`export${index}-details`} className="hidden bg-blue-50">
+                        <tr
+                          id={`export${index}-details`}
+                          className="hidden bg-blue-50"
+                        >
                           <td className="px-6 py-4" colSpan={5}>
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                               <div className="lg:col-span-2 space-y-4">
                                 <div className="bg-white rounded-lg p-4 border border-gray-200">
                                   <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
-                                    <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                    <svg
+                                      className="w-5 h-5 mr-2 text-blue-600"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                      />
                                     </svg>
                                     {t("product_information")}
                                   </h4>
                                   <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div>
-                                      <span className="font-medium">{t("company")}:</span> {r.company_name || "-"}
+                                      <span className="font-medium">
+                                        {t("company")}:
+                                      </span>{" "}
+                                      {r.company_name || "-"}
                                     </div>
                                     <div>
-                                      <span className="font-medium">{t("product")}:</span> {r.product_name || "-"}
+                                      <span className="font-medium">
+                                        {t("product")}:
+                                      </span>{" "}
+                                      {r.product_name || "-"}
                                     </div>
                                     <div>
-                                      <span className="font-medium">{t("status")}:</span> {r.status || "pending"}
+                                      <span className="font-medium">
+                                        {t("status")}:
+                                      </span>{" "}
+                                      {r.status || "pending"}
                                     </div>
                                     <div>
-                                      <span className="font-medium">{t("created_at")}:</span>{" "}
-                                      {r.created_at ? new Date(r.created_at).toLocaleString() : "-"}
+                                      <span className="font-medium">
+                                        {t("created_at")}:
+                                      </span>{" "}
+                                      {r.created_at
+                                        ? new Date(
+                                            r.created_at
+                                          ).toLocaleString()
+                                        : "-"}
                                     </div>
                                   </div>
                                 </div>
 
                                 <div className="bg-white rounded-lg p-4 border border-gray-200">
                                   <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
-                                    <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg
+                                      className="w-5 h-5 mr-2 text-purple-600"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
                                       <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
@@ -932,79 +1052,125 @@ const AgentOrdersPage: React.FC = () => {
                                     {t("attachments")}
                                   </h4>
                                   {(exportFilesMap[r.id] || []).length === 0 ? (
-                                    <div className="text-gray-500 text-sm">{t("no_files") || "No files"}</div>
+                                    <div className="text-gray-500 text-sm">
+                                      {t("no_files") || "No files"}
+                                    </div>
                                   ) : (
                                     <div className="flex gap-3 flex-wrap">
-                                      {(exportFilesMap[r.id] || []).map((file) => (
-                                        <a
-                                          key={file.id}
-                                          href={ExportService.getFilePublicUrl(file.file_path) || undefined}
-                                          target="_blank"
-                                          rel="noreferrer"
-                                          className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm"
-                                        >
-                                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path
-                                              fillRule="evenodd"
-                                              d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                                              clipRule="evenodd"
-                                            />
-                                          </svg>
-                                          {file.file_name}
-                                        </a>
-                                      ))}
+                                      {(exportFilesMap[r.id] || []).map(
+                                        (file) => (
+                                          <a
+                                            key={file.id}
+                                            href={
+                                              ExportService.getFilePublicUrl(
+                                                file.file_path
+                                              ) || undefined
+                                            }
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm"
+                                          >
+                                            <svg
+                                              className="w-4 h-4"
+                                              fill="currentColor"
+                                              viewBox="0 0 20 20"
+                                            >
+                                              <path
+                                                fillRule="evenodd"
+                                                d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                                                clipRule="evenodd"
+                                              />
+                                            </svg>
+                                            {file.file_name}
+                                          </a>
+                                        )
+                                      )}
                                     </div>
                                   )}
                                 </div>
 
                                 <div className="bg-white rounded-lg p-4 border border-gray-200">
-                                  <h4 className="font-semibold text-gray-800 mb-3">{t("description")}</h4>
-                                  <div className="text-gray-900 whitespace-pre-wrap">{r.product_description || "-"}</div>
+                                  <h4 className="font-semibold text-gray-800 mb-3">
+                                    {t("description")}
+                                  </h4>
+                                  <div className="text-gray-900 whitespace-pre-wrap">
+                                    {r.product_description || "-"}
+                                  </div>
                                 </div>
                               </div>
 
                               <div className="space-y-4">
                                 <div className="bg-white rounded-lg p-4 border border-gray-200">
-                                  <h4 className="font-semibold text-gray-800 mb-3">{t("current_status")}</h4>
+                                  <h4 className="font-semibold text-gray-800 mb-3">
+                                    {t("current_status")}
+                                  </h4>
                                   <div className="text-center">
                                     <span className="capitalize inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
                                       {r.status || "pending"}
                                     </span>
-                                    <p className="text-xs text-gray-600 mt-1">{t("waiting_for_response")}</p>
+                                    <p className="text-xs text-gray-600 mt-1">
+                                      {t("waiting_for_response")}
+                                    </p>
                                   </div>
                                 </div>
 
                                 <div className="bg-white rounded-lg p-4 border border-gray-200">
-                                  <h4 className="font-semibold text-gray-800 mb-3">{t("update_status")}</h4>
+                                  <h4 className="font-semibold text-gray-800 mb-3">
+                                    {t("update_status")}
+                                  </h4>
                                   <div className="space-y-3">
                                     <select
-                                      value={exportStatusUpdate[r.id] || (r.status || "pending")}
+                                      value={
+                                        exportStatusUpdate[r.id] ||
+                                        r.status ||
+                                        "pending"
+                                      }
                                       onChange={(e) =>
                                         setExportStatusUpdate((prev) => ({
                                           ...prev,
-                                          [r.id]: e.target.value as NonNullable<ExportRequest["status"]>,
+                                          [r.id]: e.target.value as NonNullable<
+                                            ExportRequest["status"]
+                                          >,
                                         }))
                                       }
                                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                                     >
-                                      <option value="pending">{t("pending")}</option>
-                                      <option value="in_review">{t("in_review")}</option>
-                                      <option value="processed">{t("processed")}</option>
-                                      <option value="rejected">{t("rejected")}</option>
+                                      <option value="pending">
+                                        {t("pending")}
+                                      </option>
+                                      <option value="in_review">
+                                        {t("in_review")}
+                                      </option>
+                                      <option value="processed">
+                                        {t("processed")}
+                                      </option>
+                                      <option value="rejected">
+                                        {t("rejected")}
+                                      </option>
                                     </select>
                                     <textarea
-                                      value={exportAdminNotesUpdate[r.id] ?? (r.admin_notes || "")}
+                                      value={
+                                        exportAdminNotesUpdate[r.id] ??
+                                        (r.admin_notes || "")
+                                      }
                                       onChange={(e) =>
-                                        setExportAdminNotesUpdate((prev) => ({ ...prev, [r.id]: e.target.value }))
+                                        setExportAdminNotesUpdate((prev) => ({
+                                          ...prev,
+                                          [r.id]: e.target.value,
+                                        }))
                                       }
                                       rows={3}
                                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                                      placeholder={t("admin_notes") || "Admin notes"}
+                                      placeholder={
+                                        t("admin_notes") || "Admin notes"
+                                      }
                                     />
                                     <div className="flex gap-2">
                                       <button
                                         type="button"
-                                        onClick={() => handleExportStatusSave(r)}
+                                        onClick={() =>
+                                          handleExportStatusSave(r)
+                                        }
                                         className="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 text-sm font-medium"
                                       >
                                         {t("save")}
@@ -1025,7 +1191,6 @@ const AgentOrdersPage: React.FC = () => {
           </div>
         </div>
       )}
-
 
       {/* Currency Transfer Section */}
       {activeTab === "currency" && (
@@ -1133,145 +1298,249 @@ const AgentOrdersPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredCurrencyTransfers.map((tr) => (
-                      <tr key={tr.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {tr.transfer_type || "-"}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {tr.amount?.toLocaleString()} {tr.to_currency}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {tr.from_currency} → {tr.to_currency}
-                        </td>
-                        <td
-                          className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 max-w-xs truncate"
-                          title={tr.purpose}
-                        >
-                          {tr.purpose}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {tr.beneficiary_name}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getCurrencyStatusBadge(
-                              tr.status
-                            )}`}
+                    {filteredCurrencyTransfers.map((tr, index) => (
+                      <>
+                        <tr key={tr.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {tr.transfer_type || "-"}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {tr.amount?.toLocaleString()} {tr.to_currency}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {tr.from_currency} → {tr.to_currency}
+                          </td>
+                          <td
+                            className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 max-w-xs truncate"
+                            title={tr.purpose}
                           >
-                            {tr.status}
-                          </span>
-                        </td>
-                        <td
-                          className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 max-w-xs truncate"
-                          title={tr.admin_notes || ""}
-                        >
-                          {tr.admin_notes || "-"}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {tr.created_at
-                            ? new Date(tr.created_at).toLocaleString()
-                            : "-"}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button
-                            onClick={() => openCurrencyDetails(tr)}
-                            className="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 bg-white hover:bg-gray-50"
+                            {tr.purpose}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {tr.beneficiary_name}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span
+                              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getCurrencyStatusBadge(
+                                tr.status
+                              )}`}
+                            >
+                              {tr.status}
+                            </span>
+                          </td>
+                          <td
+                            className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 max-w-xs truncate"
+                            title={tr.admin_notes || ""}
                           >
-                            <EyeIcon className="h-5 w-5 mr-1" />
-                            {t("view")}
-                          </button>
-                        </td>
-                      </tr>
+                            {tr.admin_notes || "-"}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {tr.created_at
+                              ? new Date(tr.created_at).toLocaleString()
+                              : "-"}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button
+                              onClick={() =>
+                                toggleCurrencyDetails(`currency${index}`, tr)
+                              }
+                              className="text-blue-600 hover:text-blue-900 mr-3"
+                            >
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M19 9l-7 7-7-7"
+                                />
+                              </svg>
+                            </button>
+                          </td>
+                        </tr>
+                        <tr
+                          id={`currency${index}-details`}
+                          className="hidden bg-blue-50"
+                        >
+                          <td className="px-6 py-4" colSpan={9}>
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                              <div className="lg:col-span-2 space-y-4">
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                  <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+                                    <svg
+                                      className="w-5 h-5 mr-2 text-blue-600"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                      />
+                                    </svg>
+                                    {t("currency_transfer")}
+                                  </h4>
+                                  <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                      <span className="font-medium">
+                                        {t("type")}:
+                                      </span>{" "}
+                                      {tr.transfer_type || "-"}
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">
+                                        {t("amount")}:
+                                      </span>{" "}
+                                      {tr.amount?.toLocaleString()}{" "}
+                                      {tr.to_currency}
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">
+                                        {t("currencies")}:
+                                      </span>{" "}
+                                      {tr.from_currency} → {tr.to_currency}
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">
+                                        {t("submitted")}:
+                                      </span>{" "}
+                                      {tr.created_at
+                                        ? new Date(
+                                            tr.created_at
+                                          ).toLocaleString()
+                                        : "-"}
+                                    </div>
+                                    <div className="col-span-2">
+                                      <span className="font-medium">
+                                        {t("purpose")}:
+                                      </span>{" "}
+                                      {tr.purpose}
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">
+                                        {t("beneficiary")}:
+                                      </span>{" "}
+                                      {tr.beneficiary_name}
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">
+                                        {t("bank")}:
+                                      </span>{" "}
+                                      {tr.beneficiary_bank}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                  <h4 className="font-semibold text-gray-800 mb-3">
+                                    {t("customer_request")}
+                                  </h4>
+                                  <div className="text-gray-900 whitespace-pre-wrap">
+                                    {tr.customer_request}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="space-y-4">
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                  <h4 className="font-semibold text-gray-800 mb-3">
+                                    {t("current_status")}
+                                  </h4>
+                                  <div className="text-center">
+                                    <span
+                                      className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getCurrencyStatusBadge(
+                                        tr.status
+                                      )}`}
+                                    >
+                                      {tr.status}
+                                    </span>
+                                    <p className="text-xs text-gray-600 mt-1">
+                                      {t("waiting_for_response")}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                  <h4 className="font-semibold text-gray-800 mb-3">
+                                    {t("update_status")}
+                                  </h4>
+                                  <div className="space-y-3">
+                                    <select
+                                      value={
+                                        transferStatusUpdate[tr.id] ||
+                                        tr.status ||
+                                        "pending"
+                                      }
+                                      onChange={(e) =>
+                                        setTransferStatusUpdate((prev) => ({
+                                          ...prev,
+                                          [tr.id]: e.target
+                                            .value as NonNullable<
+                                            CurrencyTransferRequest["status"]
+                                          >,
+                                        }))
+                                      }
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    >
+                                      <option value="pending">
+                                        {t("pending")}
+                                      </option>
+                                      <option value="in_review">
+                                        {t("in_review")}
+                                      </option>
+                                      <option value="processed">
+                                        {t("processed")}
+                                      </option>
+                                      <option value="rejected">
+                                        {t("rejected")}
+                                      </option>
+                                    </select>
+                                    <textarea
+                                      value={
+                                        transferAdminNotesUpdate[tr.id] ??
+                                        (tr.admin_notes || "")
+                                      }
+                                      onChange={(e) =>
+                                        setTransferAdminNotesUpdate((prev) => ({
+                                          ...prev,
+                                          [tr.id]: e.target.value,
+                                        }))
+                                      }
+                                      rows={3}
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                      placeholder={
+                                        t("admin_notes") || "Admin notes"
+                                      }
+                                    />
+                                    <div className="flex gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          handleTransferStatusSave(tr)
+                                        }
+                                        className="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 text-sm font-medium"
+                                      >
+                                        {t("save")}
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </>
                     ))}
                   </tbody>
                 </table>
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {selectedCurrencyTransfer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-xl shadow-xl border border-gray-200 w-full max-w-2xl">
-            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {t("request_details")}
-              </h3>
-              <button
-                onClick={() => setSelectedCurrencyTransfer(null)}
-                className="p-1 rounded-md hover:bg-gray-100"
-              >
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="px-6 py-4 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <div className="text-sm text-gray-500">{t("type")}</div>
-                  <div className="text-gray-900">
-                    {selectedCurrencyTransfer.transfer_type || "-"}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">{t("amount")}</div>
-                  <div className="text-gray-900">
-                    {selectedCurrencyTransfer.amount?.toLocaleString()}{" "}
-                    {selectedCurrencyTransfer.to_currency}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">{t("currencies")}</div>
-                  <div className="text-gray-900">
-                    {selectedCurrencyTransfer.from_currency} →{" "}
-                    {selectedCurrencyTransfer.to_currency}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">{t("purpose")}</div>
-                  <div className="text-gray-900">
-                    {selectedCurrencyTransfer.purpose}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <div className="text-sm text-gray-500">
-                    {t("beneficiary")}
-                  </div>
-                  <div className="text-gray-900">
-                    {selectedCurrencyTransfer.beneficiary_name}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">{t("bank")}</div>
-                  <div className="text-gray-900">
-                    {selectedCurrencyTransfer.beneficiary_bank}
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <div className="text-sm text-gray-500">
-                  {t("customer_request")}
-                </div>
-                <div className="text-gray-900 whitespace-pre-wrap">
-                  {selectedCurrencyTransfer.customer_request}
-                </div>
-              </div>
-            </div>
-
-            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-end">
-              <button
-                onClick={() => setSelectedCurrencyTransfer(null)}
-                className="px-4 py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50"
-              >
-                {t("close")}
-              </button>
-            </div>
           </div>
         </div>
       )}
