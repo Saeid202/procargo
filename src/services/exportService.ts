@@ -183,4 +183,35 @@ export class ExportService {
       return null;
     }
   }
+
+  static async updateExportStatus(
+    exportRequestId: string,
+    status: NonNullable<ExportRequest["status"]>,
+    adminNotes?: string
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const updateData: Record<string, any> = { status };
+      if (adminNotes !== undefined) {
+        updateData.admin_notes = adminNotes;
+      }
+
+      const { error } = await supabase
+        .from("export_requests")
+        .update(updateData)
+        .eq("id", exportRequestId);
+
+      if (error) {
+        console.error("Error updating export request status:", error);
+        return { success: false, error: `Failed to update export request: ${error.message}` };
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error("Error updating export request status:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
 }

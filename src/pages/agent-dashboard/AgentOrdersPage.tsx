@@ -39,10 +39,9 @@ const AgentOrdersPage: React.FC = () => {
   const [exportRequests, setExportRequests] = useState<ExportRequest[]>([]);
   const [exportFilterStatus, setExportFilterStatus] = useState<string>("all");
   const [exportSearchTerm, setExportSearchTerm] = useState<string>("");
-  const [selectedExport, setSelectedExport] = useState<ExportRequest | null>(
-    null
-  );
-  const [exportFiles, setExportFiles] = useState<ExportRequestFile[]>([]);
+  const [exportFilesMap, setExportFilesMap] = useState<Record<string, ExportRequestFile[]>>({});
+  const [exportStatusUpdate, setExportStatusUpdate] = useState<Record<string, NonNullable<ExportRequest["status"]>>>({});
+  const [exportAdminNotesUpdate, setExportAdminNotesUpdate] = useState<Record<string, string>>({});
 
   // Currency transfers state
   const [currencyLoading, setCurrencyLoading] = useState<boolean>(false);
@@ -166,20 +165,54 @@ const AgentOrdersPage: React.FC = () => {
   }, [exportRequests, exportFilterStatus, exportSearchTerm]);
 
   const openExportDetails = async (req: ExportRequest) => {
-    setSelectedExport(req);
     try {
-      const { files, error } = await ExportService.getExportRequestFiles(
-        req.id
-      );
+      const { files, error } = await ExportService.getExportRequestFiles(req.id);
       if (error) {
         console.error("Error loading files:", error);
-        setExportFiles([]);
-        return;
+        setExportFilesMap((prev) => ({ ...prev, [req.id]: [] }));
+      } else {
+        setExportFilesMap((prev) => ({ ...prev, [req.id]: files || [] }));
       }
-      setExportFiles(files || []);
     } catch (err) {
       console.error("Error loading files:", err);
-      setExportFiles([]);
+      setExportFilesMap((prev) => ({ ...prev, [req.id]: [] }));
+    } finally {
+      setExportStatusUpdate((prev) =>
+        prev[req.id]
+          ? prev
+          : { ...prev, [req.id]: (req.status || "pending") as NonNullable<ExportRequest["status"]> }
+      );
+      setExportAdminNotesUpdate((prev) =>
+        prev[req.id] !== undefined ? prev : { ...prev, [req.id]: req.admin_notes || "" }
+      );
+    }
+  };
+
+  const toggleExportDetails = async (rowId: string, req: ExportRequest) => {
+    const el = document.getElementById(`${rowId}-details`);
+    if (el) {
+      const willOpen = el.classList.contains("hidden");
+      el.classList.toggle("hidden");
+      if (willOpen) {
+        await openExportDetails(req);
+      }
+    }
+  };
+
+  const handleExportStatusSave = async (req: ExportRequest) => {
+    try {
+      const newStatus = (exportStatusUpdate[req.id] || req.status || "pending") as NonNullable<ExportRequest["status"]>;
+      const notes = exportAdminNotesUpdate[req.id] ?? req.admin_notes ?? "";
+      const { success, error } = await ExportService.updateExportStatus(req.id, newStatus, notes || undefined);
+      if (success) {
+        toast.success("Export status updated successfully");
+        await loadExportRequests();
+      } else {
+        toast.error(error || "Failed to update export status");
+      }
+    } catch (e) {
+      console.error("Exception updating export status:", e);
+      toast.error("Exception updating export status");
     }
   };
 
@@ -826,38 +859,164 @@ const AgentOrdersPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredExports.map((r) => (
-                      <tr key={r.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {r.company_name || "-"}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {r.product_name || "-"}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          <span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getCurrencyStatusBadge(
-                              r.status?.toLowerCase()
-                            )}`}
-                          >
-                            {r.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {r.created_at
-                            ? new Date(r.created_at).toLocaleString()
-                            : "-"}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button
-                            onClick={() => openExportDetails(r)}
-                            className="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 bg-white hover:bg-gray-50"
-                          >
-                            <EyeIcon className="h-5 w-5 mr-1" />
-                            {t("view")}
-                          </button>
-                        </td>
-                      </tr>
+                    {filteredExports.map((r, index) => (
+                      <>
+                        <tr key={r.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {r.company_name || "-"}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {r.product_name || "-"}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <span
+                              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getCurrencyStatusBadge(
+                                r.status?.toLowerCase()
+                              )}`}
+                            >
+                              {r.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {r.created_at ? new Date(r.created_at).toLocaleString() : "-"}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button
+                              onClick={() => toggleExportDetails(`export${index}`, r)}
+                              className="text-blue-600 hover:text-blue-900 mr-3"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </button>
+                          </td>
+                        </tr>
+                        <tr id={`export${index}-details`} className="hidden bg-blue-50">
+                          <td className="px-6 py-4" colSpan={5}>
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                              <div className="lg:col-span-2 space-y-4">
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                  <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+                                    <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                    </svg>
+                                    {t("product_information")}
+                                  </h4>
+                                  <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                      <span className="font-medium">{t("company")}:</span> {r.company_name || "-"}
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">{t("product")}:</span> {r.product_name || "-"}
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">{t("status")}:</span> {r.status || "pending"}
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">{t("created_at")}:</span>{" "}
+                                      {r.created_at ? new Date(r.created_at).toLocaleString() : "-"}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                  <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+                                    <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                                      />
+                                    </svg>
+                                    {t("attachments")}
+                                  </h4>
+                                  {(exportFilesMap[r.id] || []).length === 0 ? (
+                                    <div className="text-gray-500 text-sm">{t("no_files") || "No files"}</div>
+                                  ) : (
+                                    <div className="flex gap-3 flex-wrap">
+                                      {(exportFilesMap[r.id] || []).map((file) => (
+                                        <a
+                                          key={file.id}
+                                          href={ExportService.getFilePublicUrl(file.file_path) || undefined}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm"
+                                        >
+                                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path
+                                              fillRule="evenodd"
+                                              d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                                              clipRule="evenodd"
+                                            />
+                                          </svg>
+                                          {file.file_name}
+                                        </a>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                  <h4 className="font-semibold text-gray-800 mb-3">{t("description")}</h4>
+                                  <div className="text-gray-900 whitespace-pre-wrap">{r.product_description || "-"}</div>
+                                </div>
+                              </div>
+
+                              <div className="space-y-4">
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                  <h4 className="font-semibold text-gray-800 mb-3">{t("current_status")}</h4>
+                                  <div className="text-center">
+                                    <span className="capitalize inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                                      {r.status || "pending"}
+                                    </span>
+                                    <p className="text-xs text-gray-600 mt-1">{t("waiting_for_response")}</p>
+                                  </div>
+                                </div>
+
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                  <h4 className="font-semibold text-gray-800 mb-3">{t("update_status")}</h4>
+                                  <div className="space-y-3">
+                                    <select
+                                      value={exportStatusUpdate[r.id] || (r.status || "pending")}
+                                      onChange={(e) =>
+                                        setExportStatusUpdate((prev) => ({
+                                          ...prev,
+                                          [r.id]: e.target.value as NonNullable<ExportRequest["status"]>,
+                                        }))
+                                      }
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    >
+                                      <option value="pending">{t("pending")}</option>
+                                      <option value="in_review">{t("in_review")}</option>
+                                      <option value="processed">{t("processed")}</option>
+                                      <option value="rejected">{t("rejected")}</option>
+                                    </select>
+                                    <textarea
+                                      value={exportAdminNotesUpdate[r.id] ?? (r.admin_notes || "")}
+                                      onChange={(e) =>
+                                        setExportAdminNotesUpdate((prev) => ({ ...prev, [r.id]: e.target.value }))
+                                      }
+                                      rows={3}
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                      placeholder={t("admin_notes") || "Admin notes"}
+                                    />
+                                    <div className="flex gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleExportStatusSave(r)}
+                                        className="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 text-sm font-medium"
+                                      >
+                                        {t("save")}
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </>
                     ))}
                   </tbody>
                 </table>
@@ -867,112 +1026,6 @@ const AgentOrdersPage: React.FC = () => {
         </div>
       )}
 
-      {selectedExport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-xl shadow-xl border border-gray-200 w-full max-w-3xl">
-            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {t("request_details")}
-              </h3>
-              <button
-                onClick={() => {
-                  setSelectedExport(null);
-                  setExportFiles([]);
-                }}
-                className="p-1 rounded-md hover:bg-gray-100"
-              >
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="px-6 py-4 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <div className="text-sm text-gray-500">{t("company")}</div>
-                  <div className="text-gray-900">
-                    {selectedExport.company_name || "-"}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">{t("product")}</div>
-                  <div className="text-gray-900">
-                    {selectedExport.product_name || "-"}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">{t("status")}</div>
-                  <div className="text-gray-900">
-                    {selectedExport.status || "pending"}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">{t("created_at")}</div>
-                  <div className="text-gray-900">
-                    {selectedExport.created_at
-                      ? new Date(selectedExport.created_at).toLocaleString()
-                      : "-"}
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <div className="text-sm text-gray-500">{t("description")}</div>
-                <div className="text-gray-900 whitespace-pre-wrap">
-                  {selectedExport.product_description || "-"}
-                </div>
-              </div>
-
-              <div>
-                <div className="text-sm text-gray-500">{t("attachments")}</div>
-                {exportFiles.length === 0 ? (
-                  <div className="text-gray-500 text-sm">
-                    {t("no_files") || "No files"}
-                  </div>
-                ) : (
-                  <ul className="space-y-2">
-                    {exportFiles.map((f) => {
-                      const url = ExportService.getFilePublicUrl(f.file_path);
-                      return (
-                        <li
-                          key={f.id}
-                          className="flex items-center justify-between"
-                        >
-                          <div className="text-sm text-gray-900">
-                            {f.file_name}
-                          </div>
-                          {url && (
-                            <a
-                              href={url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center text-blue-600 hover:underline"
-                            >
-                              <LinkIcon className="h-4 w-4 mr-1" />
-                              {t("view_attachment")}
-                            </a>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </div>
-            </div>
-
-            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-end">
-              <button
-                onClick={() => {
-                  setSelectedExport(null);
-                  setExportFiles([]);
-                }}
-                className="px-4 py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50"
-              >
-                {t("close")}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Currency Transfer Section */}
       {activeTab === "currency" && (
