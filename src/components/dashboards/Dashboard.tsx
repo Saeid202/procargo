@@ -90,6 +90,24 @@ const Dashboard: React.FC = () => {
       icon: ShoppingCartIcon,
       color: "text-green-600",
     },
+    {
+      id: "compliance",
+      name: t("compliance"),
+      icon: DocumentCheckIcon,
+      color: "text-orange-600",
+    },
+    {
+      id: "legal",
+      name: t("legal_assistance"),
+      icon: ChatBubbleLeftRightIcon,
+      color: "text-purple-600",
+    },
+    {
+      id: "legal-issue",
+      name: t("legal_issue"),
+      icon: ScaleIcon,
+      color: "text-red-600",
+    },
   ];
 
   // Profile item (only for Persian)
