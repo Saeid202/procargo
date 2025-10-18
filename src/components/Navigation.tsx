@@ -21,16 +21,6 @@ const Navigation: React.FC = () => {
     }
   }, [searchParams, i18n]);
 
-  const navigation = [
-    { name: t("home"), href: i18n.language === "fa" ? "/fa" : "/en" },
-    {
-      name: t("services"),
-      href: i18n.language === "fa" ? "/fa/#services" : "/en/#services",
-    },
-    { name: t("about"), href: "/about" },
-    { name: t("contact"), href: "/contact" },
-  ];
-
   // Ensure all navigation preserves current language in URL
   const langParam =
     searchParams.get("language") ||
@@ -39,7 +29,15 @@ const Navigation: React.FC = () => {
     `${href}${href.includes("?") ? "&" : "?"}language=${langParam}`;
 
   const isActive = (path: string) => location.pathname === path;
-
+  const navigation = [
+    { name: t("home"), href: i18n.language === "fa" ? "/fa" : "/en" },
+    {
+      name: t("services"),
+      href: i18n.language === "fa" ? "/fa/#services" : "/en/#services",
+    },
+    { name: t("about"), href: withLang("/about") },
+    { name: t("contact"), href: withLang("/contact") },
+  ];
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -61,7 +59,7 @@ const Navigation: React.FC = () => {
             {navigation.map((item) => (
               <Link
                 key={item.name}
-                to={withLang(item.href)}
+                to={item.href}
                 className={`text-gray-700 hover:text-cargo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   isActive(item.href) ? "text-cargo-600" : ""
                 }`}
