@@ -22,15 +22,21 @@ const Navigation: React.FC = () => {
   }, [searchParams, i18n]);
 
   const navigation = [
-    { name: t("home"), href: "/" },
-    { name: t("services"), href: "/services" },
+    { name: t("home"), href: i18n.language === "fa" ? "/fa" : "/en" },
+    {
+      name: t("services"),
+      href: i18n.language === "fa" ? "/fa/#services" : "/en/#services",
+    },
     { name: t("about"), href: "/about" },
     { name: t("contact"), href: "/contact" },
   ];
 
   // Ensure all navigation preserves current language in URL
-  const langParam = searchParams.get("language") || (i18n.language?.startsWith("fa") ? "fa" : "en");
-  const withLang = (href: string) => `${href}${href.includes("?") ? "&" : "?"}language=${langParam}`;
+  const langParam =
+    searchParams.get("language") ||
+    (i18n.language?.startsWith("fa") ? "fa" : "en");
+  const withLang = (href: string) =>
+    `${href}${href.includes("?") ? "&" : "?"}language=${langParam}`;
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -39,7 +45,10 @@ const Navigation: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link to={withLang("/")} className="flex-shrink-0 flex items-center">
+            <Link
+              to={withLang("/")}
+              className="flex-shrink-0 flex items-center"
+            >
               <Logo />
               <span className="ms-2 text-xl font-bold text-gray-900">
                 CargoBridge
@@ -53,7 +62,9 @@ const Navigation: React.FC = () => {
               <Link
                 key={item.name}
                 to={withLang(item.href)}
-                className={`text-gray-700 hover:text-cargo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive(item.href) ? "text-cargo-600" : ""}`}
+                className={`text-gray-700 hover:text-cargo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive(item.href) ? "text-cargo-600" : ""
+                }`}
               >
                 {item.name}
               </Link>
@@ -114,7 +125,11 @@ const Navigation: React.FC = () => {
               <Link
                 key={item.name}
                 to={withLang(item.href)}
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive(item.href) ? "text-cargo-600 bg-cargo-50" : "text-gray-700 hover:text-cargo-600 hover:bg-gray-50"}`}
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  isActive(item.href)
+                    ? "text-cargo-600 bg-cargo-50"
+                    : "text-gray-700 hover:text-cargo-600 hover:bg-gray-50"
+                }`}
                 onClick={() => setIsOpen(false)}
               >
                 {item.name}
