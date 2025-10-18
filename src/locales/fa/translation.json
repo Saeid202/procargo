@@ -1132,6 +1132,7 @@
   "all_requests": "همه درخواست‌ها",
   "search_placeholder": "جستجو...",
   "no_files": "فایل‌هایی نیست",
-  "company_verification":"اعتبار سنجی شرکت",
-  "verified":"تایید شده"
+  "company_verification": "اعتبار سنجی شرکت",
+  "verified": "تایید شده",
+  "need_more_info": "نیاز به اطلاعات بیشتر"
 }

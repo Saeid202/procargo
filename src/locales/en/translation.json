@@ -1112,6 +1112,8 @@
   "all_requests": "All Requests",
   "search_placeholder": "Search...",
   "no_files": "No files",
-  "company_verification":"Company Verification",
-  "verified":"Verified"
+  "company_verification": "Company Verification",
+  "verified": "Verified",
+
+  "need_more_info": "Need More Info"
 }

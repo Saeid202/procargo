@@ -198,7 +198,6 @@ const LegalIssuePage = () => {
           alert("Failed to upload other file");
           break;
         }
-        toast("Issues submitted successfully!");
       }
     } catch (error) {
       console.log(error);

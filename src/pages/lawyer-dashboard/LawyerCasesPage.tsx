@@ -12,6 +12,12 @@ const LawyerCasesPage: React.FC = () => {
   const [cases, setCases] = useState<CaseData[]>([]);
   const [casesLoading, setCasesLoading] = useState(false);
   const [creatingResponse, setCreatingResponse] = useState(false);
+  const [caseStatusUpdate, setCaseStatusUpdate] = useState<
+    Record<string, NonNullable<CaseData["status"]>>
+  >({});
+  const [updatingCaseStatus, setUpdatingCaseStatus] = useState<
+    Record<string, boolean>
+  >({});
   const [caseResponse, setCaseResponse] = useState<string>("");
   const [caseQuickPrice, setCaseQuickPrice] = useState<number>(0);
   const [caseQuickDeliveryDate, setCaseQuickDeliveryDate] =
@@ -37,14 +43,30 @@ const LawyerCasesPage: React.FC = () => {
     }
   };
 
-  const toggleCaseDetails = (caseId: string) => {
+  const toggleCaseDetails = (
+    caseIdKey: string,
+    caseId?: string,
+    status?: CaseData["status"]
+  ) => {
     const isMobile = window.innerWidth < 1024;
     const caseDetails = document.getElementById(
-      `${caseId}-details${isMobile ? "-mobile" : ""}`
+      `${caseIdKey}-details${isMobile ? "-mobile" : ""}`
     );
 
     if (caseDetails) {
       caseDetails.classList.toggle("hidden");
+      if (caseId) {
+        setCaseStatusUpdate((prev) =>
+          prev[caseId]
+            ? prev
+            : {
+                ...prev,
+                [caseId]: (status || "SUBMITTED") as NonNullable<
+                  CaseData["status"]
+                >,
+              }
+        );
+      }
     }
   };
 
@@ -68,12 +90,37 @@ const LawyerCasesPage: React.FC = () => {
       }
     );
     if (error) {
-      toast.error("Exception creating case response:", error);
+      console.error("Exception creating case response:", error);
+      toast.error("Exception creating case response");
     } else {
       toast.success("Case response created successfully");
       await loadCases();
     }
     setCreatingResponse(false);
+  };
+
+  const handleCaseStatusSave = async (caseData: CaseData) => {
+    try {
+      const newStatus = (caseStatusUpdate[caseData.id!] ||
+        caseData.status ||
+        "SUBMITTED") as NonNullable<CaseData["status"]>;
+      setUpdatingCaseStatus((prev) => ({ ...prev, [caseData.id!]: true }));
+      const { case: updated, error } = await SupabaseService.updateCaseStatus(
+        caseData.id!,
+        newStatus
+      );
+      if (error) {
+        toast.error("Failed to update case status");
+      } else {
+        toast.success("Case status updated successfully");
+        await loadCases();
+      }
+    } catch (err) {
+      console.error("Exception updating case status:", err);
+      toast.error("Exception updating case status");
+    } finally {
+      setUpdatingCaseStatus((prev) => ({ ...prev, [caseData.id!]: false }));
+    }
   };
   if (casesLoading) {
     return <Loading />;
@@ -146,7 +193,13 @@ const LawyerCasesPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
-                      onClick={() => toggleCaseDetails(`caseData${index}`)}
+                      onClick={() =>
+                        toggleCaseDetails(
+                          `caseData${index}`,
+                          caseData.id!,
+                          caseData.status
+                        )
+                      }
                       className="text-blue-600 hover:text-blue-900 mr-3"
                     >
                       <svg
@@ -324,6 +377,88 @@ const LawyerCasesPage: React.FC = () => {
                           </div>
                         </div>
 
+                        <div className="bg-white rounded-lg p-4 border border-gray-200">
+                          <h4 className="font-semibold text-gray-800 mb-3">
+                            {t("update_status")}
+                          </h4>
+                          <div className="space-y-3">
+                            <select
+                              value={
+                                caseStatusUpdate[caseData.id!] ||
+                                caseData.status ||
+                                "SUBMITTED"
+                              }
+                              onChange={(e) =>
+                                setCaseStatusUpdate((prev) => ({
+                                  ...prev,
+                                  [caseData.id!]: e.target.value as NonNullable<
+                                    CaseData["status"]
+                                  >,
+                                }))
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                            >
+                              <option value="SUBMITTED">
+                                {t("submitted") || "Submitted"}
+                              </option>
+                              <option value="IN_REVIEW">
+                                {t("in_review") || "In Review"}
+                              </option>
+                              <option value="NEED_MORE_INFO">
+                                {t("need_more_info")}
+                              </option>
+                              <option value="RESOLVED">
+                                {t("resolved") || "Resolved"}
+                              </option>
+                              <option value="CLOSED">
+                                {t("closed") || "Closed"}
+                              </option>
+                              <option value="REJECTED">
+                                {t("rejected") || "Rejected"}
+                              </option>
+                              <option value="COMPLETED">
+                                {t("completed") || "Completed"}
+                              </option>
+                            </select>
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleCaseStatusSave(caseData)}
+                                disabled={!!updatingCaseStatus[caseData.id!]}
+                                className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium ${
+                                  updatingCaseStatus[caseData.id!]
+                                    ? "bg-green-400 cursor-not-allowed"
+                                    : "bg-green-600 hover:bg-green-700"
+                                } text-white flex items-center justify-center gap-2`}
+                              >
+                                {updatingCaseStatus[caseData.id!] && (
+                                  <svg
+                                    className="animate-spin h-4 w-4 text-white"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <circle
+                                      className="opacity-25"
+                                      cx="12"
+                                      cy="12"
+                                      r="10"
+                                      stroke="currentColor"
+                                      strokeWidth="4"
+                                    ></circle>
+                                    <path
+                                      className="opacity-75"
+                                      fill="currentColor"
+                                      d="M4 12a8 8 0 018-8v4l3-3-3-3v4a12 12 0 100 8z"
+                                    ></path>
+                                  </svg>
+                                )}
+                                {t("save")}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
                         {caseData.status === "COMPLETED" ? (
                           <div className="bg-white rounded-lg p-4 border border-gray-200">
                             <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
@@ -395,24 +530,39 @@ const LawyerCasesPage: React.FC = () => {
                               </div>
                               <div className="flex gap-2">
                                 <button
-                                  onClick={() => createCaseResponse(caseData.id!)}
+                                  onClick={() =>
+                                    createCaseResponse(caseData.id!)
+                                  }
                                   disabled={creatingResponse}
-                                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium ${creatingResponse ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"} text-white flex items-center justify-center gap-2`}
+                                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium ${
+                                    creatingResponse
+                                      ? "bg-blue-400 cursor-not-allowed"
+                                      : "bg-blue-600 hover:bg-blue-700"
+                                  } text-white flex items-center justify-center gap-2`}
                                 >
                                   {creatingResponse && (
-                                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a12 12 0 100 8z"></path>
+                                    <svg
+                                      className="animate-spin h-4 w-4 text-white"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <circle
+                                        className="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                      ></circle>
+                                      <path
+                                        className="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8v4l3-3-3-3v4a12 12 0 100 8z"
+                                      ></path>
                                     </svg>
                                   )}
                                   {t("send_reply")}
-                                </button>
-                                <button
-                                  // onclick="updateOrderStatus('ORD-001', 'in-progress')"
-                                  type="button"
-                                  className="px-3 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 text-sm font-medium"
-                                >
-                                  {t("in_progress")}
                                 </button>
                               </div>
                             </div>
@@ -443,7 +593,13 @@ const LawyerCasesPage: React.FC = () => {
                 </h3>
                 <div className="flex gap-2 ml-3">
                   <button
-                    onClick={() => toggleCaseDetails(`caseData${index}`)}
+                    onClick={() =>
+                      toggleCaseDetails(
+                        `caseData${index}`,
+                        caseData.id!,
+                        caseData.status
+                      )
+                    }
                     className="text-blue-600 hover:text-blue-900 p-1"
                   >
                     <svg
@@ -665,6 +821,86 @@ const LawyerCasesPage: React.FC = () => {
                     </p>
                   </div>
 
+                  <div className="bg-white rounded-lg p-4 border border-gray-200">
+                    <h5 className="font-semibold text-gray-800 mb-3">
+                      {t("update_status")}
+                    </h5>
+                    <div className="space-y-3">
+                      <select
+                        value={
+                          caseStatusUpdate[caseData.id!] ||
+                          caseData.status ||
+                          "SUBMITTED"
+                        }
+                        onChange={(e) =>
+                          setCaseStatusUpdate((prev) => ({
+                            ...prev,
+                            [caseData.id!]: e.target.value as NonNullable<
+                              CaseData["status"]
+                            >,
+                          }))
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="SUBMITTED">
+                          {t("submitted") || "Submitted"}
+                        </option>
+                        <option value="IN_REVIEW">
+                          {t("in_review") || "In Review"}
+                        </option>
+                        <option value="NEED_MORE_INFO">
+                          {t("need_more_info")}
+                        </option>
+                        <option value="RESOLVED">
+                          {t("resolved") || "Resolved"}
+                        </option>
+                        <option value="CLOSED">
+                          {t("closed") || "Closed"}
+                        </option>
+                        <option value="REJECTED">
+                          {t("rejected") || "Rejected"}
+                        </option>
+                        <option value="COMPLETED">
+                          {t("completed") || "Completed"}
+                        </option>
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => handleCaseStatusSave(caseData)}
+                        disabled={!!updatingCaseStatus[caseData.id!]}
+                        className={`w-full px-3 py-2 rounded-lg text-sm font-medium ${
+                          updatingCaseStatus[caseData.id!]
+                            ? "bg-green-400 cursor-not-allowed"
+                            : "bg-green-600 hover:bg-green-700"
+                        } text-white flex items-center justify-center gap-2`}
+                      >
+                        {updatingCaseStatus[caseData.id!] && (
+                          <svg
+                            className="animate-spin h-4 w-4 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8v4l3-3-3-3v4a12 12 0 100 8z"
+                            ></path>
+                          </svg>
+                        )}
+                        {t("save")}
+                      </button>
+                    </div>
+                  </div>
+
                   {caseData.status === "COMPLETED" ? (
                     <div>
                       <h5 className="font-semibold text-gray-800 mb-2 flex items-center">
@@ -737,21 +973,35 @@ const LawyerCasesPage: React.FC = () => {
                             type="button"
                             onClick={() => createCaseResponse(caseData.id!)}
                             disabled={creatingResponse}
-                            className={`w-full px-3 py-2 rounded-lg text-sm font-medium ${creatingResponse ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"} text-white flex items-center justify-center gap-2`}
+                            className={`w-full px-3 py-2 rounded-lg text-sm font-medium ${
+                              creatingResponse
+                                ? "bg-blue-400 cursor-not-allowed"
+                                : "bg-blue-600 hover:bg-blue-700"
+                            } text-white flex items-center justify-center gap-2`}
                           >
                             {creatingResponse && (
-                              <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a12 12 0 100 8z"></path>
+                              <svg
+                                className="animate-spin h-4 w-4 text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                ></circle>
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8v4l3-3-3-3v4a12 12 0 100 8z"
+                                ></path>
                               </svg>
                             )}
                             {t("send_reply")}
-                          </button>
-                          <button
-                            type="button"
-                            className="w-full px-3 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 text-sm font-medium"
-                          >
-                            {t("in_progress")}
                           </button>
                         </div>
                       </div>

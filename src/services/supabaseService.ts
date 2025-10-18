@@ -33,7 +33,7 @@ export interface CaseData {
     | "SUBMITTED"
     | "IN_REVIEW"
     | "NEED_MORE_INFO"
-    | "RESOlVED"
+    | "RESOLVED"
     | "CLOSED"
     | "REJECTED"
     | "COMPLETED";
@@ -646,6 +646,30 @@ export class SupabaseService {
       return { cases: data, error: null };
     } catch (error: any) {
       return { cases: null, error: error.message || "Failed to get cases" };
+    }
+  }
+  static async updateCaseStatus(
+    caseId: string,
+    status: NonNullable<CaseData["status"]>
+  ): Promise<{ case: CaseData | null; error: string | null }> {
+    try {
+      const { data, error } = await supabase
+        .from("cases")
+        .update({ status })
+        .eq("id", caseId)
+        .select()
+        .single();
+
+      if (error) {
+        return { case: null, error: error.message };
+      }
+
+      return { case: (data as unknown) as CaseData, error: null };
+    } catch (err: any) {
+      return {
+        case: null,
+        error: err.message || "Failed to update case status",
+      };
     }
   }
 }
