@@ -45,6 +45,47 @@ const LegalIssuePage = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
 
+  const [errors, setErrors] = useState<{
+    headquarter?: string;
+    defendant_name?: string;
+    subject?: string;
+    description?: string;
+  }>({});
+
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  const allowedTypes = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "image/jpeg",
+    "image/png",
+  ];
+
+  const docTypeLabelKey = {
+    contract: "contract",
+    proforma: "proforma_invoice",
+    receipt: "payment_receipt",
+    shipping: "shipping_document",
+    other: "other_document",
+  } as const;
+
+  const validateCaseDetails = () => {
+    const newErrors: {
+      headquarter?: string;
+      defendant_name?: string;
+      subject?: string;
+      description?: string;
+    } = {};
+
+    if (!caseDetails.headquarter.trim()) newErrors.headquarter = t("headquarter_required");
+    if (!caseDetails.defendant_name.trim()) newErrors.defendant_name = t("defendant_name_required");
+    if (!caseDetails.subject.trim()) newErrors.subject = t("subject_required");
+    if (!caseDetails.description || caseDetails.description.trim().length < 20)
+      newErrors.description = t("description_min_20");
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
   const handlePlusDocument = (type: keyof DocumentFiles) => {
     setDocumnetFiles((prev) => ({
       ...prev,
@@ -68,14 +109,34 @@ const LegalIssuePage = () => {
   };
 
   const handleNext = () => {
+    if (!validateCaseDetails()) {
+      toast.error(t("validation_errors_present"));
+      setActiveTab("case-details");
+      return;
+    }
     setActiveTab("documents-upload");
   };
 
   const handleFileChange = (
     type: keyof DocumentFiles,
     index: number,
-    file: File
+    file?: File
   ) => {
+    if (!file || file.size === 0) {
+      setDocumnetFiles((prev) => ({
+        ...prev,
+        [type]: prev[type].map((f, i) => (i === index ? new File([], "") : f)),
+      }));
+      return;
+    }
+    if (!allowedTypes.includes(file.type)) {
+      toast.error(t("invalid_file_type"));
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error(t("file_too_large"));
+      return;
+    }
     setDocumnetFiles((prev) => ({
       ...prev,
       [type]: prev[type].map((f, i) => (i === index ? file : f)),
@@ -83,9 +144,17 @@ const LegalIssuePage = () => {
   };
 
   const handleSubmit = async () => {
+    if (!validateCaseDetails()) {
+      toast.error(t("validation_errors_present"));
+      setActiveTab("case-details");
+      return;
+    }
     try {
       setLoading(true);
+      const createToastId = toast.loading(t("creating_case"));
+
       if (!user) throw new Error("User not found");
+
       const { case: savedCase, error: caseError } =
         await SupabaseService.createCase({
           user_id: user.id,
@@ -99,109 +168,44 @@ const LegalIssuePage = () => {
         });
       if (caseError) throw new Error(caseError);
 
-      for (const contractFile of documnetFiles.contract) {
-        if (contractFile.size === 0) break;
-        const { error: documentsError } =
-          await SupabaseService.createCaseDocuments((savedCase as any)?.id, {
-            case_id: (savedCase as any)?.id,
-            doc_type: "contract",
-          });
-        if (documentsError) throw new Error(documentsError);
-        const { error: uploadedDocumentsError } =
-          await SupabaseService.uploadCaseDocuments(
-            (savedCase as any).id,
-            contractFile,
-            "contract"
-          );
-        if (uploadedDocumentsError) {
-          alert("Failed to upload contract file");
-          break;
-        }
-      }
+      toast.dismiss(createToastId);
 
-      for (const performaFile of documnetFiles.proforma) {
-        if (performaFile.size === 0) break;
-        const { error: documentsError } =
-          await SupabaseService.createCaseDocuments((savedCase as any)?.id, {
-            case_id: (savedCase as any)?.id,
-            doc_type: "proforma",
-          });
-        if (documentsError) throw new Error(documentsError);
-        const { error: uploadedDocumentsError } =
-          await SupabaseService.uploadCaseDocuments(
-            (savedCase as any).id,
-            performaFile,
-            "proforma"
-          );
-        if (uploadedDocumentsError) {
-          alert("Failed to upload proforma file");
-          break;
-        }
-      }
+      const uploadToastId = toast.loading(t("uploading_documents"));
+      const caseId = (savedCase as any)?.id;
 
-      for (const receiptFile of documnetFiles.receipt) {
-        if (receiptFile.size === 0) break;
-        const { error: documentsError } =
-          await SupabaseService.createCaseDocuments((savedCase as any)?.id, {
-            case_id: (savedCase as any)?.id,
-            doc_type: "receipt",
-          });
-        if (documentsError) throw new Error(documentsError);
-        const { error: uploadedDocumentsError } =
-          await SupabaseService.uploadCaseDocuments(
-            (savedCase as any).id,
-            receiptFile,
-            "receipt"
-          );
-        if (uploadedDocumentsError) {
-          alert("Failed to upload receipt file");
-          break;
+      const uploadDoc = async (
+        files: File[],
+        docType: keyof DocumentFiles,
+        typeKey: typeof docTypeLabelKey[keyof typeof docTypeLabelKey]
+      ) => {
+        for (const f of files) {
+          if (!f || f.size === 0) break;
+          const { error: documentsError } =
+            await SupabaseService.createCaseDocuments(caseId, {
+              case_id: caseId,
+              doc_type: docType,
+            });
+          if (documentsError) throw new Error(documentsError);
+          const { error: uploadedDocumentsError } =
+            await SupabaseService.uploadCaseDocuments(caseId, f, docType as any);
+          if (uploadedDocumentsError) {
+            toast.error(`${t("upload_failed")} (${t(typeKey)})`);
+            break;
+          }
         }
-      }
+      };
 
-      for (const shippingFile of documnetFiles.shipping) {
-        if (shippingFile.size === 0) break;
-        const { error: documentsError } =
-          await SupabaseService.createCaseDocuments((savedCase as any)?.id, {
-            case_id: (savedCase as any)?.id,
-            doc_type: "shipping",
-          });
-        if (documentsError) throw new Error(documentsError);
-        const { error: uploadedDocumentsError } =
-          await SupabaseService.uploadCaseDocuments(
-            (savedCase as any).id,
-            shippingFile,
-            "shipping"
-          );
-        if (uploadedDocumentsError) {
-          alert("Failed to upload shipping file");
-          break;
-        }
-      }
+      await uploadDoc(documnetFiles.contract, "contract", docTypeLabelKey.contract);
+      await uploadDoc(documnetFiles.proforma, "proforma", docTypeLabelKey.proforma);
+      await uploadDoc(documnetFiles.receipt, "receipt", docTypeLabelKey.receipt);
+      await uploadDoc(documnetFiles.shipping, "shipping", docTypeLabelKey.shipping);
+      await uploadDoc(documnetFiles.other, "other", docTypeLabelKey.other);
 
-      for (const otherFile of documnetFiles.other) {
-        if (otherFile.size === 0) break;
-
-        const { error: documentsError } =
-          await SupabaseService.createCaseDocuments((savedCase as any)?.id, {
-            case_id: (savedCase as any)?.id,
-            doc_type: "other",
-          });
-        if (documentsError) throw new Error(documentsError);
-        const { error: uploadedDocumentsError } =
-          await SupabaseService.uploadCaseDocuments(
-            (savedCase as any).id,
-            otherFile,
-            "other"
-          );
-        if (uploadedDocumentsError) {
-          alert("Failed to upload other file");
-          break;
-        }
-      }
+      toast.dismiss(uploadToastId);
+      toast.success(t("case_submitted_successfully"));
     } catch (error) {
       console.log(error);
-      alert("Error submitting case. Please try again.");
+      toast.error(t("case_submission_failed"));
     } finally {
       setLoading(false);
     }
@@ -337,6 +341,9 @@ const LegalIssuePage = () => {
                 <p className="text-gray-400 text-xs mt-1">
                   {t("example_city_country")}
                 </p>
+                {errors.headquarter && (
+                  <p className="text-red-500 text-xs mt-1">{errors.headquarter}</p>
+                )}
               </div>
             </fieldset>
 
@@ -367,6 +374,9 @@ const LegalIssuePage = () => {
                   required
                   className="w-full px-4 py-2 rounded-lg border border-white/10  focus:border-purple-600 focus:ring-2 focus:ring-purple-500/40 outline-none"
                 />
+                {errors.defendant_name && (
+                  <p className="text-red-500 text-xs mt-1">{errors.defendant_name}</p>
+                )}
               </div>
             </fieldset>
 
@@ -391,6 +401,9 @@ const LegalIssuePage = () => {
                   required
                   className="w-full px-4 py-2 rounded-lg border border-white/10  focus:border-purple-600 focus:ring-2 focus:ring-purple-500/40 outline-none"
                 />
+                {errors.subject && (
+                  <p className="text-red-500 text-xs mt-1">{errors.subject}</p>
+                )}
               </div>
 
               <div>
@@ -420,6 +433,9 @@ const LegalIssuePage = () => {
                 <p className="text-gray-400 text-xs mt-1">
                   {t("minimum_20_characters")}
                 </p>
+                {errors.description && (
+                  <p className="text-red-500 text-xs mt-1">{errors.description}</p>
+                )}
               </div>
             </fieldset>
           </section>
@@ -535,14 +551,16 @@ const LegalIssuePage = () => {
             <button
               onClick={handleNext}
               type="button"
-              className="px-4 py-2 rounded-lg font-bold text-gray-400 border border-white/10"
+              disabled={loading}
+              className="px-4 py-2 rounded-lg font-bold text-gray-400 border border-white/10 disabled:opacity-60"
             >
               {t("next")}
             </button>
             <button
               onClick={handleSubmit}
               type="button"
-              className="px-4 py-2 rounded-lg font-bold text-white bg-gradient-to-b from-purple-600 to-purple-800 shadow-lg"
+              disabled={loading}
+              className="px-4 py-2 rounded-lg font-bold text-white bg-gradient-to-b from-purple-600 to-purple-800 shadow-lg disabled:opacity-60"
             >
               {t("submit_case")}
             </button>
