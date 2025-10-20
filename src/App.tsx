@@ -1,9 +1,4 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  HashRouter,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LandingPage from "./components/LandingPage";
 import SignUpPage from "./components/authentication/SignUpPage";
 import LoginPage from "./components/authentication/LoginPage";
@@ -27,7 +22,7 @@ import { Toaster } from "react-hot-toast";
 function App() {
   return (
     <AuthProvider>
-      <HashRouter>
+      <Router>
         <div className="App">
           <Navigation />
           <Routes>
@@ -77,7 +72,7 @@ function App() {
           </Routes>
           <Toaster />
         </div>
-      </HashRouter>
+      </Router>
     </AuthProvider>
   );
 }
