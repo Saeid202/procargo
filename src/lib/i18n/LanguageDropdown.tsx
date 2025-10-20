@@ -29,7 +29,10 @@ const LanguageDropdown: React.FC<IProps> = ({ className }) => {
         params.set("language", lng);
         setSearchParams(params);
       }}
-      className={cn("p-2 border rounded outline-none bg-white",className)}
+      className={cn(
+        "p-2 border rounded outline-none bg-white appearance-none",
+        className
+      )}
     >
       <option value="en">🇺🇸 English</option>
       <option value="fa">🇮🇷 فارسی</option>
