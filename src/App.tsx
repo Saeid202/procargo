@@ -19,10 +19,34 @@ import "./lib/i18n";
 import NotFound from "./pages/not-found/NotFound";
 import { Toaster } from "react-hot-toast";
 
+const normalizeBasename = (value: string | undefined) => {
+  if (!value || value === "." || value === "/") {
+    return "/";
+  }
+
+  if (value.startsWith("http://") || value.startsWith("https://")) {
+    try {
+      const url = new URL(value);
+      const pathname = url.pathname.replace(/\/+$/, "");
+      return pathname || "/";
+    } catch {
+      return "/";
+    }
+  }
+
+  const prefixed = value.startsWith("/") ? value : `/${value}`;
+  const trimmed = prefixed.replace(/\/+$/, "");
+  return trimmed || "/";
+};
+
+const ROUTER_BASENAME = normalizeBasename(
+  process.env.REACT_APP_BASENAME ?? process.env.PUBLIC_URL
+);
+
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router basename={ROUTER_BASENAME}>
         <div className="App">
           <Navigation />
           <Routes>
