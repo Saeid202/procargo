@@ -4,11 +4,13 @@ import {
   CalculatorIcon,
   ClipboardDocumentListIcon,
   HomeIcon,
+  ChatBubbleOvalLeftEllipsisIcon,
 } from "@heroicons/react/24/outline";
 import LawyerOverviewPage from '../../pages/lawyer-dashboard/LawyerOverviewPage';
 import LawyerSettingPage from '../../pages/lawyer-dashboard/LawyerSettingPage';
 import LawyerCasesPage from '../../pages/lawyer-dashboard/LawyerCasesPage';
 import { useTranslation } from 'react-i18next';
+import MessagesPage from '../../pages/dashboard/MessagesPage';
 
 const LawyerDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('agent-overview');
@@ -30,6 +32,8 @@ const LawyerDashboard: React.FC = () => {
         return <LawyerOverviewPage />;
       case 'lawyer-cases':
         return <LawyerCasesPage />;
+      case 'lawyer-messages':
+        return <MessagesPage />;
       case 'lawyer-settings':
         return <LawyerSettingPage />;
       default:
@@ -49,6 +53,12 @@ const LawyerDashboard: React.FC = () => {
       name: t("cases"),
       icon: CalculatorIcon,
       color: "text-green-600",
+    },
+    {
+      id: "lawyer-messages",
+      name: t("messages"),
+      icon: ChatBubbleOvalLeftEllipsisIcon,
+      color: "text-blue-600",
     },
     {
       id: "lawyer-settings",

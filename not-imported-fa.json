@@ -1,0 +1,15 @@
+{
+  "messages": "پیام‌ها",
+  "new_message": "پیام جدید",
+  "start_conversation": "شروع گفتگو",
+  "select_recipient": "انتخاب کاربر",
+  "no_conversations": "هنوز گفتگویی وجود ندارد",
+  "no_messages_yet": "هنوز پیامی ارسال نشده است",
+  "type_a_message": "پیام خود را بنویسید...",
+  "send": "ارسال",
+  "select_conversation": "برای شروع، یک گفتگو را انتخاب کنید",
+  "message_send_error": "ارسال پیام انجام نشد. لطفاً دوباره تلاش کنید.",
+  "conversation_create_error": "ایجاد گفتگو ممکن نشد. لطفاً دوباره تلاش کنید.",
+  "loading": "در حال بارگذاری...",
+  "mark_as_read": "علامت خوانده شد"
+}

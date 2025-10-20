@@ -1126,6 +1126,18 @@
   "no_files": "No files",
   "company_verification": "Company Verification",
   "verified": "Verified",
-
+  "messages": "Messages",
+  "new_message": "New Message",
+  "start_conversation": "Start Conversation",
+  "select_recipient": "Select a user",
+  "no_conversations": "No conversations yet",
+  "no_messages_yet": "No messages yet",
+  "type_a_message": "Type your message...",
+  "send": "Send",
+  "select_conversation": "Select a conversation to start chatting",
+  "message_send_error": "Could not send message. Please try again.",
+  "conversation_create_error": "Could not create conversation. Please try again.",
+  "loading": "Loading...",
+  "mark_as_read": "Mark as read",
   "need_more_info": "Need More Info"
 }

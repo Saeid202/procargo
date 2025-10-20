@@ -7,6 +7,7 @@ import {
   QuestionMarkCircleIcon,
   UserGroupIcon,
   ChatBubbleBottomCenterTextIcon,
+  ChatBubbleOvalLeftEllipsisIcon,
   DocumentTextIcon,
   TruckIcon,
   CurrencyDollarIcon,
@@ -32,6 +33,7 @@ import AdminDocumentsPage from '../../pages/admin/AdminDocumentsPage';
 import AdminCurrencyTransferPage from '../../pages/admin/AdminCurrencyTransferPage';
 import AdminExportPage from '../../pages/admin/AdminExportPage';
 import AdminCompanyVerificationPage from '../../pages/admin/AdminCompanyVerificationPage';
+import MessagesPage from '../../pages/dashboard/MessagesPage';
 
 const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('admin-overview');
@@ -69,6 +71,8 @@ const AdminDashboard: React.FC = () => {
         return <AdminContactPage />;
       case 'admin-support':
         return <AdminSupportPage />;
+      case 'admin-messages':
+        return <MessagesPage />;
       case 'admin-ai':
         return <AdminAIPage />;
       case 'admin-quotations':
@@ -144,6 +148,12 @@ const AdminDashboard: React.FC = () => {
       name: t("contact"),
       icon: QuestionMarkCircleIcon,
       color: "text-indigo-600",
+    },
+    {
+      id: "admin-messages",
+      name: t("messages"),
+      icon: ChatBubbleOvalLeftEllipsisIcon,
+      color: "text-blue-600",
     },
     {
       id: "admin-support",

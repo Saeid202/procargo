@@ -5,11 +5,13 @@ import {
   ClipboardDocumentListIcon,
   HomeIcon,
   TruckIcon,
+  ChatBubbleOvalLeftEllipsisIcon,
 } from "@heroicons/react/24/outline";
 import AgentOverviewPage from '../../pages/agent-dashboard/AgentOverviewPage';
 import AgentOrdersPage from '../../pages/agent-dashboard/AgentOrdersPage';
 import AgentLogisticsPage from '../../pages/agent-dashboard/AgentLogisticsPage';
 import AgentSettingPage from '../../pages/agent-dashboard/AgentSettingPage';
+import MessagesPage from '../../pages/dashboard/MessagesPage';
 import { useTranslation } from 'react-i18next';
 
 const AgentDashboard: React.FC = () => {
@@ -34,6 +36,8 @@ const AgentDashboard: React.FC = () => {
         return <AgentOrdersPage />;
       case 'agent-logistics':
         return <AgentLogisticsPage />;
+      case 'agent-messages':
+        return <MessagesPage />;
       case 'agent-settings':
         return <AgentSettingPage />;
       default:
@@ -58,6 +62,12 @@ const AgentDashboard: React.FC = () => {
       id: "agent-logistics",
       name: t("logistics"),
       icon: TruckIcon,
+      color: "text-blue-600",
+    },
+    {
+      id: "agent-messages",
+      name: t("messages"),
+      icon: ChatBubbleOvalLeftEllipsisIcon,
       color: "text-blue-600",
     },
     {

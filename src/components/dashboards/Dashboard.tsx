@@ -15,6 +15,7 @@ import {
   TruckIcon,
   DocumentCheckIcon,
   ChatBubbleLeftRightIcon,
+  ChatBubbleOvalLeftEllipsisIcon,
   ScaleIcon,
   QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
@@ -22,6 +23,7 @@ import LegalIssuePage from "../../pages/dashboard/LegalIssuePage";
 import CompanyVerificationPage from "../../pages/dashboard/CompanyVerificationPage";
 import LegalServicesPage from "../../pages/dashboard/LegalServicesPage";
 import CurrencyTransferPage from "../../pages/dashboard/CurrencyTransferPage";
+import MessagesPage from "../../pages/dashboard/MessagesPage";
 import { useTranslation } from "react-i18next";
 
 const Dashboard: React.FC = () => {
@@ -69,6 +71,8 @@ const Dashboard: React.FC = () => {
         return <LegalServicesPage />;
       case "support":
         return <SupportPage />;
+      case "messages":
+        return <MessagesPage />;
       case "settings":
         return <SettingsPage />;
       default:
@@ -175,6 +179,12 @@ const Dashboard: React.FC = () => {
       name: t("shipments"),
       icon: TruckIcon,
       color: "text-indigo-600",
+    },
+    {
+      id: "messages",
+      name: t("messages"),
+      icon: ChatBubbleOvalLeftEllipsisIcon,
+      color: "text-blue-600",
     },
     {
       id: "support",
