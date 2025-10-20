@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DashboardLayout from "../layout/DashboardLayout";
 import OverviewPage from "../../pages/dashboard/OverviewPage";
 import OrdersPage from "../../pages/dashboard/OrdersPage";
@@ -33,6 +33,28 @@ const Dashboard: React.FC = () => {
   const { t, i18n } = useTranslation();
   const currentLanguage = i18n.language;
   const isPersian = currentLanguage === "fa" || currentLanguage === "fa-IR";
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const customEvent = event as CustomEvent<{ tabId?: string }>;
+      const tabId = customEvent.detail?.tabId;
+      if (!tabId) {
+        return;
+      }
+      setActiveTab(tabId);
+    };
+
+    window.addEventListener(
+      "procargo:navigate-dashboard-tab",
+      handler as EventListener
+    );
+    return () => {
+      window.removeEventListener(
+        "procargo:navigate-dashboard-tab",
+        handler as EventListener
+      );
+    };
+  }, []);
 
   // Tab change handler
   const handleTabChange = (tab: string) => {

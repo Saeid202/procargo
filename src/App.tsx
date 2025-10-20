@@ -6,6 +6,7 @@ import Dashboard from "./components/dashboards/Dashboard";
 import AuthCallback from "./components/authentication/AuthCallback";
 import Navigation from "./components/Navigation";
 import { AuthProvider } from "./contexts/AuthContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
 import ProtectedRoute from "./components/authentication/ProtectedRoute";
 import AgentDashboard from "./components/dashboards/AgentDashboard";
 import LawyerDashboard from "./components/dashboards/LawyerDashboard";
@@ -22,57 +23,59 @@ import { Toaster } from "react-hot-toast";
 function App() {
   return (
     <AuthProvider>
-      <Router basename="/dashboard">
-        <div className="App">
-          <Navigation />
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/signup" element={<SignUpPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/services" element={<ServicesPage />} />
-            <Route path="/careers" element={<CareersPage />} />
-            <Route path="/news" element={<NewsPage />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/agent"
-              element={
-                <ProtectedRoute>
-                  <AgentDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/lawyer"
-              element={
-                <ProtectedRoute>
-                  <LawyerDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/admin"
-              element={
-                <ProtectedRoute>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
+      <NotificationProvider>
+        <Router basename="/dashboard">
+          <div className="App">
+            <Navigation />
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/signup" element={<SignUpPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/services" element={<ServicesPage />} />
+              <Route path="/careers" element={<CareersPage />} />
+              <Route path="/news" element={<NewsPage />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/agent"
+                element={
+                  <ProtectedRoute>
+                    <AgentDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/lawyer"
+                element={
+                  <ProtectedRoute>
+                    <LawyerDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/admin"
+                element={
+                  <ProtectedRoute>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Toaster />
-        </div>
-      </Router>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Toaster />
+          </div>
+        </Router>
+      </NotificationProvider>
     </AuthProvider>
   );
 }

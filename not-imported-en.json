@@ -11,5 +11,19 @@
   "message_send_error": "Could not send message. Please try again.",
   "conversation_create_error": "Could not create conversation. Please try again.",
   "loading": "Loading...",
-  "mark_as_read": "Mark as read"
+  "mark_as_read": "Mark as read",
+  "notifications_panel_title": "Notifications",
+  "notifications_unread": "{{count}} unread item",
+  "notifications_unread_plural": "{{count}} unread items",
+  "notifications_mark_all": "Mark all read",
+  "notifications_empty": "You're all caught up.",
+  "notifications_dismiss": "Dismiss notification",
+  "notifications_unknown_user": "Unknown",
+  "notifications_conversation": "Conversation",
+  "notifications_new_message": "New message received",
+  "notifications_export_new": "New export request",
+  "notifications_export_product": "New export inquiry: {{product}}",
+  "notifications_export_generic": "A new export request was submitted",
+  "notifications_currency_new": "New currency transfer",
+  "notifications_currency_amount": "Transfer request {{amount}} {{from}} -> {{to}}"
 }

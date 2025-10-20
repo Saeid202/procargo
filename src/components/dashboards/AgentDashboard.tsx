@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DashboardLayout from '../layout/DashboardLayout';
 import {
   CalculatorIcon,
@@ -19,6 +19,28 @@ const AgentDashboard: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const { t } = useTranslation();
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const customEvent = event as CustomEvent<{ tabId?: string }>;
+      const tabId = customEvent.detail?.tabId;
+      if (!tabId) {
+        return;
+      }
+      setActiveTab(tabId);
+    };
+
+    window.addEventListener(
+      "procargo:navigate-dashboard-tab",
+      handler as EventListener
+    );
+    return () => {
+      window.removeEventListener(
+        "procargo:navigate-dashboard-tab",
+        handler as EventListener
+      );
+    };
+  }, []);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);

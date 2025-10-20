@@ -1,9 +1,10 @@
 import React from 'react';
-import { BellIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import { UserCircleIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline';
+import NotificationBell from '../notifications/NotificationBell';
 
 interface HeaderProps {
   activeTab: string;
@@ -107,10 +108,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab }) => {
             </div>
           </div>
 
-          <button className="p-2 text-gray-400 hover:text-gray-500 relative">
-            <BellIcon className="h-6 w-6" />
-            <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
-          </button>
+          <NotificationBell />
 
           <button
             onClick={handleLogout}

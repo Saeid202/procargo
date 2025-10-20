@@ -72,6 +72,29 @@ const AgentOrdersPage: React.FC = () => {
   );
 
   useEffect(() => {
+    const handler = (event: Event) => {
+      const customEvent = event as CustomEvent<{
+        view?: "orders" | "export" | "currency";
+      }>;
+      const view = customEvent.detail?.view;
+      if (view) {
+        setActiveTab(view);
+      }
+    };
+
+    window.addEventListener(
+      "procargo:agent-orders-view",
+      handler as EventListener
+    );
+    return () => {
+      window.removeEventListener(
+        "procargo:agent-orders-view",
+        handler as EventListener
+      );
+    };
+  }, []);
+
+  useEffect(() => {
     if (user) {
       loadOrders();
     }
