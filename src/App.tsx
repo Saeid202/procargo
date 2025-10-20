@@ -22,7 +22,7 @@ import { Toaster } from "react-hot-toast";
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router basename="/dashboard">
         <div className="App">
           <Navigation />
           <Routes>
