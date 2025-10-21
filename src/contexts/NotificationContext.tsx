@@ -10,9 +10,14 @@ import React, {
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthContext";
 import { MessagingService, DirectMessageThread } from "../services/messagingService";
-import { ExportRequest, ExportService } from "../services/exportService";
+import {
+  ExportRequest,
+  ExportResponseRecord,
+  ExportService,
+} from "../services/exportService";
 import {
   CurrencyTransferRequest,
+  CurrencyTransferResponse,
   CurrencyTransferService,
 } from "../services/currencyTransferService";
 import { RolesEnum } from "../abstractions/enums/roles.enum";
@@ -163,8 +168,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   const [userOrders, setUserOrders] = useState<UserOrder[]>([]);
   const [orderResponses, setOrderResponses] = useState<OrderResponseRecord[]>([]);
   const [exportRequests, setExportRequests] = useState<ExportRequest[]>([]);
+  const [exportResponses, setExportResponses] = useState<ExportResponseRecord[]>([]);
   const [currencyTransfers, setCurrencyTransfers] = useState<
     CurrencyTransferRequest[]
+  >([]);
+  const [currencyResponses, setCurrencyResponses] = useState<
+    CurrencyTransferResponse[]
   >([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -173,6 +182,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   const isUser = user?.role === RolesEnum.USER;
   const caseIdsRef = useRef<Set<string>>(new Set());
   const orderNumbersRef = useRef<Set<string>>(new Set());
+  const exportRequestIdsRef = useRef<Set<string>>(new Set());
+  const currencyTransferIdsRef = useRef<Set<string>>(new Set());
 
   const syncPersistedReadState = useCallback(
     (items: AppNotification[]) => {
@@ -567,6 +578,150 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     return [...statusNotifications, ...responseNotifications];
   }, [formatOrderStatus, i18n.language, isUser, orderResponses, stateRef, t, userOrders]);
 
+  const computeUserExportResponseNotifications = useCallback(() => {
+    if (!isUser) {
+      return [] as AppNotification[];
+    }
+
+    const responseLastSeen = parseDate(stateRef.current.lastSeen["export:response"]);
+    const requestMap = new Map(
+      exportRequests
+        .map((request) => [request.id, request])
+        .filter(
+          (entry): entry is [string, ExportRequest] =>
+            Boolean(entry[0]) && Boolean(entry[1])
+        )
+    );
+
+    return exportResponses
+      .filter((response) => {
+        const createdTime = parseDate(response.created_at);
+        return createdTime > responseLastSeen && requestMap.has(response.export_request_id);
+      })
+      .map((response) => {
+        const request = requestMap.get(response.export_request_id);
+        const title = request?.product_name
+          ? t("notifications_export_response_title_with_product", {
+              product: request.product_name,
+            })
+          : t("notifications_export_response_title");
+
+        const price =
+          typeof response.price === "number"
+            ? t("notifications_export_response_price", {
+                price: new Intl.NumberFormat(i18n.language, {
+                  maximumFractionDigits: 2,
+                }).format(response.price || 0),
+              })
+            : null;
+
+        const delivery = response.delivery_date
+          ? t("notifications_export_response_delivery", {
+              deliveryDate: new Date(response.delivery_date).toLocaleDateString(i18n.language),
+            })
+          : null;
+
+        const preview = response.response
+          ? response.response.slice(0, 140)
+          : t("notifications_export_response_preview");
+
+        const description = [price, delivery, preview].filter(Boolean).join(" • ");
+
+        return {
+          id: `export-response-${response.id}`,
+          type: "export" as const,
+          title,
+          description,
+          createdAt: response.created_at || new Date().toISOString(),
+          read: false,
+          metadata: {
+            exportRequestId: response.export_request_id,
+            notificationCategory: "export:response",
+          },
+        };
+      });
+  }, [exportRequests, exportResponses, i18n.language, isUser, stateRef, t]);
+
+  const computeUserCurrencyResponseNotifications = useCallback(() => {
+    if (!isUser) {
+      return [] as AppNotification[];
+    }
+
+    const responseLastSeen = parseDate(stateRef.current.lastSeen["currency:response"]);
+    const transferMap = new Map(
+      currencyTransfers
+        .map((transfer) => [transfer.id, transfer])
+        .filter(
+          (entry): entry is [string, CurrencyTransferRequest] =>
+            Boolean(entry[0]) && Boolean(entry[1])
+        )
+    );
+
+    return currencyResponses
+      .filter((response) => {
+        const createdAt = parseDate(response.created_at);
+        return createdAt > responseLastSeen && transferMap.has(response.transfer_id);
+      })
+      .map((response) => {
+        const transfer = transferMap.get(response.transfer_id);
+        const agentName = response.agent
+          ? [response.agent.first_name, response.agent.last_name]
+              .filter(Boolean)
+              .join(" ") || response.agent.email || null
+          : null;
+
+        const title = agentName
+          ? t("notifications_currency_response_title_with_agent", { agent: agentName })
+          : t("notifications_currency_response_title");
+
+        const rate =
+          typeof response.offered_rate === "number"
+            ? t("notifications_currency_response_rate", {
+                rate: new Intl.NumberFormat(i18n.language, {
+                  maximumFractionDigits: 4,
+                }).format(response.offered_rate || 0),
+              })
+            : null;
+
+        const fee =
+          typeof response.fee === "number"
+            ? t("notifications_currency_response_fee", {
+                fee: new Intl.NumberFormat(i18n.language, {
+                  maximumFractionDigits: 2,
+                }).format(response.fee || 0),
+              })
+            : null;
+
+        const delivery = response.delivery_date
+          ? t("notifications_currency_response_delivery", {
+              date: new Date(response.delivery_date).toLocaleDateString(i18n.language),
+            })
+          : null;
+
+        const preview = response.response
+          ? response.response.slice(0, 140)
+          : t("notifications_currency_response_preview");
+
+        const description = [rate, fee, delivery, preview].filter(Boolean).join(" • ");
+
+        return {
+          id: `currency-response-${response.id}`,
+          type: "currency" as const,
+          title,
+          description,
+          createdAt: response.created_at || new Date().toISOString(),
+          read: false,
+          metadata: {
+            transferId: response.transfer_id,
+            amount: transfer?.amount,
+            fromCurrency: transfer?.from_currency,
+            toCurrency: transfer?.to_currency,
+            notificationCategory: "currency:response",
+          },
+        };
+      });
+  }, [currencyResponses, currencyTransfers, i18n.language, isUser, stateRef, t]);
+
   const computeExportNotifications = useCallback(() => {
     if (!isAgent) {
       return [] as AppNotification[];
@@ -628,6 +783,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
       ...computeLawyerCaseNotifications(),
       ...computeUserCaseNotifications(),
       ...computeUserOrderNotifications(),
+      ...computeUserExportResponseNotifications(),
+      ...computeUserCurrencyResponseNotifications(),
       ...computeExportNotifications(),
       ...computeCurrencyNotifications(),
     ];
@@ -644,6 +801,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [
     computeCurrencyNotifications,
     computeExportNotifications,
+    computeUserCurrencyResponseNotifications,
+    computeUserExportResponseNotifications,
     computeLawyerCaseNotifications,
     computeUserCaseNotifications,
     computeUserOrderNotifications,
@@ -661,19 +820,31 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
       setUserOrders([]);
       setOrderResponses([]);
       setExportRequests([]);
+      setExportResponses([]);
       setCurrencyTransfers([]);
+      setCurrencyResponses([]);
       return;
     }
 
     setIsLoading(true);
     try {
       let persistChanged = false;
+      const exportPromise = isAgent
+        ? ExportService.getAllExportRequests()
+        : isUser
+        ? ExportService.getExportRequestsByUser(userId)
+        : Promise.resolve({ exports: [] as ExportRequest[], error: null });
+
+      const currencyPromise = isAgent
+        ? CurrencyTransferService.getAllTransfers()
+        : isUser
+        ? CurrencyTransferService.getTransfersByUser(userId)
+        : Promise.resolve({ transfers: [] as CurrencyTransferRequest[], error: null });
+
       const [threadRes, exportRes, currencyRes, ordersRes, casesRes, userOrdersRes] = await Promise.all([
         MessagingService.fetchThreads(),
-        isAgent ? ExportService.getAllExportRequests() : Promise.resolve({ exports: [] }),
-        isAgent
-          ? CurrencyTransferService.getAllTransfers()
-          : Promise.resolve({ transfers: [] }),
+        exportPromise,
+        currencyPromise,
         isAgent
           ? SupabaseService.getAgentOrders()
           : Promise.resolve({ orders: [] as AgentOrder[], error: null }),
@@ -691,9 +862,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         setThreads(threadRes.data);
       }
       if (exportRes.exports) {
-        setExportRequests(exportRes.exports);
+        const exportList = (exportRes.exports as ExportRequest[]) || [];
+        setExportRequests(exportList);
         if (isAgent && !stateRef.current.lastSeen["export"]) {
-          const latest = exportRes.exports
+          const latest = exportList
             .map((item) => parseDate(item.created_at))
             .reduce((max, value) => (value > max ? value : max), 0);
           if (latest > 0) {
@@ -703,11 +875,42 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
           }
           persistChanged = true;
         }
+        if (isUser) {
+          const requestIds = exportList
+            .map((item) => item.id)
+            .filter((value): value is string => Boolean(value));
+          if (requestIds.length > 0) {
+            const exportResponsesRes = await ExportService.getExportResponsesByRequestIds(requestIds);
+            if (exportResponsesRes.error) {
+              console.error("Failed to load export responses", exportResponsesRes.error);
+            }
+            if (exportResponsesRes.responses) {
+              setExportResponses(exportResponsesRes.responses);
+              if (!stateRef.current.lastSeen["export:response"] && exportResponsesRes.responses.length > 0) {
+                const latestResponse = exportResponsesRes.responses
+                  .map((item) => parseDate(item.created_at))
+                  .reduce((max, value) => (value > max ? value : max), 0);
+                stateRef.current.lastSeen["export:response"] =
+                  latestResponse > 0 ? new Date(latestResponse).toISOString() : new Date().toISOString();
+                persistChanged = true;
+              }
+            }
+          } else {
+            setExportResponses([]);
+          }
+        } else {
+          setExportResponses([]);
+        }
+      } else {
+        setExportRequests([]);
+        setExportResponses([]);
       }
+
       if ("transfers" in currencyRes && currencyRes.transfers) {
-        setCurrencyTransfers(currencyRes.transfers);
+        const transferList = (currencyRes.transfers as CurrencyTransferRequest[]) || [];
+        setCurrencyTransfers(transferList);
         if (isAgent && !stateRef.current.lastSeen["currency"]) {
-          const latest = currencyRes.transfers
+          const latest = transferList
             .map((item) => parseDate(item.created_at))
             .reduce((max, value) => (value > max ? value : max), 0);
           if (latest > 0) {
@@ -716,6 +919,35 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
             stateRef.current.lastSeen["currency"] = new Date().toISOString();
           }
           persistChanged = true;
+        }
+        if (isUser) {
+          const transferIds = transferList
+            .map((item) => item.id)
+            .filter((value): value is string => Boolean(value));
+          if (transferIds.length > 0) {
+            const currencyResponsesRes = await CurrencyTransferService.getResponsesForTransfers(transferIds);
+            if (currencyResponsesRes.error) {
+              console.error("Failed to load currency transfer responses", currencyResponsesRes.error);
+            }
+            if (currencyResponsesRes.responses) {
+              setCurrencyResponses(currencyResponsesRes.responses);
+              if (
+                !stateRef.current.lastSeen["currency:response"] &&
+                currencyResponsesRes.responses.length > 0
+              ) {
+                const latestResponse = currencyResponsesRes.responses
+                  .map((item) => parseDate(item.created_at))
+                  .reduce((max, value) => (value > max ? value : max), 0);
+                stateRef.current.lastSeen["currency:response"] =
+                  latestResponse > 0 ? new Date(latestResponse).toISOString() : new Date().toISOString();
+                persistChanged = true;
+              }
+            }
+          } else {
+            setCurrencyResponses([]);
+          }
+        } else {
+          setCurrencyResponses([]);
         }
       }
       if ("error" in ordersRes && ordersRes.error) {
@@ -878,11 +1110,40 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [userOrders]);
 
   useEffect(() => {
+    exportRequestIdsRef.current = new Set(
+      exportRequests
+        .map((item) => item.id)
+        .filter((value): value is string => Boolean(value))
+    );
+  }, [exportRequests]);
+
+  useEffect(() => {
+    currencyTransferIdsRef.current = new Set(
+      currencyTransfers
+        .map((item) => item.id)
+        .filter((value): value is string => Boolean(value))
+    );
+  }, [currencyTransfers]);
+
+  useEffect(() => {
     if (!userId) {
       return;
     }
     rebuildNotifications();
-  }, [caseResponses, cases, currencyTransfers, exportRequests, orderResponses, orders, rebuildNotifications, threads, userId, userOrders]);
+  }, [
+    caseResponses,
+    cases,
+    currencyResponses,
+    currencyTransfers,
+    exportRequests,
+    exportResponses,
+    orderResponses,
+    orders,
+    rebuildNotifications,
+    threads,
+    userId,
+    userOrders,
+  ]);
 
   useEffect(() => {
     if (!userId) {
@@ -1040,6 +1301,174 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
             }
             return [enrichedOrder, ...prev].sort(
               (a, b) => parseDate(b.updated_at || b.created_at) - parseDate(a.updated_at || a.created_at)
+            );
+          });
+        }
+      );
+
+      channel.on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "export_requests",
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          const request = payload.new as ExportRequest | null;
+          const oldRequest = payload.old as ExportRequest | null;
+          if (payload.eventType === "DELETE" && oldRequest?.id) {
+            setExportRequests((prev) => {
+              const next = prev.filter((item) => item.id !== oldRequest.id);
+              exportRequestIdsRef.current = new Set(
+                next
+                  .map((item) => item.id)
+                  .filter((value): value is string => Boolean(value))
+              );
+              return next;
+            });
+            return;
+          }
+          if (!request || request.user_id !== userId) {
+            return;
+          }
+          setExportRequests((prev) => {
+            const exists = prev.find((item) => item.id === request.id);
+            const next = exists
+              ? prev
+                  .map((item) => (item.id === request.id ? { ...item, ...request } : item))
+                  .sort((a, b) => parseDate(b.created_at) - parseDate(a.created_at))
+              : [request, ...prev].sort(
+                  (a, b) => parseDate(b.created_at) - parseDate(a.created_at)
+                );
+            exportRequestIdsRef.current = new Set(
+              next
+                .map((item) => item.id)
+                .filter((value): value is string => Boolean(value))
+            );
+            return next;
+          });
+        }
+      );
+
+      channel.on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "export_response",
+        },
+        (payload) => {
+          if (payload.eventType === "DELETE") {
+            const oldResponse = payload.old as ExportResponseRecord | null;
+            if (!oldResponse?.id) {
+              return;
+            }
+            setExportResponses((prev) => prev.filter((item) => item.id !== oldResponse.id));
+            return;
+          }
+
+          const response = payload.new as ExportResponseRecord | null;
+          if (!response || !exportRequestIdsRef.current.has(response.export_request_id)) {
+            return;
+          }
+          const enrichedResponse: ExportResponseRecord = {
+            ...response,
+            created_at: response.created_at || payload.commit_timestamp || response.created_at,
+          };
+          setExportResponses((prev) => {
+            const exists = prev.find((item) => item.id === enrichedResponse.id);
+            if (exists) {
+              return prev
+                .map((item) => (item.id === enrichedResponse.id ? { ...item, ...enrichedResponse } : item))
+                .sort((a, b) => parseDate(b.created_at) - parseDate(a.created_at));
+            }
+            return [enrichedResponse, ...prev].sort(
+              (a, b) => parseDate(b.created_at) - parseDate(a.created_at)
+            );
+          });
+        }
+      );
+
+      channel.on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "currency_transfer_requests",
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          const transfer = payload.new as CurrencyTransferRequest | null;
+          const oldTransfer = payload.old as CurrencyTransferRequest | null;
+          if (payload.eventType === "DELETE" && oldTransfer?.id) {
+            setCurrencyTransfers((prev) => {
+              const next = prev.filter((item) => item.id !== oldTransfer.id);
+              currencyTransferIdsRef.current = new Set(
+                next
+                  .map((item) => item.id)
+                  .filter((value): value is string => Boolean(value))
+              );
+              return next;
+            });
+            return;
+          }
+          if (!transfer || transfer.user_id !== userId) {
+            return;
+          }
+          setCurrencyTransfers((prev) => {
+            const exists = prev.find((item) => item.id === transfer.id);
+            const next = exists
+              ? prev
+                  .map((item) => (item.id === transfer.id ? { ...item, ...transfer } : item))
+                  .sort((a, b) => parseDate(b.created_at) - parseDate(a.created_at))
+              : [transfer, ...prev].sort(
+                  (a, b) => parseDate(b.created_at) - parseDate(a.created_at)
+                );
+            currencyTransferIdsRef.current = new Set(
+              next
+                .map((item) => item.id)
+                .filter((value): value is string => Boolean(value))
+            );
+            return next;
+          });
+        }
+      );
+
+      channel.on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "currency_transfer_responses",
+        },
+        (payload) => {
+          if (payload.eventType === "DELETE") {
+            const oldResponse = payload.old as CurrencyTransferResponse | null;
+            if (!oldResponse?.id) {
+              return;
+            }
+            setCurrencyResponses((prev) => prev.filter((item) => item.id !== oldResponse.id));
+            return;
+          }
+
+          const response = payload.new as CurrencyTransferResponse | null;
+          if (!response || !currencyTransferIdsRef.current.has(response.transfer_id)) {
+            return;
+          }
+          const enrichedResponse: CurrencyTransferResponse = {
+            ...response,
+            created_at: response.created_at || payload.commit_timestamp || response.created_at,
+          };
+          setCurrencyResponses((prev) => {
+            const exists = prev.find((item) => item.id === enrichedResponse.id);
+            if (exists) {
+              return prev
+                .map((item) => (item.id === enrichedResponse.id ? { ...item, ...enrichedResponse } : item))
+                .sort((a, b) => parseDate(b.created_at) - parseDate(a.created_at));
+            }
+            return [enrichedResponse, ...prev].sort(
+              (a, b) => parseDate(b.created_at) - parseDate(a.created_at)
             );
           });
         }

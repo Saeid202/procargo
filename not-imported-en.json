@@ -137,5 +137,16 @@
   "currency_transfer_status_pending": "Pending",
   "currency_transfer_status_in_review": "In Review",
   "currency_transfer_status_processed": "Processed",
-  "currency_transfer_status_rejected": "Rejected"
+  "currency_transfer_status_rejected": "Rejected",
+  "notifications_export_response_title": "New export response available",
+  "notifications_export_response_title_with_product": "Update on {{product}} export inquiry",
+  "notifications_export_response_price": "Offer {{price}}",
+  "notifications_export_response_delivery": "Estimated delivery {{deliveryDate}}",
+  "notifications_export_response_preview": "An agent responded to your export request",
+  "notifications_currency_response_title": "New reply for your currency transfer",
+  "notifications_currency_response_title_with_agent": "{{agent}} replied to your currency transfer",
+  "notifications_currency_response_rate": "Rate {{rate}}",
+  "notifications_currency_response_fee": "Fee {{fee}}",
+  "notifications_currency_response_delivery": "Settlement {{date}}",
+  "notifications_currency_response_preview": "An agent responded with more details"
 }
