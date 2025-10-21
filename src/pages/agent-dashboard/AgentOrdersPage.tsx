@@ -406,264 +406,187 @@ const AgentOrdersPage: React.FC = () => {
       {activeTab === "orders" && (
         <>
           <div className="bg-white shadow overflow-hidden rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t("order_id")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t("buyer")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t("product")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t("qty")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t("status")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t("date")}
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t("actions")}
-                </th>
-              </tr>
-            </thead>
-            <tbody
-              className="bg-white divide-y divide-gray-200"
-              id="orderTableBody"
-            >
-              {orders.map((order, index) => (
-                <>
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {order.order_number}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {order.destination_country}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {order.suppliers
-                        ?.map((supplier) => supplier.product_name)
-                        .join(", ")}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {order.suppliers?.reduce(
-                        (acc, supplier) => acc + supplier.quantity,
-                        0
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={cn(
-                          "capitalize inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-                          order.status === "pending"
-                            ? "bg-red-100 text-red-800"
-                            : order.status === "in-progress"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-green-100 text-green-800"
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t("order_id")}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t("buyer")}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t("product")}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t("qty")}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t("status")}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t("date")}
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t("actions")}
+                  </th>
+                </tr>
+              </thead>
+              <tbody
+                className="bg-white divide-y divide-gray-200"
+                id="orderTableBody"
+              >
+                {orders.map((order, index) => (
+                  <>
+                    <tr className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {order.order_number}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {order.destination_country}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        {order.suppliers
+                          ?.map((supplier) => supplier.product_name)
+                          .join(", ")}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {order.suppliers?.reduce(
+                          (acc, supplier) => acc + supplier.quantity,
+                          0
                         )}
-                      >
-                        {order.status?.replace("-", " ")}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(order.created_at).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => toggleOrderDetails(`order${index}`)}
-                        className="text-blue-600 hover:text-blue-900 mr-3"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={cn(
+                            "capitalize inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                            order.status === "pending"
+                              ? "bg-red-100 text-red-800"
+                              : order.status === "in-progress"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-green-100 text-green-800"
+                          )}
                         >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                      </button>
-                      <button
-                        // onclick="downloadOrder('ORD-001')"
-                        className="text-green-600 hover:text-green-900"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                          {order.status?.replace("-", " ")}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(order.created_at).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button
+                          onClick={() => toggleOrderDetails(`order${index}`)}
+                          className="text-blue-600 hover:text-blue-900 mr-3"
                         >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                  <tr
-                    id={`order${index}-details`}
-                    className={cn(
-                      "hidden",
-                      order.status === "pending"
-                        ? "bg-blue-50"
-                        : order.status === "in-progress"
-                        ? "bg-yellow-50"
-                        : "bg-green-50"
-                    )}
-                  >
-                    <td className="px-6 py-4" colSpan={7}>
-                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="lg:col-span-2 space-y-4">
-                          <div className="bg-white rounded-lg p-4 border border-gray-200">
-                            <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
-                              <svg
-                                className="w-5 h-5 mr-2 text-blue-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                  stroke-width="2"
-                                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                                />
-                              </svg>
-                              {t("product_information")}
-                            </h4>
-                            <div className="grid grid-cols-2 gap-4 text-sm">
-                              <div>
-                                <span className="font-medium">
-                                  {t("name")}:
-                                </span>{" "}
-                                {order.suppliers
-                                  ?.map((supplier) => supplier.product_name)
-                                  .join(", ")}
-                              </div>
-                              <div>
-                                <span className="font-medium">
-                                  {t("quantity")}:
-                                </span>{" "}
-                                {order.suppliers?.reduce(
-                                  (acc, supplier) => acc + supplier.quantity,
-                                  0
-                                )}{" "}
-                                units
-                              </div>
-                              {/* //TODO-Question: What is the category? */}
-                              <div>
-                                <span className="font-medium">
-                                  {t("category")}:
-                                </span>{" "}
-                                Commercial Equipment
-                              </div>
-                              <div>
-                                <span className="font-medium">
-                                  {t("priority")}:
-                                </span>{" "}
-                                <span className="text-red-600 font-medium capitalize">
-                                  {order.priority}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="bg-white rounded-lg p-4 border border-gray-200">
-                            <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
-                              <svg
-                                className="w-5 h-5 mr-2 text-green-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                  stroke-width="2"
-                                  d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-                                />
-                              </svg>
-                              {t("supplier_links")}
-                            </h4>
-                            {order.suppliers?.map((supplier) => (
-                              <div className="space-y-2 text-sm">
-                                <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                                  <span className="text-blue-600 overflow-auto">
-                                    {supplier.supplier_links?.[0].url}
-                                  </span>
-                                  <span className="text-xs text-gray-500">
-                                    {supplier.supplier_links?.[0].description}
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          // onclick="downloadOrder('ORD-001')"
+                          className="text-green-600 hover:text-green-900"
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                          </svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr
+                      id={`order${index}-details`}
+                      className={cn(
+                        "hidden",
+                        order.status === "pending"
+                          ? "bg-blue-50"
+                          : order.status === "in-progress"
+                          ? "bg-yellow-50"
+                          : "bg-green-50"
+                      )}
+                    >
+                      <td className="px-6 py-4" colSpan={7}>
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                          <div className="lg:col-span-2 space-y-4">
+                            <div className="bg-white rounded-lg p-4 border border-gray-200">
+                              <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+                                <svg
+                                  className="w-5 h-5 mr-2 text-blue-600"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                  />
+                                </svg>
+                                {t("product_information")}
+                              </h4>
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <span className="font-medium">
+                                    {t("name")}:
+                                  </span>{" "}
+                                  {order.suppliers
+                                    ?.map((supplier) => supplier.product_name)
+                                    .join(", ")}
+                                </div>
+                                <div>
+                                  <span className="font-medium">
+                                    {t("quantity")}:
+                                  </span>{" "}
+                                  {order.suppliers?.reduce(
+                                    (acc, supplier) => acc + supplier.quantity,
+                                    0
+                                  )}{" "}
+                                  units
+                                </div>
+                                {/* //TODO-Question: What is the category? */}
+                                <div>
+                                  <span className="font-medium">
+                                    {t("category")}:
+                                  </span>{" "}
+                                  Commercial Equipment
+                                </div>
+                                <div>
+                                  <span className="font-medium">
+                                    {t("priority")}:
+                                  </span>{" "}
+                                  <span className="text-red-600 font-medium capitalize">
+                                    {order.priority}
                                   </span>
                                 </div>
                               </div>
-                            ))}
-                          </div>
+                            </div>
 
-                          <div className="bg-white rounded-lg p-4 border border-gray-200">
-                            <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
-                              <svg
-                                className="w-5 h-5 mr-2 text-purple-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                  stroke-width="2"
-                                  d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                                />
-                              </svg>
-                              {t("attachments")}
-                            </h4>
-                            {order.suppliers?.map((supplier) => (
-                              <>
-                                {supplier?.supplier_files?.map((file) => (
-                                  <>
-                                    <div className="flex gap-3">
-                                      <a
-                                        href={file.file_url}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm"
-                                      >
-                                        <svg
-                                          className="w-4 h-4"
-                                          fill="currentColor"
-                                          viewBox="0 0 20 20"
-                                        >
-                                          <path
-                                            fill-rule="evenodd"
-                                            d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                                            clip-rule="evenodd"
-                                          />
-                                        </svg>
-                                        {file.file_name}
-                                      </a>
-                                    </div>
-                                  </>
-                                ))}
-                              </>
-                            ))}
-                          </div>
-
-                          {order.status === "completed" && (
                             <div className="bg-white rounded-lg p-4 border border-gray-200">
                               <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
                                 <svg
@@ -676,541 +599,275 @@ const AgentOrdersPage: React.FC = () => {
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="2"
+                                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                                  />
+                                </svg>
+                                {t("supplier_links")}
+                              </h4>
+                              {order.suppliers?.map((supplier) => (
+                                <div className="space-y-2 text-sm">
+                                  <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                    <span className="text-blue-600 overflow-auto">
+                                      {supplier.supplier_links?.[0].url}
+                                    </span>
+                                    <span className="text-xs text-gray-500">
+                                      {supplier.supplier_links?.[0].description}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            <div className="bg-white rounded-lg p-4 border border-gray-200">
+                              <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+                                <svg
+                                  className="w-5 h-5 mr-2 text-purple-600"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                                  />
+                                </svg>
+                                {t("attachments")}
+                              </h4>
+                              {order.suppliers?.map((supplier) => (
+                                <>
+                                  {supplier?.supplier_files?.map((file) => (
+                                    <>
+                                      <div className="flex gap-3">
+                                        <a
+                                          href={file.file_url}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm"
+                                        >
+                                          <svg
+                                            className="w-4 h-4"
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                          >
+                                            <path
+                                              fill-rule="evenodd"
+                                              d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                                              clip-rule="evenodd"
+                                            />
+                                          </svg>
+                                          {file.file_name}
+                                        </a>
+                                      </div>
+                                    </>
+                                  ))}
+                                </>
+                              ))}
+                            </div>
+
+                            {order.status === "completed" && (
+                              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+                                  <svg
+                                    className="w-5 h-5 mr-2 text-green-600"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="2"
+                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
+                                  {t("order_summary")}
+                                </h4>
+                                <div className="grid grid-cols-3 gap-4 text-center">
+                                  <div className="p-3 bg-green-50 rounded-lg">
+                                    <p className="text-xs text-gray-600">
+                                      {t("final_price")}
+                                    </p>
+                                    <p className="text-lg font-bold text-green-600">
+                                      ${order.total_value}
+                                    </p>
+                                  </div>
+                                  <div className="p-3 bg-blue-50 rounded-lg">
+                                    {/* //TODO-Question: Delivery Date */}
+                                    <p className="text-xs text-gray-600">
+                                      {t("delivery_date")}
+                                    </p>
+                                    <p className="text-sm font-semibold text-blue-600">
+                                      May 15, 2025
+                                    </p>
+                                  </div>
+                                  <div className="p-3 bg-purple-50 rounded-lg">
+                                    {/* //TODO-Question: Status */}
+                                    <p className="text-xs text-gray-600">
+                                      {t("status")}
+                                    </p>
+                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                      {t("delivered")}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="space-y-4">
+                            <div className="bg-white rounded-lg p-4 border border-gray-200">
+                              <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+                                <svg
+                                  className="w-5 h-5 mr-2 text-orange-600"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
                                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                                   />
                                 </svg>
-                                {t("order_summary")}
+                                {t("current_status")}
                               </h4>
-                              <div className="grid grid-cols-3 gap-4 text-center">
-                                <div className="p-3 bg-green-50 rounded-lg">
-                                  <p className="text-xs text-gray-600">
-                                    {t("final_price")}
-                                  </p>
-                                  <p className="text-lg font-bold text-green-600">
-                                    ${order.total_value}
-                                  </p>
-                                </div>
-                                <div className="p-3 bg-blue-50 rounded-lg">
-                                  {/* //TODO-Question: Delivery Date */}
-                                  <p className="text-xs text-gray-600">
-                                    {t("delivery_date")}
-                                  </p>
-                                  <p className="text-sm font-semibold text-blue-600">
-                                    May 15, 2025
-                                  </p>
-                                </div>
-                                <div className="p-3 bg-purple-50 rounded-lg">
-                                  {/* //TODO-Question: Status */}
-                                  <p className="text-xs text-gray-600">
-                                    {t("status")}
-                                  </p>
-                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    {t("delivered")}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="space-y-4">
-                          <div className="bg-white rounded-lg p-4 border border-gray-200">
-                            <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
-                              <svg
-                                className="w-5 h-5 mr-2 text-orange-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                  stroke-width="2"
-                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                              </svg>
-                              {t("current_status")}
-                            </h4>
-                            <div className="text-center">
-                              <span
-                                className={cn(
-                                  "capitalize inline-flex items-center px-3 py-1 rounded-full text-sm font-medium",
-                                  order.status === "pending"
-                                    ? "bg-red-100 text-red-800"
-                                    : order.status === "in-progress"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-green-100 text-green-800"
-                                )}
-                              >
-                                {order.status?.replace("-", " ")}
-                              </span>
-                              <p className="text-xs text-gray-600 mt-1">
-                                {t("waiting_for_response")}
-                              </p>
-                            </div>
-                          </div>
-
-                          {order.status === "completed" ? (
-                            <div className="bg-white rounded-lg p-4 border border-gray-200">
-                              <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
-                                <svg
-                                  className="w-5 h-5 mr-2 text-blue-600"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                                  />
-                                </svg>
-                                {t("agent_notes")}
-                              </h4>
-                              <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                                {t("order_successfully_completed")}.{" "}
-                                {t("buyer_satisfied_with_delivery")}.{" "}
-                                {t(
-                                  "all_requirements_met_and_product_quality_exceeded_expectations"
-                                )}
-                                .
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="bg-white rounded-lg p-4 border border-gray-200">
-                              <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
-                                <svg
-                                  className="w-5 h-5 mr-2 text-blue-600"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                                  />
-                                </svg>
-                                {t("quick_response")}
-                              </h4>
-                              <form className="space-y-3">
-                                <textarea
-                                  placeholder={t("type_your_response")}
-                                  rows={3}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm resize-none"
-                                  value={orderResponse}
-                                  onChange={(e) =>
-                                    setOrderResponse(e.target.value)
-                                  }
-                                ></textarea>
-                                <div className="grid grid-cols-2 gap-2">
-                                  <input
-                                    type="number"
-                                    placeholder={t("price_dollar")}
-                                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                                    value={orderQuickPrice}
-                                    onChange={(e) =>
-                                      setOrderQuickPrice(Number(e.target.value))
-                                    }
-                                  />
-                                  <input
-                                    type="date"
-                                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                                    value={orderQuickDeliveryDate}
-                                    onChange={(e) =>
-                                      setOrderQuickDeliveryDate(e.target.value)
-                                    }
-                                  />
-                                </div>
-                                <div className="flex gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={async () =>
-                                      await createOrderResponse(
-                                        order.order_number
-                                      )
-                                    }
-                                    className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium"
-                                  >
-                                    {t("send_reply")}
-                                  </button>
-                                  <button
-                                    onClick={async () =>
-                                      await updateOrderStatus(
-                                        order.order_number,
-                                        "in-progress"
-                                      )
-                                    }
-                                    type="button"
-                                    className="px-3 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 text-sm font-medium"
-                                  >
-                                    {t("in_progress")}
-                                  </button>
-                                </div>
-                              </form>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                </>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Export Requests inside Orders tab */}
-        <div className="mt-8">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-gray-900 flex items-center">
-              <DocumentTextIcon className="h-6 w-6 mr-2 text-blue-600" />
-              {t("export")}
-            </h2>
-            <button
-              onClick={loadExportRequests}
-              className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-md border border-gray-300 bg-white hover:bg-gray-50"
-            >
-              <ArrowPathIcon className="h-5 w-5 mr-1" />
-              {t("refresh")}
-            </button>
-          </div>
-
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm mb-6">
-            <div className="px-6 py-4 grid md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t("status")}
-                </label>
-                <select
-                  value={exportFilterStatus}
-                  onChange={(e) => setExportFilterStatus(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                >
-                  <option value="all">{t("all")}</option>
-                  <option value="pending">{t("pending")}</option>
-                  <option value="in_review">{t("in_review")}</option>
-                  <option value="processed">{t("processed")}</option>
-                  <option value="rejected">{t("rejected")}</option>
-                </select>
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t("search")}
-                </label>
-                <input
-                  value={exportSearchTerm}
-                  onChange={(e) => setExportSearchTerm(e.target.value)}
-                  placeholder={t("search_placeholder")}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {t("all_requests")}
-              </h3>
-            </div>
-
-            {exportLoading ? (
-              <div className="p-6 text-center">
-                <ArrowPathIcon className="h-6 w-6 mx-auto text-gray-400 animate-spin" />
-                <p className="mt-2 text-gray-600">{t("loading")}</p>
-              </div>
-            ) : filteredExports.length === 0 ? (
-              <div className="text-center py-12">
-                <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h4 className="mt-2 text-sm font-medium text-gray-900">
-                  {t("no_requests_found")}
-                </h4>
-                <p className="mt-1 text-sm text-gray-500">
-                  {t("no_requests_found")}
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        {t("company")}
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        {t("product")}
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        {t("status")}
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        {t("created_at")}
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        {t("actions")}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredExports.map((r, index) => (
-                      <>
-                        <tr key={r.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {r.company_name || "-"}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {r.product_name || "-"}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            <span
-                              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getCurrencyStatusBadge(
-                                r.status?.toLowerCase()
-                              )}`}
-                            >
-                              {r.status}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {r.created_at
-                              ? new Date(r.created_at).toLocaleString()
-                              : "-"}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button
-                              onClick={() =>
-                                toggleExportDetails(`orders_export${index}`, r)
-                              }
-                              className="text-blue-600 hover:text-blue-900 mr-3"
-                            >
-                              <svg
-                                className="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                  stroke-width="2"
-                                  d="M19 9l-7 7-7-7"
-                                />
-                              </svg>
-                            </button>
-                          </td>
-                        </tr>
-                        <tr
-                          id={`orders_export${index}-details`}
-                          className="hidden bg-blue-50"
-                        >
-                          <td className="px-6 py-4" colSpan={5}>
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                              <div className="lg:col-span-2 space-y-4">
-                                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                                  <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
-                                    <svg
-                                      className="w-5 h-5 mr-2 text-blue-600"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                                      />
-                                    </svg>
-                                    {t("product_information")}
-                                  </h4>
-                                  <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                      <span className="font-medium">
-                                        {t("company")}:
-                                      </span>{" "}
-                                      {r.company_name || "-"}
-                                    </div>
-                                    <div>
-                                      <span className="font-medium">
-                                        {t("product")}:
-                                      </span>{" "}
-                                      {r.product_name || "-"}
-                                    </div>
-                                    <div>
-                                      <span className="font-medium">
-                                        {t("status")}:
-                                      </span>{" "}
-                                      {r.status || "pending"}
-                                    </div>
-                                    <div>
-                                      <span className="font-medium">
-                                        {t("created_at")}:
-                                      </span>{" "}
-                                      {r.created_at
-                                        ? new Date(r.created_at).toLocaleString()
-                                        : "-"}
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                                  <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
-                                    <svg
-                                      className="w-5 h-5 mr-2 text-purple-600"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                                      />
-                                    </svg>
-                                    {t("attachments")}
-                                  </h4>
-                                  {(exportFilesMap[r.id] || []).length === 0 ? (
-                                    <div className="text-gray-500 text-sm">
-                                      {t("no_files") || "No files"}
-                                    </div>
-                                  ) : (
-                                    <div className="flex gap-3 flex-wrap">
-                                      {(exportFilesMap[r.id] || []).map(
-                                        (file) => (
-                                          <a
-                                            key={file.id}
-                                            href={
-                                              ExportService.getFilePublicUrl(
-                                                file.file_path
-                                              ) || undefined
-                                            }
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm"
-                                          >
-                                            <svg
-                                              className="w-4 h-4"
-                                              fill="currentColor"
-                                              viewBox="0 0 20 20"
-                                            >
-                                              <path
-                                                fillRule="evenodd"
-                                                d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                                                clipRule="evenodd"
-                                              />
-                                            </svg>
-                                            {file.file_name}
-                                          </a>
-                                        )
-                                      )}
-                                    </div>
+                              <div className="text-center">
+                                <span
+                                  className={cn(
+                                    "capitalize inline-flex items-center px-3 py-1 rounded-full text-sm font-medium",
+                                    order.status === "pending"
+                                      ? "bg-red-100 text-red-800"
+                                      : order.status === "in-progress"
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-green-100 text-green-800"
                                   )}
-                                </div>
+                                >
+                                  {order.status?.replace("-", " ")}
+                                </span>
+                                <p className="text-xs text-gray-600 mt-1">
+                                  {t("waiting_for_response")}
+                                </p>
+                              </div>
+                            </div>
 
-                                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                                  <h4 className="font-semibold text-gray-800 mb-3">
-                                    {t("description")}
-                                  </h4>
-                                  <div className="text-gray-900 whitespace-pre-wrap">
-                                    {r.product_description || "-"}
-                                  </div>
+                            {order.status === "completed" ? (
+                              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+                                  <svg
+                                    className="w-5 h-5 mr-2 text-blue-600"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="2"
+                                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                                    />
+                                  </svg>
+                                  {t("agent_notes")}
+                                </h4>
+                                <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                                  {t("order_successfully_completed")}.{" "}
+                                  {t("buyer_satisfied_with_delivery")}.{" "}
+                                  {t(
+                                    "all_requirements_met_and_product_quality_exceeded_expectations"
+                                  )}
+                                  .
                                 </div>
                               </div>
-
-                              <div className="space-y-4">
-                                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                                  <h4 className="font-semibold text-gray-800 mb-3">
-                                    {t("current_status")}
-                                  </h4>
-                                  <div className="text-center">
-                                    <span className="capitalize inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                                      {r.status || "pending"}
-                                    </span>
-                                    <p className="text-xs text-gray-600 mt-1">
-                                      {t("waiting_for_response")}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                                  <h4 className="font-semibold text-gray-800 mb-3">
-                                    {t("update_status")}
-                                  </h4>
-                                  <div className="space-y-3">
-                                    <select
-                                      value={
-                                        exportStatusUpdate[r.id] ||
-                                        r.status ||
-                                        "pending"
-                                      }
+                            ) : (
+                              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+                                  <svg
+                                    className="w-5 h-5 mr-2 text-blue-600"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="2"
+                                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                                    />
+                                  </svg>
+                                  {t("quick_response")}
+                                </h4>
+                                <form className="space-y-3">
+                                  <textarea
+                                    placeholder={t("type_your_response")}
+                                    rows={3}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm resize-none"
+                                    value={orderResponse}
+                                    onChange={(e) =>
+                                      setOrderResponse(e.target.value)
+                                    }
+                                  ></textarea>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <input
+                                      type="number"
+                                      placeholder={t("price_dollar")}
+                                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                      value={orderQuickPrice}
                                       onChange={(e) =>
-                                        setExportStatusUpdate((prev) => ({
-                                          ...prev,
-                                          [r.id]: e.target.value as NonNullable<
-                                            ExportRequest["status"]
-                                          >,
-                                        }))
-                                      }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                                    >
-                                      <option value="pending">
-                                        {t("pending")}
-                                      </option>
-                                      <option value="in_review">
-                                        {t("in_review")}
-                                      </option>
-                                      <option value="processed">
-                                        {t("processed")}
-                                      </option>
-                                      <option value="rejected">
-                                        {t("rejected")}
-                                      </option>
-                                    </select>
-                                    <textarea
-                                      value={
-                                        exportAdminNotesUpdate[r.id] ??
-                                        (r.admin_notes || "")
-                                      }
-                                      onChange={(e) =>
-                                        setExportAdminNotesUpdate((prev) => ({
-                                          ...prev,
-                                          [r.id]: e.target.value,
-                                        }))
-                                      }
-                                      rows={3}
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                                      placeholder={
-                                        t("admin_notes") || "Admin notes"
+                                        setOrderQuickPrice(
+                                          Number(e.target.value)
+                                        )
                                       }
                                     />
-                                    <div className="flex gap-2">
-                                      <button
-                                        type="button"
-                                        onClick={() =>
-                                          handleExportStatusSave(r)
-                                        }
-                                        className="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 text-sm font-medium"
-                                      >
-                                        {t("save")}
-                                      </button>
-                                    </div>
+                                    <input
+                                      type="date"
+                                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                      value={orderQuickDeliveryDate}
+                                      onChange={(e) =>
+                                        setOrderQuickDeliveryDate(
+                                          e.target.value
+                                        )
+                                      }
+                                    />
                                   </div>
-                                </div>
+                                  <div className="flex gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={async () =>
+                                        await createOrderResponse(
+                                          order.order_number
+                                        )
+                                      }
+                                      className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium"
+                                    >
+                                      {t("send_reply")}
+                                    </button>
+                                    <button
+                                      onClick={async () =>
+                                        await updateOrderStatus(
+                                          order.order_number,
+                                          "in-progress"
+                                        )
+                                      }
+                                      type="button"
+                                      className="px-3 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 text-sm font-medium"
+                                    >
+                                      {t("in_progress")}
+                                    </button>
+                                  </div>
+                                </form>
                               </div>
-                            </div>
-                          </td>
-                        </tr>
-                      </>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
         </>
       )}
 

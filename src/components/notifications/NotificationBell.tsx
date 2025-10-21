@@ -6,6 +6,7 @@ import {
   DocumentArrowUpIcon,
   BanknotesIcon,
   XMarkIcon,
+  ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 import { useNotifications } from "../../contexts/NotificationContext";
 import { useAuth } from "../../contexts/AuthContext";
@@ -18,12 +19,14 @@ const iconByType = {
   message: EnvelopeOpenIcon,
   export: DocumentArrowUpIcon,
   currency: BanknotesIcon,
+  order: ClipboardDocumentListIcon,
 };
 
 const badgeColors = {
   message: "bg-blue-100 text-blue-700",
   export: "bg-emerald-100 text-emerald-700",
   currency: "bg-amber-100 text-amber-700",
+  order: "bg-indigo-100 text-indigo-700",
 };
 
 const formatRelativeTime = (locale: string, timestamp: string) => {
@@ -93,7 +96,7 @@ const NotificationBell: React.FC = () => {
 
   const handleNotificationClick = async (
     id: string,
-    type: "message" | "export" | "currency",
+    type: "message" | "export" | "currency" | "order",
     metadata?: Record<string, unknown>
   ) => {
     markAsRead(id);
@@ -122,6 +125,12 @@ const NotificationBell: React.FC = () => {
     if (type === "currency") {
       dispatchDashboardEvent("agent-orders");
       dispatchAgentOrdersEvent("currency");
+      return;
+    }
+
+    if (type === "order") {
+      dispatchDashboardEvent("agent-orders");
+      dispatchAgentOrdersEvent("orders");
     }
   };
 

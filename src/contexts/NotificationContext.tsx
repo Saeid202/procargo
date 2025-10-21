@@ -17,8 +17,9 @@ import {
 } from "../services/currencyTransferService";
 import { RolesEnum } from "../abstractions/enums/roles.enum";
 import { useTranslation } from "react-i18next";
+import { SupabaseService } from "../services/supabaseService";
 
-export type NotificationType = "message" | "export" | "currency";
+export type NotificationType = "message" | "export" | "currency" | "order";
 
 export interface AppNotification {
   id: string;
@@ -29,6 +30,18 @@ export interface AppNotification {
   read: boolean;
   metadata?: Record<string, unknown>;
 }
+
+type AgentOrder = {
+  id: string;
+  order_number: string;
+  created_at: string | null;
+  status?: string | null;
+  priority?: string | null;
+  origin_country?: string | null;
+  destination_country?: string | null;
+  total_value?: number | null;
+  currency?: string | null;
+};
 
 interface NotificationContextValue {
   notifications: AppNotification[];
@@ -125,6 +138,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     usePersistedState(userId);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [threads, setThreads] = useState<DirectMessageThread[]>([]);
+  const [orders, setOrders] = useState<AgentOrder[]>([]);
   const [exportRequests, setExportRequests] = useState<ExportRequest[]>([]);
   const [currencyTransfers, setCurrencyTransfers] = useState<
     CurrencyTransferRequest[]
@@ -205,6 +219,58 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     return notifications;
   }, [threads, userId]);
 
+  const computeOrderNotifications = useCallback(() => {
+    if (!isAgent) {
+      return [] as AppNotification[];
+    }
+
+    const lastSeen = parseDate(stateRef.current.lastSeen["order"]);
+
+    return orders
+      .filter((order) => parseDate(order.created_at) > lastSeen)
+      .map((order) => {
+        const origin =
+          order.origin_country || t("notifications_order_unknown_location");
+        const destination =
+          order.destination_country || t("notifications_order_unknown_location");
+        const amount =
+          typeof order.total_value === "number"
+            ? new Intl.NumberFormat(i18n.language).format(order.total_value)
+            : null;
+
+        const summaryParts = [
+          order.origin_country || order.destination_country
+            ? t("notifications_order_route", { origin, destination })
+            : null,
+          amount && order.currency
+            ? t("notifications_order_value", {
+                amount,
+                currency: order.currency,
+              })
+            : null,
+          order.status
+            ? t("notifications_order_status", { status: order.status })
+            : null,
+        ].filter((part): part is string => Boolean(part));
+
+        return {
+          id: `order-${order.id}-${order.created_at}`,
+          type: "order" as const,
+          title: order.order_number
+            ? t("notifications_order_title", { orderNumber: order.order_number })
+            : t("notifications_order_new"),
+          description:
+            summaryParts.join(" • ") || t("notifications_order_new"),
+          createdAt: order.created_at || new Date().toISOString(),
+          read: false,
+          metadata: {
+            orderId: order.id,
+            orderNumber: order.order_number,
+          },
+        };
+      });
+  }, [i18n.language, isAgent, orders, stateRef, t]);
+
   const computeExportNotifications = useCallback(() => {
     if (!isAgent) {
       return [] as AppNotification[];
@@ -262,6 +328,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   const rebuildNotifications = useCallback(() => {
     const next = [
       ...computeMessageNotifications(),
+      ...computeOrderNotifications(),
       ...computeExportNotifications(),
       ...computeCurrencyNotifications(),
     ];
@@ -278,6 +345,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [
     computeCurrencyNotifications,
     computeExportNotifications,
+    computeOrderNotifications,
     computeMessageNotifications,
     syncPersistedReadState,
   ]);
@@ -285,18 +353,24 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   const refresh = useCallback(async () => {
     if (!userId) {
       setNotifications([]);
+      setOrders([]);
+      setExportRequests([]);
+      setCurrencyTransfers([]);
       return;
     }
 
     setIsLoading(true);
     try {
       let persistChanged = false;
-      const [threadRes, exportRes, currencyRes] = await Promise.all([
+      const [threadRes, exportRes, currencyRes, ordersRes] = await Promise.all([
         MessagingService.fetchThreads(),
         isAgent ? ExportService.getAllExportRequests() : Promise.resolve({ exports: [] }),
         isAgent
           ? CurrencyTransferService.getAllTransfers()
           : Promise.resolve({ transfers: [] }),
+        isAgent
+          ? SupabaseService.getAgentOrders()
+          : Promise.resolve({ orders: [] as AgentOrder[], error: null }),
       ]);
 
       if (threadRes.data) {
@@ -330,6 +404,23 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
           persistChanged = true;
         }
       }
+      if ("error" in ordersRes && ordersRes.error) {
+        console.error("Failed to load orders notifications", ordersRes.error);
+      }
+      if ("orders" in ordersRes) {
+        setOrders((ordersRes.orders as AgentOrder[]) || []);
+        if (isAgent && !stateRef.current.lastSeen["order"] && ordersRes.orders) {
+          const latest = (ordersRes.orders as AgentOrder[])
+            .map((item) => parseDate(item.created_at))
+            .reduce((max, value) => (value > max ? value : max), 0);
+          if (latest > 0) {
+            stateRef.current.lastSeen["order"] = new Date(latest).toISOString();
+          } else {
+            stateRef.current.lastSeen["order"] = new Date().toISOString();
+          }
+          persistChanged = true;
+        }
+      }
       if (persistChanged) {
         savePersisted();
       }
@@ -355,7 +446,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
     rebuildNotifications();
-  }, [currencyTransfers, exportRequests, rebuildNotifications, threads, userId]);
+  }, [currencyTransfers, exportRequests, orders, rebuildNotifications, threads, userId]);
 
   useEffect(() => {
     if (!userId) {
@@ -395,9 +486,35 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
             });
           });
         }
-      );
+    );
 
     if (isAgent) {
+      channel.on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "orders",
+        },
+        (payload) => {
+          const order = payload.new as AgentOrder | null;
+          if (!order) {
+            return;
+          }
+          setOrders((prev) => {
+            const exists = prev.find((item) => item.id === order.id);
+            if (exists) {
+              return prev
+                .map((item) => (item.id === order.id ? { ...item, ...order } : item))
+                .sort((a, b) => parseDate(b.created_at) - parseDate(a.created_at));
+            }
+            return [order, ...prev].sort(
+              (a, b) => parseDate(b.created_at) - parseDate(a.created_at)
+            );
+          });
+        }
+      );
+
       channel.on(
         "postgres_changes",
         {
@@ -490,7 +607,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     const nextReadMap = { ...stateRef.current.readMap };
     notifications.forEach((notification) => {
       nextReadMap[notification.id] = nowIso;
-      if (notification.type === "export" || notification.type === "currency") {
+      if (
+        notification.type === "export" ||
+        notification.type === "currency" ||
+        notification.type === "order"
+      ) {
         stateRef.current.lastSeen[notification.type] = nowIso;
       }
     });

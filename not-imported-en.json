@@ -25,5 +25,11 @@
   "notifications_export_product": "New export inquiry: {{product}}",
   "notifications_export_generic": "A new export request was submitted",
   "notifications_currency_new": "New currency transfer",
-  "notifications_currency_amount": "Transfer request {{amount}} {{from}} -> {{to}}"
+  "notifications_currency_amount": "Transfer request {{amount}} {{from}} -> {{to}}",
+  "notifications_order_new": "New order submitted",
+  "notifications_order_title": "Order {{orderNumber}}",
+  "notifications_order_route": "{{origin}} to {{destination}}",
+  "notifications_order_value": "Value {{amount}} {{currency}}",
+  "notifications_order_status": "Status {{status}}",
+  "notifications_order_unknown_location": "Unknown location"
 }
