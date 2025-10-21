@@ -17,9 +17,9 @@ import {
 } from "../services/currencyTransferService";
 import { RolesEnum } from "../abstractions/enums/roles.enum";
 import { useTranslation } from "react-i18next";
-import { SupabaseService } from "../services/supabaseService";
+import { CaseData, SupabaseService } from "../services/supabaseService";
 
-export type NotificationType = "message" | "export" | "currency" | "order";
+export type NotificationType = "message" | "export" | "currency" | "order" | "case";
 
 export interface AppNotification {
   id: string;
@@ -138,6 +138,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     usePersistedState(userId);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [threads, setThreads] = useState<DirectMessageThread[]>([]);
+  const [cases, setCases] = useState<CaseData[]>([]);
   const [orders, setOrders] = useState<AgentOrder[]>([]);
   const [exportRequests, setExportRequests] = useState<ExportRequest[]>([]);
   const [currencyTransfers, setCurrencyTransfers] = useState<
@@ -146,6 +147,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(false);
 
   const isAgent = user?.role === RolesEnum.AGENT;
+  const isLawyer = user?.role === RolesEnum.LAWYER;
 
   const syncPersistedReadState = useCallback(
     (items: AppNotification[]) => {
@@ -271,6 +273,54 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
       });
   }, [i18n.language, isAgent, orders, stateRef, t]);
 
+  const computeCaseNotifications = useCallback(() => {
+    if (!isLawyer) {
+      return [] as AppNotification[];
+    }
+    const lastSeen = parseDate(stateRef.current.lastSeen["case"]);
+
+    return cases
+      .filter((caseItem) => parseDate(caseItem.created_at) > lastSeen)
+      .map((caseItem) => {
+        const caseIdentifier =
+          caseItem.id || caseItem.created_at || Math.random().toString(36);
+        const statusLabel = caseItem.status
+          ? caseItem.status
+              .toLowerCase()
+              .split("_")
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(" ")
+          : null;
+
+        const defendant = caseItem.defendant_name?.trim()
+          ? t("notifications_case_against", { name: caseItem.defendant_name })
+          : t("notifications_case_unknown_defendant");
+
+        const summaryParts = [
+          defendant,
+          statusLabel
+            ? t("notifications_case_status", { status: statusLabel })
+            : null,
+        ].filter((part): part is string => Boolean(part));
+
+        return {
+          id: `case-${caseIdentifier}-${caseItem.created_at}`,
+          type: "case" as const,
+          title: caseItem.subject
+            ? t("notifications_case_title", { subject: caseItem.subject })
+            : t("notifications_case_new"),
+          description:
+            summaryParts.join(" • ") || t("notifications_case_fallback"),
+          createdAt: caseItem.created_at || new Date().toISOString(),
+          read: false,
+          metadata: {
+            caseId: caseItem.id,
+            status: caseItem.status,
+          },
+        };
+      });
+  }, [cases, isLawyer, stateRef, t]);
+
   const computeExportNotifications = useCallback(() => {
     if (!isAgent) {
       return [] as AppNotification[];
@@ -329,6 +379,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     const next = [
       ...computeMessageNotifications(),
       ...computeOrderNotifications(),
+      ...computeCaseNotifications(),
       ...computeExportNotifications(),
       ...computeCurrencyNotifications(),
     ];
@@ -345,6 +396,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [
     computeCurrencyNotifications,
     computeExportNotifications,
+    computeCaseNotifications,
     computeOrderNotifications,
     computeMessageNotifications,
     syncPersistedReadState,
@@ -353,6 +405,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   const refresh = useCallback(async () => {
     if (!userId) {
       setNotifications([]);
+      setCases([]);
       setOrders([]);
       setExportRequests([]);
       setCurrencyTransfers([]);
@@ -362,7 +415,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(true);
     try {
       let persistChanged = false;
-      const [threadRes, exportRes, currencyRes, ordersRes] = await Promise.all([
+      const [threadRes, exportRes, currencyRes, ordersRes, casesRes] = await Promise.all([
         MessagingService.fetchThreads(),
         isAgent ? ExportService.getAllExportRequests() : Promise.resolve({ exports: [] }),
         isAgent
@@ -371,6 +424,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         isAgent
           ? SupabaseService.getAgentOrders()
           : Promise.resolve({ orders: [] as AgentOrder[], error: null }),
+        isLawyer
+          ? SupabaseService.getCases()
+          : Promise.resolve({ cases: [] as CaseData[], error: null }),
       ]);
 
       if (threadRes.data) {
@@ -421,6 +477,23 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
           persistChanged = true;
         }
       }
+      if ("error" in casesRes && casesRes.error) {
+        console.error("Failed to load case notifications", casesRes.error);
+      }
+      if ("cases" in casesRes) {
+        setCases((casesRes.cases as CaseData[]) || []);
+        if (isLawyer && !stateRef.current.lastSeen["case"] && casesRes.cases) {
+          const latest = (casesRes.cases as CaseData[])
+            .map((item) => parseDate(item.created_at))
+            .reduce((max, value) => (value > max ? value : max), 0);
+          if (latest > 0) {
+            stateRef.current.lastSeen["case"] = new Date(latest).toISOString();
+          } else {
+            stateRef.current.lastSeen["case"] = new Date().toISOString();
+          }
+          persistChanged = true;
+        }
+      }
       if (persistChanged) {
         savePersisted();
       }
@@ -446,7 +519,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
     rebuildNotifications();
-  }, [currencyTransfers, exportRequests, orders, rebuildNotifications, threads, userId]);
+  }, [cases, currencyTransfers, exportRequests, orders, rebuildNotifications, threads, userId]);
 
   useEffect(() => {
     if (!userId) {
@@ -567,6 +640,33 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       );
     }
+    if (isLawyer) {
+      channel.on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "cases",
+        },
+        (payload) => {
+          const caseRecord = payload.new as CaseData | null;
+          if (!caseRecord) {
+            return;
+          }
+          setCases((prev) => {
+            const exists = prev.find((item) => item.id === caseRecord.id);
+            if (exists) {
+              return prev
+                .map((item) => (item.id === caseRecord.id ? { ...item, ...caseRecord } : item))
+                .sort((a, b) => parseDate(b.created_at) - parseDate(a.created_at));
+            }
+            return [caseRecord, ...prev].sort(
+              (a, b) => parseDate(b.created_at) - parseDate(a.created_at)
+            );
+          });
+        }
+      );
+    }
 
     channel.subscribe();
 
@@ -610,7 +710,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
       if (
         notification.type === "export" ||
         notification.type === "currency" ||
-        notification.type === "order"
+        notification.type === "order" ||
+        notification.type === "case"
       ) {
         stateRef.current.lastSeen[notification.type] = nowIso;
       }

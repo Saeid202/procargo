@@ -9,7 +9,6 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import ProtectedRoute from "./components/authentication/ProtectedRoute";
 import AgentDashboard from "./components/dashboards/AgentDashboard";
-import LawyerDashboard from "./components/dashboards/LawyerDashboard";
 import AdminDashboard from "./components/dashboards/AdminDashboard.";
 import AboutPage from "./pages/about/AboutPage";
 import ContactPage from "./pages/contact/ContactPage";
@@ -19,6 +18,7 @@ import NewsPage from "./pages/news/NewsPage";
 import "./lib/i18n";
 import NotFound from "./pages/not-found/NotFound";
 import { Toaster } from "react-hot-toast";
+import LawyerDashboard from "./components/dashboards/LawyerDashboard";
 
 function App() {
   return (

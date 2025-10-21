@@ -7,6 +7,7 @@ import {
   BanknotesIcon,
   XMarkIcon,
   ClipboardDocumentListIcon,
+  ScaleIcon,
 } from "@heroicons/react/24/outline";
 import { useNotifications } from "../../contexts/NotificationContext";
 import { useAuth } from "../../contexts/AuthContext";
@@ -20,6 +21,7 @@ const iconByType = {
   export: DocumentArrowUpIcon,
   currency: BanknotesIcon,
   order: ClipboardDocumentListIcon,
+  case: ScaleIcon,
 };
 
 const badgeColors = {
@@ -27,6 +29,7 @@ const badgeColors = {
   export: "bg-emerald-100 text-emerald-700",
   currency: "bg-amber-100 text-amber-700",
   order: "bg-indigo-100 text-indigo-700",
+  case: "bg-purple-100 text-purple-700",
 };
 
 const formatRelativeTime = (locale: string, timestamp: string) => {
@@ -96,7 +99,7 @@ const NotificationBell: React.FC = () => {
 
   const handleNotificationClick = async (
     id: string,
-    type: "message" | "export" | "currency" | "order",
+    type: "message" | "export" | "currency" | "order" | "case",
     metadata?: Record<string, unknown>
   ) => {
     markAsRead(id);
@@ -105,6 +108,8 @@ const NotificationBell: React.FC = () => {
     if (type === "message" && metadata?.threadId && typeof metadata.threadId === "string") {
       if (user?.role === RolesEnum.AGENT) {
         dispatchDashboardEvent("agent-messages");
+      } else if (user?.role === RolesEnum.LAWYER) {
+        dispatchDashboardEvent("lawyer-messages");
       } else {
         dispatchDashboardEvent("messages");
       }
@@ -131,6 +136,11 @@ const NotificationBell: React.FC = () => {
     if (type === "order") {
       dispatchDashboardEvent("agent-orders");
       dispatchAgentOrdersEvent("orders");
+      return;
+    }
+
+    if (type === "case") {
+      dispatchDashboardEvent("lawyer-cases");
     }
   };
 

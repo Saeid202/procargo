@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
-import DashboardLayout from '../layout/DashboardLayout';
+import React, { useEffect, useState } from "react";
+import DashboardLayout from "../layout/DashboardLayout";
 import {
   CalculatorIcon,
   ClipboardDocumentListIcon,
   HomeIcon,
   ChatBubbleOvalLeftEllipsisIcon,
 } from "@heroicons/react/24/outline";
-import LawyerOverviewPage from '../../pages/lawyer-dashboard/LawyerOverviewPage';
-import LawyerSettingPage from '../../pages/lawyer-dashboard/LawyerSettingPage';
-import LawyerCasesPage from '../../pages/lawyer-dashboard/LawyerCasesPage';
-import { useTranslation } from 'react-i18next';
-import MessagesPage from '../../pages/dashboard/MessagesPage';
+import LawyerOverviewPage from "../../pages/lawyer-dashboard/LawyerOverviewPage";
+import LawyerSettingPage from "../../pages/lawyer-dashboard/LawyerSettingPage";
+import LawyerCasesPage from "../../pages/lawyer-dashboard/LawyerCasesPage";
+import { useTranslation } from "react-i18next";
+import MessagesPage from "../../pages/dashboard/MessagesPage";
 
 const LawyerDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('agent-overview');
+  const [activeTab, setActiveTab] = useState("lawyer-overview");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const { t } = useTranslation();
@@ -23,18 +23,40 @@ const LawyerDashboard: React.FC = () => {
   };
 
   const handleToggleCollapse = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
+    setSidebarCollapsed((prev) => !prev);
   };
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const customEvent = event as CustomEvent<{ tabId?: string }>;
+      const tabId = customEvent.detail?.tabId;
+      if (!tabId) {
+        return;
+      }
+      setActiveTab(tabId);
+    };
+
+    window.addEventListener(
+      "procargo:navigate-dashboard-tab",
+      handler as EventListener
+    );
+    return () => {
+      window.removeEventListener(
+        "procargo:navigate-dashboard-tab",
+        handler as EventListener
+      );
+    };
+  }, []);
 
   const renderPageContent = () => {
     switch (activeTab) {
-      case 'lawyer-overview':
+      case "lawyer-overview":
         return <LawyerOverviewPage />;
-      case 'lawyer-cases':
+      case "lawyer-cases":
         return <LawyerCasesPage />;
-      case 'lawyer-messages':
+      case "lawyer-messages":
         return <MessagesPage />;
-      case 'lawyer-settings':
+      case "lawyer-settings":
         return <LawyerSettingPage />;
       default:
         return <LawyerOverviewPage />;
@@ -70,7 +92,7 @@ const LawyerDashboard: React.FC = () => {
 
   return (
     <DashboardLayout
-      showUserProfile={true}
+      showUserProfile
       showSettings={false}
       sidebarItems={sidebarItems}
       activeTab={activeTab}
@@ -84,3 +106,4 @@ const LawyerDashboard: React.FC = () => {
 };
 
 export default LawyerDashboard;
+
