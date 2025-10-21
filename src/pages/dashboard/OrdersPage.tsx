@@ -7,6 +7,7 @@ import {
   ChatBubbleLeftRightIcon,
   ClockIcon,
   DocumentPlusIcon,
+  PaperAirplaneIcon,
 } from "@heroicons/react/24/outline";
 import {
   OrderResponseRecord,
@@ -14,6 +15,7 @@ import {
 } from "../../services/supabaseService";
 import { QuotationService } from "../../services/quotationService";
 import { OtherRequestService } from "../../services/otherRequestService";
+import { MessagingService } from "../../services/messagingService";
 import { useTranslation } from "react-i18next";
 import { supabase } from "../../lib/supabase";
 
@@ -126,6 +128,13 @@ const OrdersPage: React.FC = () => {
   const [orderResponses, setOrderResponses] = useState<OrderResponseRecord[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [mainTab, setMainTab] = useState<"create" | "history">("create");
+  const [messageTarget, setMessageTarget] = useState<{
+    orderIdentifier: string;
+    agentId: string;
+    orderNumber?: string;
+  } | null>(null);
+  const [messageDraft, setMessageDraft] = useState("");
+  const [messageSending, setMessageSending] = useState(false);
 
   const { t, i18n } = useTranslation();
 
@@ -159,7 +168,8 @@ const OrdersPage: React.FC = () => {
     }
   };
 
-  const parseDate = (value?: string | null) => (value ? new Date(value).getTime() : 0);
+  const parseDate = (value?: string | null) =>
+    value ? new Date(value).getTime() : 0;
 
   const formatOrderStatus = (status?: string | null) => {
     if (!status) {
@@ -197,12 +207,15 @@ const OrdersPage: React.FC = () => {
     if (!user) return;
     try {
       setHistoryLoading(true);
-      const { orders, error: ordersError } = await SupabaseService.getOrdersByUser(user.id);
+      const { orders, error: ordersError } =
+        await SupabaseService.getOrdersByUser(user.id);
       if (ordersError) {
         console.error("Failed to load user orders", ordersError);
       }
       const orderList = ((orders || []) as Order[]).sort(
-        (a, b) => parseDate(b.updated_at || b.created_at) - parseDate(a.updated_at || a.created_at)
+        (a, b) =>
+          parseDate(b.updated_at || b.created_at) -
+          parseDate(a.updated_at || a.created_at)
       );
       setUserOrders(orderList);
 
@@ -211,9 +224,8 @@ const OrdersPage: React.FC = () => {
         .filter((value): value is string => Boolean(value));
 
       if (orderNumbers.length > 0) {
-        const { responses, error: responsesError } = await SupabaseService.getOrderResponsesByNumbers(
-          orderNumbers
-        );
+        const { responses, error: responsesError } =
+          await SupabaseService.getOrderResponsesByNumbers(orderNumbers);
         if (responsesError) {
           console.error("Failed to load order responses", responsesError);
           setOrderResponses([]);
@@ -279,16 +291,25 @@ const OrdersPage: React.FC = () => {
   useEffect(() => {
     const handler = (event: Event) => {
       const customEvent = event as CustomEvent<{ tab?: "create" | "history" }>;
-      if (customEvent.detail?.tab === "create" || customEvent.detail?.tab === "history") {
+      if (
+        customEvent.detail?.tab === "create" ||
+        customEvent.detail?.tab === "history"
+      ) {
         setMainTab(customEvent.detail.tab);
       } else {
         setMainTab("history");
       }
     };
 
-    window.addEventListener("procargo:user-orders-view", handler as EventListener);
+    window.addEventListener(
+      "procargo:user-orders-view",
+      handler as EventListener
+    );
     return () => {
-      window.removeEventListener("procargo:user-orders-view", handler as EventListener);
+      window.removeEventListener(
+        "procargo:user-orders-view",
+        handler as EventListener
+      );
     };
   }, []);
 
@@ -306,6 +327,72 @@ const OrdersPage: React.FC = () => {
     });
     return map;
   }, [orderResponses]);
+
+  const handleMessageAgent = useCallback(
+    (orderIdentifier: string, agentId?: string | null, orderNumber?: string | null) => {
+      if (!agentId) {
+        alert(t("user_orders_message_agent_unavailable"));
+        return;
+      }
+
+      const prefill =
+        orderNumber && orderNumber.trim().length > 0
+          ? t("user_orders_message_agent_default", { orderNumber })
+          : "";
+
+      setMessageDraft(prefill);
+      setMessageTarget({
+        orderIdentifier,
+        agentId,
+        orderNumber: orderNumber || undefined,
+      });
+    },
+    [t]
+  );
+
+  const closeMessageModal = useCallback(() => {
+    if (messageSending) {
+      return;
+    }
+    setMessageTarget(null);
+    setMessageDraft("");
+  }, [messageSending]);
+
+  const handleSendAgentMessage = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!messageTarget) {
+      return;
+    }
+
+    const body = messageDraft.trim();
+    if (!body) {
+      alert(t("user_orders_message_agent_empty"));
+      return;
+    }
+
+    try {
+      setMessageSending(true);
+      const { data: thread, error: threadError } =
+        await MessagingService.createOrGetDirectThread(messageTarget.agentId);
+      if (threadError || !thread) {
+        throw threadError || new Error("Thread creation failed");
+      }
+
+      const { error: sendError } = await MessagingService.sendMessage(thread.id, body);
+      if (sendError) {
+        throw sendError;
+      }
+
+      alert(t("user_orders_message_agent_success"));
+      setMessageDraft("");
+      setMessageTarget(null);
+    } catch (error) {
+      console.error("Failed to send message to agent", error);
+      alert(t("user_orders_message_agent_error"));
+    } finally {
+      setMessageSending(false);
+    }
+  };
   const generateOrderNumber = () => {
     const date = new Date();
     const dateStr = date.toISOString().slice(0, 10).replace(/-/g, "");
@@ -801,1139 +888,1311 @@ const OrdersPage: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-3">
                 {t("choose_the_appropriate_option_based_on_your_needs")}
               </h3>
-          <div className="space-y-3 text-sm text-gray-700">
-            <div className="flex items-start gap-3">
-              <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-600 text-white text-xs font-bold rounded-full flex-shrink-0 mt-0.5">
-                1
-              </span>
-              <div>
-                <span className="font-semibold text-blue-900">
+              <div className="space-y-3 text-sm text-gray-700">
+                <div className="flex items-start gap-3">
+                  <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-600 text-white text-xs font-bold rounded-full flex-shrink-0 mt-0.5">
+                    1
+                  </span>
+                  <div>
+                    <span className="font-semibold text-blue-900">
+                      {t("i_have_a_supplier")}
+                    </span>{" "}
+                    -{" "}
+                    {t(
+                      "use_this_form_if_you_have_already_negotiated_prices_with_suppliers_and_need_us_to_purchase_consolidate_and_ship_your_products_you_can_also_request_supplier_credibility_verification"
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="inline-flex items-center justify-center w-6 h-6 bg-green-600 text-white text-xs font-bold rounded-full flex-shrink-0 mt-0.5">
+                    2
+                  </span>
+                  <div>
+                    <span className="font-semibold text-green-900">
+                      {t("i_dont_have_a_supplier")}
+                    </span>{" "}
+                    -{" "}
+                    {t(
+                      "use_this_form_if_you_need_us_to_source_products_for_you_please_provide_detailed_specifications_and_attach_any_relevant_documents"
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="inline-flex items-center justify-center w-6 h-6 bg-purple-600 text-white text-xs font-bold rounded-full flex-shrink-0 mt-0.5">
+                    3
+                  </span>
+                  <div>
+                    <span className="font-semibold text-purple-900">
+                      {t("other_requests")}
+                    </span>{" "}
+                    -{" "}
+                    {t(
+                      "use_this_form_for_any_other_inquiries_related_to_the_chinese_market"
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Segmented Bar */}
+          <div className="mb-6">
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <div className="flex">
+                <button
+                  onClick={() => setActiveSegment("I have a Supplier")}
+                  className={`flex-1 px-6 py-4 text-center border-r border-gray-200 transition-all duration-200 font-medium ${
+                    activeSegment === "I have a Supplier"
+                      ? "bg-cargo-50 text-cargo-700 border-b-2 border-cargo-600"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
+                >
                   {t("i_have_a_supplier")}
-                </span>{" "}
-                -{" "}
-                {t(
-                  "use_this_form_if_you_have_already_negotiated_prices_with_suppliers_and_need_us_to_purchase_consolidate_and_ship_your_products_you_can_also_request_supplier_credibility_verification"
-                )}
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="inline-flex items-center justify-center w-6 h-6 bg-green-600 text-white text-xs font-bold rounded-full flex-shrink-0 mt-0.5">
-                2
-              </span>
-              <div>
-                <span className="font-semibold text-green-900">
-                  {t("i_dont_have_a_supplier")}
-                </span>{" "}
-                -{" "}
-                {t(
-                  "use_this_form_if_you_need_us_to_source_products_for_you_please_provide_detailed_specifications_and_attach_any_relevant_documents"
-                )}
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="inline-flex items-center justify-center w-6 h-6 bg-purple-600 text-white text-xs font-bold rounded-full flex-shrink-0 mt-0.5">
-                3
-              </span>
-              <div>
-                <span className="font-semibold text-purple-900">
-                  {t("other_requests")}
-                </span>{" "}
-                -{" "}
-                {t(
-                  "use_this_form_for_any_other_inquiries_related_to_the_chinese_market"
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Segmented Bar */}
-      <div className="mb-6">
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-          <div className="flex">
-            <button
-              onClick={() => setActiveSegment("I have a Supplier")}
-              className={`flex-1 px-6 py-4 text-center border-r border-gray-200 transition-all duration-200 font-medium ${
-                activeSegment === "I have a Supplier"
-                  ? "bg-cargo-50 text-cargo-700 border-b-2 border-cargo-600"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              }`}
-            >
-              {t("i_have_a_supplier")}
-            </button>
-            <button
-              onClick={() => setActiveSegment("I don't have a Supplier")}
-              className={`flex-1 px-6 py-4 text-center border-r border-gray-200 transition-all duration-200 font-medium ${
-                activeSegment === "I don't have a Supplier"
-                  ? "bg-cargo-50 text-cargo-700 border-b-2 border-cargo-600"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              }`}
-            >
-              {t("i_dont_have_a_supplier")}
-            </button>
-            <button
-              onClick={() => setActiveSegment("Other requests")}
-              className={`flex-1 px-6 py-4 text-center transition-all duration-200 font-medium ${
-                activeSegment === "Other requests"
-                  ? "bg-cargo-50 text-cargo-700 border-b-2 border-cargo-600"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              }`}
-            >
-              {t("other_requests")}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Other Requests Form */}
-      {activeSegment === "Other requests" && (
-        <div className="mb-6">
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-br from-slate-50 to-slate-200">
-              <h2 className="text-xl font-semibold text-gray-900">
-                {t("describe_your_request")}
-              </h2>
-              <p className="text-gray-600 text-sm mt-1">
-                {t(
-                  "tell_us_what_you_need_and_we_ll_help_you_find_the_right_solution"
-                )}
-              </p>
-            </div>
-
-            <form onSubmit={handleOtherRequestSubmit} className="p-6 space-y-6">
-              <div>
-                <label
-                  htmlFor="description"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  {t("what_do_you_need_help_with")} *
-                </label>
-                <textarea
-                  id="description"
-                  rows={6}
-                  value={otherRequestData.description}
-                  onChange={(e) =>
-                    setOtherRequestData((prev) => ({
-                      ...prev,
-                      description: e.target.value,
-                    }))
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500 resize-none"
-                  placeholder={t(
-                    "please_describe_your_specific_requirements_questions_or_needs_in_detail"
-                  )}
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label
-                    htmlFor="contactInfo"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    {t("contact_information")}
-                  </label>
-                  <input
-                    type="text"
-                    id="contactInfo"
-                    value={otherRequestData.contactInfo}
-                    onChange={(e) =>
-                      setOtherRequestData((prev) => ({
-                        ...prev,
-                        contactInfo: e.target.value,
-                      }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
-                    placeholder={t("phone_number_or_email_optional")}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="urgency"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    {t("urgency_level")}
-                  </label>
-                  <select
-                    id="urgency"
-                    value={otherRequestData.urgency}
-                    onChange={(e) =>
-                      setOtherRequestData((prev) => ({
-                        ...prev,
-                        urgency: e.target.value,
-                      }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
-                  >
-                    <option value="low">{t("low_no_rush")}</option>
-                    <option value="normal">{t("normal_within_a_week")}</option>
-                    <option value="high">{t("high_within_2_3_days")}</option>
-                    <option value="urgent">{t("urgent_same_day")}</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  type="submit"
-                  disabled={loading || !otherRequestData.description.trim()}
-                  className="bg-cargo-600 hover:bg-cargo-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors duration-200"
-                >
-                  {loading ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  ) : (
-                    <>
-                      <PlusIcon className="h-5 w-5" />
-                      {t("submit_request")}
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* I have a Supplier Form */}
-      {activeSegment === "I have a Supplier" && (
-        <div className="mb-6">
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gradient-to-br from-blue-50 to-blue-100">
-              <h2 className="text-xl font-semibold text-gray-900">
-                {t("submit_new_order")}
-              </h2>
-              <button
-                type="button"
-                onClick={addSupplier}
-                className="bg-gradient-to-tr from-green-600 to-green-700 text-white px-3 py-2 rounded-xl flex items-center gap-2 text-sm font-medium"
-              >
-                <PlusIcon className="h-4 w-4 opacity-70" />
-                {t("add_supplier")}
-              </button>
-            </div>
-
-            <form onSubmit={handleOrderSubmit} className="p-6 space-y-6">
-              <div>
-                <div className="space-y-6">
-                  {formData.suppliers.map((supplier, index) => (
-                    <section
-                      key={supplier.id}
-                      className="relative border border-gray-200 rounded-2xl p-6 bg-white hover:border-2 hover:border-indigo-500 transition-all duration-200"
-                    >
-                      {formData.suppliers.length > 1 && (
-                        <div className="bg-gray-100 h-8 w-10 absolute top-6 right-6 rtl:left-6 rtl:right-auto flex items-center justify-center rounded-xl">
-                          <button
-                            type="button"
-                            onClick={() => removeSupplier(supplier.id)}
-                            className="text-red-600 hover:text-red-800"
-                            title="Remove Supplier"
-                          >
-                            <XMarkIcon className="h-5 w-5" />
-                          </button>
-                        </div>
-                      )}
-
-                      <div className="mb-4 flex w-full items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="inline-block bg-blue-700 text-white text-sm px-4 py-1.5 rounded-lg">
-                            {t("supplier")} {index + 1}
-                          </span>
-                          <span className="font-medium text-gray-500">
-                            {t("suppliers_and_products")}
-                          </span>
-                        </div>
-
-                        <div className="flex justify-between items-center mb-4">
-                          {formData.suppliers.length === 1 ? (
-                            <div className="bg-gray-100 h-8 w-10 absolute top-6 right-6 rtl:left-6 rtl:right-auto flex items-center justify-center rounded-xl">
-                              <button
-                                onClick={() =>
-                                  setActiveSegment("I don't have a Supplier")
-                                }
-                                className="text-gray-400 hover:text-gray-600 transition-colors"
-                              >
-                                <XMarkIcon className="h-5 w-5" />
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="size-5"></div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="mb-4">
-                        <label className="block text-sm font-semibold text-gray-700 mb-1">
-                          {t("product_name_and_description")}{" "}
-                          <span className="text-red-500">*</span>
-                        </label>
-                        <textarea
-                          value={supplier.product_name}
-                          onChange={(e) =>
-                            updateSupplier(
-                              supplier.id,
-                              "product_name",
-                              e.target.value
-                            )
-                          }
-                          rows={2}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
-                          placeholder="Describe the product..."
-                        />
-                        {errors[`supplier-${index}-product_name`] && (
-                          <p className="text-red-500 text-xs mt-1">
-                            {errors[`supplier-${index}-product_name`]}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="mb-4">
-                        <label className="block text-sm font-semibold text-gray-700 mb-1">
-                          {t("supplier_links")}
-                        </label>
-                        <div className="space-y-2">
-                          {supplier.supplier_links.map((link, linkIndex) => (
-                            <div
-                              key={linkIndex}
-                              className="flex items-start gap-2 w-full bg-gray-50 p-4 border rounded-xl relative"
-                            >
-                              <div className="flex w-full items-center gap-2 flex-col">
-                                <input
-                                  type="url"
-                                  value={link.url}
-                                  onChange={(e) =>
-                                    updateSupplierLink(
-                                      supplier.id,
-                                      linkIndex,
-                                      "url",
-                                      e.target.value
-                                    )
-                                  }
-                                  className="flex-1 px-3 py-2 border border-gray-300 rounded-xl w-full focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
-                                  placeholder={t("alibaba_1688_link")}
-                                />
-                                {errors[
-                                  `supplier-${index}-link-${linkIndex}-url`
-                                ] && (
-                                  <p className="text-red-500 text-xs mt-1">
-                                    {
-                                      errors[
-                                        `supplier-${index}-link-${linkIndex}-url`
-                                      ]
-                                    }
-                                  </p>
-                                )}
-                                <div className="w-full flex items-center justify-between gap-2">
-                                  <input
-                                    type="text"
-                                    value={link.description}
-                                    onChange={(e) =>
-                                      updateSupplierLink(
-                                        supplier.id,
-                                        linkIndex,
-                                        "description",
-                                        e.target.value
-                                      )
-                                    }
-                                    className="w-full md:w-3/4 px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
-                                    placeholder={t("description_optional")}
-                                  />
-                                  <input
-                                    type="number"
-                                    value={link.quantity}
-                                    onChange={(e) =>
-                                      updateSupplierLink(
-                                        supplier.id,
-                                        linkIndex,
-                                        "quantity",
-                                        e.target.value
-                                      )
-                                    }
-                                    className="w-full md:w-1/4 px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
-                                    placeholder={t("qty")}
-                                  />
-                                  {errors[
-                                    `supplier-${index}-link-${linkIndex}-quantity`
-                                  ] && (
-                                    <p className="text-red-500 text-xs mt-1">
-                                      {
-                                        errors[
-                                          `supplier-${index}-link-${linkIndex}-quantity`
-                                        ]
-                                      }
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                              {supplier.supplier_links.length > 1 && (
-                                <div className="size-5 rounded-full bg-red-500 flex items-center justify-center absolute right-3 top-3">
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      removeSupplierLink(supplier.id, linkIndex)
-                                    }
-                                    className="text-gray-100"
-                                    title="Remove Link"
-                                  >
-                                    <XMarkIcon className="h-4 w-4" />
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                          <button
-                            type="button"
-                            onClick={() => addSupplierLink(supplier.id)}
-                            className="text-gray-600 hover:text-gray-800 text-sm font-medium mt-1"
-                          >
-                            + {t("add_another_link")}
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 gap-4 mb-4">
-                        <div className="w-full md:max-w-[30%]">
-                          <label className="block text-sm font-semibold text-gray-700 mb-1">
-                            {t("quantity")}{" "}
-                            <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="number"
-                            value={supplier.quantity}
-                            onChange={(e) =>
-                              updateSupplier(
-                                supplier.id,
-                                "quantity",
-                                parseInt(e.target.value) || 0
-                              )
-                            }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-1">
-                            {t("logistics_type")}{" "}
-                            <span className="text-red-500">*</span>
-                          </label>
-                          <select
-                            value={supplier.logistics_type}
-                            onChange={(e) =>
-                              updateSupplier(
-                                supplier.id,
-                                "logistics_type",
-                                e.target.value
-                              )
-                            }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
-                          >
-                            <option value={"Air"}>{t("air")}</option>
-                            <option value={"Sea LCL"}>{t("sea_lcl")}</option>
-                            <option value={"Sea FCL"}>{t("sea_fcl")}</option>
-                            <option value={"Express"}>{t("express")}</option>
-                            <option value={"Consolidation"}>
-                              {t("consolidation")}
-                            </option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-1">
-                            {t("special_instructions")}
-                          </label>
-                          <textarea
-                            value={supplier.special_instructions}
-                            onChange={(e) =>
-                              updateSupplier(
-                                supplier.id,
-                                "special_instructions",
-                                e.target.value
-                              )
-                            }
-                            rows={2}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
-                            placeholder={t("special_instructions_optional")}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-1">
-                            {t("notes")}
-                          </label>
-                          <textarea
-                            value={supplier.notes}
-                            onChange={(e) =>
-                              updateSupplier(
-                                supplier.id,
-                                "notes",
-                                e.target.value
-                              )
-                            }
-                            rows={2}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
-                            placeholder={t("notes_optional")}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="mb-4">
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          {t("upload_files")}
-                        </label>
-                        <div className="space-y-2">
-                          {supplier.files.map((file, fileIndex) => (
-                            <div
-                              key={fileIndex}
-                              className="flex items-start gap-2 w-full bg-gray-50 p-4 border rounded-xl relative"
-                            >
-                              <div className="flex items-center gap-2 w-full">
-                                <input
-                                  type="file"
-                                  onChange={(e) => {
-                                    const newFile = e.target.files?.[0];
-                                    if (newFile) {
-                                      const newFiles = [...supplier.files];
-                                      newFiles[fileIndex] = newFile;
-                                      updateSupplier(
-                                        supplier.id,
-                                        "files",
-                                        newFiles
-                                      );
-                                    }
-                                  }}
-                                  className="flex-1 px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white file:border-0 file:bg-gray-50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:text-sm file:font-semibold file:hover:bg-gray-100 cursor-pointer"
-                                />
-                              </div>
-                              <div className="size-5 rounded-full bg-red-500 flex items-center justify-center absolute right-3 top-3">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    removeSupplierFile(supplier.id, fileIndex)
-                                  }
-                                  className="text-gray-100"
-                                  title="Remove File"
-                                >
-                                  <XMarkIcon className="h-4 w-4" />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                          <button
-                            type="button"
-                            onClick={() => addSupplierFile(supplier.id)}
-                            className="text-gray-600 hover:text-gray-800 text-sm font-medium mt-1"
-                          >
-                            + {t("add_another_file")}
-                          </button>
-                          <div className="text-sm mt-1">
-                            {t(
-                              "attach_invoices_specs_or_photos_for_this_supplier_product"
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </section>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-3 rounded-md font-medium flex items-center gap-2"
-                >
-                  {loading ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  ) : (
-                    <>
-                      <PlusIcon className="h-5 w-5" />
-                      {t("submit_order")}
-                    </>
-                  )}
                 </button>
                 <button
-                  type="button"
                   onClick={() => setActiveSegment("I don't have a Supplier")}
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-3 rounded-md font-medium"
+                  className={`flex-1 px-6 py-4 text-center border-r border-gray-200 transition-all duration-200 font-medium ${
+                    activeSegment === "I don't have a Supplier"
+                      ? "bg-cargo-50 text-cargo-700 border-b-2 border-cargo-600"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
                 >
-                  {t("cancel")}
+                  {t("i_dont_have_a_supplier")}
+                </button>
+                <button
+                  onClick={() => setActiveSegment("Other requests")}
+                  className={`flex-1 px-6 py-4 text-center transition-all duration-200 font-medium ${
+                    activeSegment === "Other requests"
+                      ? "bg-cargo-50 text-cargo-700 border-b-2 border-cargo-600"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
+                >
+                  {t("other_requests")}
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Quotation Request Form */}
-      {activeSegment === "I don't have a Supplier" && (
-        <div className="mb-6">
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-br from-green-50 to-green-100">
-              <h2 className="text-xl font-semibold text-gray-900">
-                {t("request_quotation_from_our_agents")}
-              </h2>
-              <p className="text-gray-600 text-sm mt-1">
-                {t(
-                  "tell_us_about_the_product_you_need_and_our_agents_will_find_the_best_suppliers_for_you"
-                )}
-              </p>
             </div>
+          </div>
 
-            <form
-              onSubmit={handleQuotationRequestSubmit}
-              className="p-6 space-y-6"
-            >
-              {/* Product Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
-                  {t("product_information")}
-                </h3>
+          {/* Other Requests Form */}
+          {activeSegment === "Other requests" && (
+            <div className="mb-6">
+              <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-br from-slate-50 to-slate-200">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    {t("describe_your_request")}
+                  </h2>
+                  <p className="text-gray-600 text-sm mt-1">
+                    {t(
+                      "tell_us_what_you_need_and_we_ll_help_you_find_the_right_solution"
+                    )}
+                  </p>
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <form
+                  onSubmit={handleOtherRequestSubmit}
+                  className="p-6 space-y-6"
+                >
                   <div>
                     <label
-                      htmlFor="productName"
+                      htmlFor="description"
                       className="block text-sm font-medium text-gray-700 mb-2"
                     >
-                      {t("product_name")} *
+                      {t("what_do_you_need_help_with")} *
                     </label>
-                    <input
-                      type="text"
-                      id="productName"
-                      value={quotationRequestData.productName}
+                    <textarea
+                      id="description"
+                      rows={6}
+                      value={otherRequestData.description}
                       onChange={(e) =>
-                        setQuotationRequestData((prev) => ({
+                        setOtherRequestData((prev) => ({
                           ...prev,
-                          productName: e.target.value,
+                          description: e.target.value,
                         }))
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
-                      placeholder={t("e_g_led_strip_lights_water_bottles_etc")}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500 resize-none"
+                      placeholder={t(
+                        "please_describe_your_specific_requirements_questions_or_needs_in_detail"
+                      )}
                       required
                     />
                   </div>
 
-                  <div>
-                    <label
-                      htmlFor="quantity"
-                      className="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                      {t("quantity")} *
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="number"
-                        id="quantity"
-                        value={quotationRequestData.quantity}
-                        onChange={(e) =>
-                          setQuotationRequestData((prev) => ({
-                            ...prev,
-                            quantity: parseInt(e.target.value) || 0,
-                          }))
-                        }
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
-                        placeholder={t("1000")}
-                        min="1"
-                        required
-                      />
-                      <select
-                        value={quotationRequestData.unitType}
-                        onChange={(e) =>
-                          setQuotationRequestData((prev) => ({
-                            ...prev,
-                            unitType: e.target.value,
-                          }))
-                        }
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label
+                        htmlFor="contactInfo"
+                        className="block text-sm font-medium text-gray-700 mb-2"
                       >
-                        <option value="Pcs">{t("pcs")}</option>
-                        <option value="Sets">{t("sets")}</option>
-                        <option value="Boxes">{t("boxes")}</option>
-                        <option value="Kg">{t("kg")}</option>
-                        <option value="Lbs">{t("lbs")}</option>
-                        <option value="Meters">{t("meters")}</option>
-                        <option value="Feet">{t("feet")}</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="description"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    {t("product_description")} *
-                  </label>
-                  <textarea
-                    id="description"
-                    rows={4}
-                    value={quotationRequestData.description}
-                    onChange={(e) =>
-                      setQuotationRequestData((prev) => ({
-                        ...prev,
-                        description: e.target.value,
-                      }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500 resize-none"
-                    placeholder={t(
-                      "describe_the_product_specifications_materials_colors_dimensions_etc"
-                    )}
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Reference Links */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium text-gray-900">
-                    {t("reference_links")}
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={addReferenceLink}
-                    className="text-cargo-600 hover:text-cargo-700 text-sm font-medium flex items-center gap-1"
-                  >
-                    <PlusIcon className="h-4 w-4" />
-                    {t("add_link")}
-                  </button>
-                </div>
-
-                {quotationRequestData.referenceLinks.map((link, index) => (
-                  <div key={index} className="flex gap-3 items-end">
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {t("website_url")}
-                      </label>
-                      <input
-                        type="url"
-                        value={link.url}
-                        onChange={(e) =>
-                          updateReferenceLink(index, "url", e.target.value)
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
-                        placeholder="https://example.com/product"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {t("description")}
+                        {t("contact_information")}
                       </label>
                       <input
                         type="text"
-                        value={link.description}
+                        id="contactInfo"
+                        value={otherRequestData.contactInfo}
                         onChange={(e) =>
-                          updateReferenceLink(
-                            index,
-                            "description",
-                            e.target.value
-                          )
+                          setOtherRequestData((prev) => ({
+                            ...prev,
+                            contactInfo: e.target.value,
+                          }))
                         }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
-                        placeholder={t("what_is_this_link_for")}
+                        placeholder={t("phone_number_or_email_optional")}
                       />
                     </div>
-                    {quotationRequestData.referenceLinks.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeReferenceLink(index)}
-                        className="text-red-600 hover:text-red-700 p-2"
+
+                    <div>
+                      <label
+                        htmlFor="urgency"
+                        className="block text-sm font-medium text-gray-700 mb-2"
                       >
-                        <XMarkIcon className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Product Images */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">
-                  {t("product_images")}
-                </h3>
-
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                  <input
-                    type="file"
-                    id="productImages"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                  <label
-                    htmlFor="productImages"
-                    className="cursor-pointer flex flex-col items-center gap-2"
-                  >
-                    <div className="p-3 bg-cargo-50 rounded-full">
-                      <PlusIcon className="h-8 w-8 text-cargo-600" />
+                        {t("urgency_level")}
+                      </label>
+                      <select
+                        id="urgency"
+                        value={otherRequestData.urgency}
+                        onChange={(e) =>
+                          setOtherRequestData((prev) => ({
+                            ...prev,
+                            urgency: e.target.value,
+                          }))
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
+                      >
+                        <option value="low">{t("low_no_rush")}</option>
+                        <option value="normal">
+                          {t("normal_within_a_week")}
+                        </option>
+                        <option value="high">
+                          {t("high_within_2_3_days")}
+                        </option>
+                        <option value="urgent">{t("urgent_same_day")}</option>
+                      </select>
                     </div>
-                    <span className="text-sm font-medium text-gray-700">
-                      {t("upload_product_images")}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {t("png_jpg_gif_up_to_10mb_each")}
-                    </span>
-                  </label>
+                  </div>
+
+                  <div className="flex justify-end space-x-3 pt-4">
+                    <button
+                      type="submit"
+                      disabled={loading || !otherRequestData.description.trim()}
+                      className="bg-cargo-600 hover:bg-cargo-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors duration-200"
+                    >
+                      {loading ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      ) : (
+                        <>
+                          <PlusIcon className="h-5 w-5" />
+                          {t("submit_request")}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* I have a Supplier Form */}
+          {activeSegment === "I have a Supplier" && (
+            <div className="mb-6">
+              <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gradient-to-br from-blue-50 to-blue-100">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    {t("submit_new_order")}
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={addSupplier}
+                    className="bg-gradient-to-tr from-green-600 to-green-700 text-white px-3 py-2 rounded-xl flex items-center gap-2 text-sm font-medium"
+                  >
+                    <PlusIcon className="h-4 w-4 opacity-70" />
+                    {t("add_supplier")}
+                  </button>
                 </div>
 
-                {quotationRequestData.productImages.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {quotationRequestData.productImages.map((file, index) => (
-                      <div key={index} className="relative group">
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={`Product ${index + 1}`}
-                          className="w-full h-24 object-cover rounded-lg border border-gray-200"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                <form onSubmit={handleOrderSubmit} className="p-6 space-y-6">
+                  <div>
+                    <div className="space-y-6">
+                      {formData.suppliers.map((supplier, index) => (
+                        <section
+                          key={supplier.id}
+                          className="relative border border-gray-200 rounded-2xl p-6 bg-white hover:border-2 hover:border-indigo-500 transition-all duration-200"
                         >
-                          <XMarkIcon className="h-3 w-3" />
-                        </button>
+                          {formData.suppliers.length > 1 && (
+                            <div className="bg-gray-100 h-8 w-10 absolute top-6 right-6 rtl:left-6 rtl:right-auto flex items-center justify-center rounded-xl">
+                              <button
+                                type="button"
+                                onClick={() => removeSupplier(supplier.id)}
+                                className="text-red-600 hover:text-red-800"
+                                title="Remove Supplier"
+                              >
+                                <XMarkIcon className="h-5 w-5" />
+                              </button>
+                            </div>
+                          )}
+
+                          <div className="mb-4 flex w-full items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="inline-block bg-blue-700 text-white text-sm px-4 py-1.5 rounded-lg">
+                                {t("supplier")} {index + 1}
+                              </span>
+                              <span className="font-medium text-gray-500">
+                                {t("suppliers_and_products")}
+                              </span>
+                            </div>
+
+                            <div className="flex justify-between items-center mb-4">
+                              {formData.suppliers.length === 1 ? (
+                                <div className="bg-gray-100 h-8 w-10 absolute top-6 right-6 rtl:left-6 rtl:right-auto flex items-center justify-center rounded-xl">
+                                  <button
+                                    onClick={() =>
+                                      setActiveSegment(
+                                        "I don't have a Supplier"
+                                      )
+                                    }
+                                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                                  >
+                                    <XMarkIcon className="h-5 w-5" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="size-5"></div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="mb-4">
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">
+                              {t("product_name_and_description")}{" "}
+                              <span className="text-red-500">*</span>
+                            </label>
+                            <textarea
+                              value={supplier.product_name}
+                              onChange={(e) =>
+                                updateSupplier(
+                                  supplier.id,
+                                  "product_name",
+                                  e.target.value
+                                )
+                              }
+                              rows={2}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
+                              placeholder="Describe the product..."
+                            />
+                            {errors[`supplier-${index}-product_name`] && (
+                              <p className="text-red-500 text-xs mt-1">
+                                {errors[`supplier-${index}-product_name`]}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="mb-4">
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">
+                              {t("supplier_links")}
+                            </label>
+                            <div className="space-y-2">
+                              {supplier.supplier_links.map(
+                                (link, linkIndex) => (
+                                  <div
+                                    key={linkIndex}
+                                    className="flex items-start gap-2 w-full bg-gray-50 p-4 border rounded-xl relative"
+                                  >
+                                    <div className="flex w-full items-center gap-2 flex-col">
+                                      <input
+                                        type="url"
+                                        value={link.url}
+                                        onChange={(e) =>
+                                          updateSupplierLink(
+                                            supplier.id,
+                                            linkIndex,
+                                            "url",
+                                            e.target.value
+                                          )
+                                        }
+                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-xl w-full focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
+                                        placeholder={t("alibaba_1688_link")}
+                                      />
+                                      {errors[
+                                        `supplier-${index}-link-${linkIndex}-url`
+                                      ] && (
+                                        <p className="text-red-500 text-xs mt-1">
+                                          {
+                                            errors[
+                                              `supplier-${index}-link-${linkIndex}-url`
+                                            ]
+                                          }
+                                        </p>
+                                      )}
+                                      <div className="w-full flex items-center justify-between gap-2">
+                                        <input
+                                          type="text"
+                                          value={link.description}
+                                          onChange={(e) =>
+                                            updateSupplierLink(
+                                              supplier.id,
+                                              linkIndex,
+                                              "description",
+                                              e.target.value
+                                            )
+                                          }
+                                          className="w-full md:w-3/4 px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
+                                          placeholder={t(
+                                            "description_optional"
+                                          )}
+                                        />
+                                        <input
+                                          type="number"
+                                          value={link.quantity}
+                                          onChange={(e) =>
+                                            updateSupplierLink(
+                                              supplier.id,
+                                              linkIndex,
+                                              "quantity",
+                                              e.target.value
+                                            )
+                                          }
+                                          className="w-full md:w-1/4 px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
+                                          placeholder={t("qty")}
+                                        />
+                                        {errors[
+                                          `supplier-${index}-link-${linkIndex}-quantity`
+                                        ] && (
+                                          <p className="text-red-500 text-xs mt-1">
+                                            {
+                                              errors[
+                                                `supplier-${index}-link-${linkIndex}-quantity`
+                                              ]
+                                            }
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+                                    {supplier.supplier_links.length > 1 && (
+                                      <div className="size-5 rounded-full bg-red-500 flex items-center justify-center absolute right-3 top-3">
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            removeSupplierLink(
+                                              supplier.id,
+                                              linkIndex
+                                            )
+                                          }
+                                          className="text-gray-100"
+                                          title="Remove Link"
+                                        >
+                                          <XMarkIcon className="h-4 w-4" />
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                )
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => addSupplierLink(supplier.id)}
+                                className="text-gray-600 hover:text-gray-800 text-sm font-medium mt-1"
+                              >
+                                + {t("add_another_link")}
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 gap-4 mb-4">
+                            <div className="w-full md:max-w-[30%]">
+                              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                {t("quantity")}{" "}
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="number"
+                                value={supplier.quantity}
+                                onChange={(e) =>
+                                  updateSupplier(
+                                    supplier.id,
+                                    "quantity",
+                                    parseInt(e.target.value) || 0
+                                  )
+                                }
+                                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                {t("logistics_type")}{" "}
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <select
+                                value={supplier.logistics_type}
+                                onChange={(e) =>
+                                  updateSupplier(
+                                    supplier.id,
+                                    "logistics_type",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
+                              >
+                                <option value={"Air"}>{t("air")}</option>
+                                <option value={"Sea LCL"}>
+                                  {t("sea_lcl")}
+                                </option>
+                                <option value={"Sea FCL"}>
+                                  {t("sea_fcl")}
+                                </option>
+                                <option value={"Express"}>
+                                  {t("express")}
+                                </option>
+                                <option value={"Consolidation"}>
+                                  {t("consolidation")}
+                                </option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                {t("special_instructions")}
+                              </label>
+                              <textarea
+                                value={supplier.special_instructions}
+                                onChange={(e) =>
+                                  updateSupplier(
+                                    supplier.id,
+                                    "special_instructions",
+                                    e.target.value
+                                  )
+                                }
+                                rows={2}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
+                                placeholder={t("special_instructions_optional")}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                {t("notes")}
+                              </label>
+                              <textarea
+                                value={supplier.notes}
+                                onChange={(e) =>
+                                  updateSupplier(
+                                    supplier.id,
+                                    "notes",
+                                    e.target.value
+                                  )
+                                }
+                                rows={2}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white"
+                                placeholder={t("notes_optional")}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="mb-4">
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                              {t("upload_files")}
+                            </label>
+                            <div className="space-y-2">
+                              {supplier.files.map((file, fileIndex) => (
+                                <div
+                                  key={fileIndex}
+                                  className="flex items-start gap-2 w-full bg-gray-50 p-4 border rounded-xl relative"
+                                >
+                                  <div className="flex items-center gap-2 w-full">
+                                    <input
+                                      type="file"
+                                      onChange={(e) => {
+                                        const newFile = e.target.files?.[0];
+                                        if (newFile) {
+                                          const newFiles = [...supplier.files];
+                                          newFiles[fileIndex] = newFile;
+                                          updateSupplier(
+                                            supplier.id,
+                                            "files",
+                                            newFiles
+                                          );
+                                        }
+                                      }}
+                                      className="flex-1 px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 focus:bg-white file:border-0 file:bg-gray-50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:text-sm file:font-semibold file:hover:bg-gray-100 cursor-pointer"
+                                    />
+                                  </div>
+                                  <div className="size-5 rounded-full bg-red-500 flex items-center justify-center absolute right-3 top-3">
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        removeSupplierFile(
+                                          supplier.id,
+                                          fileIndex
+                                        )
+                                      }
+                                      className="text-gray-100"
+                                      title="Remove File"
+                                    >
+                                      <XMarkIcon className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                              <button
+                                type="button"
+                                onClick={() => addSupplierFile(supplier.id)}
+                                className="text-gray-600 hover:text-gray-800 text-sm font-medium mt-1"
+                              >
+                                + {t("add_another_file")}
+                              </button>
+                              <div className="text-sm mt-1">
+                                {t(
+                                  "attach_invoices_specs_or_photos_for_this_supplier_product"
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </section>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 pt-4 border-t border-gray-200">
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-3 rounded-md font-medium flex items-center gap-2"
+                    >
+                      {loading ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      ) : (
+                        <>
+                          <PlusIcon className="h-5 w-5" />
+                          {t("submit_order")}
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setActiveSegment("I don't have a Supplier")
+                      }
+                      className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-3 rounded-md font-medium"
+                    >
+                      {t("cancel")}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Quotation Request Form */}
+          {activeSegment === "I don't have a Supplier" && (
+            <div className="mb-6">
+              <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-br from-green-50 to-green-100">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    {t("request_quotation_from_our_agents")}
+                  </h2>
+                  <p className="text-gray-600 text-sm mt-1">
+                    {t(
+                      "tell_us_about_the_product_you_need_and_our_agents_will_find_the_best_suppliers_for_you"
+                    )}
+                  </p>
+                </div>
+
+                <form
+                  onSubmit={handleQuotationRequestSubmit}
+                  className="p-6 space-y-6"
+                >
+                  {/* Product Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
+                      {t("product_information")}
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label
+                          htmlFor="productName"
+                          className="block text-sm font-medium text-gray-700 mb-2"
+                        >
+                          {t("product_name")} *
+                        </label>
+                        <input
+                          type="text"
+                          id="productName"
+                          value={quotationRequestData.productName}
+                          onChange={(e) =>
+                            setQuotationRequestData((prev) => ({
+                              ...prev,
+                              productName: e.target.value,
+                            }))
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
+                          placeholder={t(
+                            "e_g_led_strip_lights_water_bottles_etc"
+                          )}
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="quantity"
+                          className="block text-sm font-medium text-gray-700 mb-2"
+                        >
+                          {t("quantity")} *
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="number"
+                            id="quantity"
+                            value={quotationRequestData.quantity}
+                            onChange={(e) =>
+                              setQuotationRequestData((prev) => ({
+                                ...prev,
+                                quantity: parseInt(e.target.value) || 0,
+                              }))
+                            }
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
+                            placeholder={t("1000")}
+                            min="1"
+                            required
+                          />
+                          <select
+                            value={quotationRequestData.unitType}
+                            onChange={(e) =>
+                              setQuotationRequestData((prev) => ({
+                                ...prev,
+                                unitType: e.target.value,
+                              }))
+                            }
+                            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
+                          >
+                            <option value="Pcs">{t("pcs")}</option>
+                            <option value="Sets">{t("sets")}</option>
+                            <option value="Boxes">{t("boxes")}</option>
+                            <option value="Kg">{t("kg")}</option>
+                            <option value="Lbs">{t("lbs")}</option>
+                            <option value="Meters">{t("meters")}</option>
+                            <option value="Feet">{t("feet")}</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="description"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
+                        {t("product_description")} *
+                      </label>
+                      <textarea
+                        id="description"
+                        rows={4}
+                        value={quotationRequestData.description}
+                        onChange={(e) =>
+                          setQuotationRequestData((prev) => ({
+                            ...prev,
+                            description: e.target.value,
+                          }))
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500 resize-none"
+                        placeholder={t(
+                          "describe_the_product_specifications_materials_colors_dimensions_etc"
+                        )}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Reference Links */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-medium text-gray-900">
+                        {t("reference_links")}
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={addReferenceLink}
+                        className="text-cargo-600 hover:text-cargo-700 text-sm font-medium flex items-center gap-1"
+                      >
+                        <PlusIcon className="h-4 w-4" />
+                        {t("add_link")}
+                      </button>
+                    </div>
+
+                    {quotationRequestData.referenceLinks.map((link, index) => (
+                      <div key={index} className="flex gap-3 items-end">
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t("website_url")}
+                          </label>
+                          <input
+                            type="url"
+                            value={link.url}
+                            onChange={(e) =>
+                              updateReferenceLink(index, "url", e.target.value)
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
+                            placeholder="https://example.com/product"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t("description")}
+                          </label>
+                          <input
+                            type="text"
+                            value={link.description}
+                            onChange={(e) =>
+                              updateReferenceLink(
+                                index,
+                                "description",
+                                e.target.value
+                              )
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
+                            placeholder={t("what_is_this_link_for")}
+                          />
+                        </div>
+                        {quotationRequestData.referenceLinks.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeReferenceLink(index)}
+                            className="text-red-600 hover:text-red-700 p-2"
+                          >
+                            <XMarkIcon className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
-                )}
-              </div>
 
-              {/* Additional Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
-                  {t("additional_information")}
-                </h3>
+                  {/* Product Images */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium text-gray-900">
+                      {t("product_images")}
+                    </h3>
 
-                <div>
-                  <label
-                    htmlFor="needsExplanation"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    {t("please_explain_your_needs")} *
-                  </label>
-                  <textarea
-                    id="needsExplanation"
-                    rows={4}
-                    value={quotationRequestData.needsExplanation}
-                    onChange={(e) =>
-                      setQuotationRequestData((prev) => ({
-                        ...prev,
-                        needsExplanation: e.target.value,
-                      }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500 resize-none"
-                    placeholder={t(
-                      "explain_what_you_re_looking_for_any_specific_requirements_quality_standards_etc"
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                      <input
+                        type="file"
+                        id="productImages"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="productImages"
+                        className="cursor-pointer flex flex-col items-center gap-2"
+                      >
+                        <div className="p-3 bg-cargo-50 rounded-full">
+                          <PlusIcon className="h-8 w-8 text-cargo-600" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-700">
+                          {t("upload_product_images")}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {t("png_jpg_gif_up_to_10mb_each")}
+                        </span>
+                      </label>
+                    </div>
+
+                    {quotationRequestData.productImages.length > 0 && (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {quotationRequestData.productImages.map(
+                          (file, index) => (
+                            <div key={index} className="relative group">
+                              <img
+                                src={URL.createObjectURL(file)}
+                                alt={`Product ${index + 1}`}
+                                className="w-full h-24 object-cover rounded-lg border border-gray-200"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeImage(index)}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <XMarkIcon className="h-3 w-3" />
+                              </button>
+                            </div>
+                          )
+                        )}
+                      </div>
                     )}
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <label
-                      htmlFor="budget"
-                      className="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                      {t("budget_range")}
-                    </label>
-                    <input
-                      type="text"
-                      id="budget"
-                      value={quotationRequestData.budget}
-                      onChange={(e) =>
-                        setQuotationRequestData((prev) => ({
-                          ...prev,
-                          budget: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
-                      placeholder={t("e_g_1000_5000")}
-                    />
                   </div>
 
-                  <div>
-                    <label
-                      htmlFor="timeline"
-                      className="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                      {t("timeline")}
-                    </label>
-                    <select
-                      id="timeline"
-                      value={quotationRequestData.timeline}
-                      onChange={(e) =>
-                        setQuotationRequestData((prev) => ({
-                          ...prev,
-                          timeline: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
-                    >
-                      <option value="">{t("select_timeline")}</option>
-                      <option value="urgent">{t("urgent_1_2_weeks")}</option>
-                      <option value="normal">{t("normal_2_4_weeks")}</option>
-                      <option value="flexible">
-                        {t("flexible_1_2_months")}
-                      </option>
-                      <option value="long-term">
-                        {t("long_term_2_plus_months")}
-                      </option>
-                    </select>
+                  {/* Additional Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
+                      {t("additional_information")}
+                    </h3>
+
+                    <div>
+                      <label
+                        htmlFor="needsExplanation"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
+                        {t("please_explain_your_needs")} *
+                      </label>
+                      <textarea
+                        id="needsExplanation"
+                        rows={4}
+                        value={quotationRequestData.needsExplanation}
+                        onChange={(e) =>
+                          setQuotationRequestData((prev) => ({
+                            ...prev,
+                            needsExplanation: e.target.value,
+                          }))
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500 resize-none"
+                        placeholder={t(
+                          "explain_what_you_re_looking_for_any_specific_requirements_quality_standards_etc"
+                        )}
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div>
+                        <label
+                          htmlFor="budget"
+                          className="block text-sm font-medium text-gray-700 mb-2"
+                        >
+                          {t("budget_range")}
+                        </label>
+                        <input
+                          type="text"
+                          id="budget"
+                          value={quotationRequestData.budget}
+                          onChange={(e) =>
+                            setQuotationRequestData((prev) => ({
+                              ...prev,
+                              budget: e.target.value,
+                            }))
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
+                          placeholder={t("e_g_1000_5000")}
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="timeline"
+                          className="block text-sm font-medium text-gray-700 mb-2"
+                        >
+                          {t("timeline")}
+                        </label>
+                        <select
+                          id="timeline"
+                          value={quotationRequestData.timeline}
+                          onChange={(e) =>
+                            setQuotationRequestData((prev) => ({
+                              ...prev,
+                              timeline: e.target.value,
+                            }))
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
+                        >
+                          <option value="">{t("select_timeline")}</option>
+                          <option value="urgent">
+                            {t("urgent_1_2_weeks")}
+                          </option>
+                          <option value="normal">
+                            {t("normal_2_4_weeks")}
+                          </option>
+                          <option value="flexible">
+                            {t("flexible_1_2_months")}
+                          </option>
+                          <option value="long-term">
+                            {t("long_term_2_plus_months")}
+                          </option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="specialRequirements"
+                          className="block text-sm font-medium text-gray-700 mb-2"
+                        >
+                          {t("special_requirements")}
+                        </label>
+                        <input
+                          type="text"
+                          id="specialRequirements"
+                          value={quotationRequestData.specialRequirements}
+                          onChange={(e) =>
+                            setQuotationRequestData((prev) => ({
+                              ...prev,
+                              specialRequirements: e.target.value,
+                            }))
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
+                          placeholder={t("e_g_custom_packaging_certifications")}
+                        />
+                      </div>
+                    </div>
                   </div>
 
-                  <div>
-                    <label
-                      htmlFor="specialRequirements"
-                      className="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                      {t("special_requirements")}
-                    </label>
-                    <input
-                      type="text"
-                      id="specialRequirements"
-                      value={quotationRequestData.specialRequirements}
-                      onChange={(e) =>
-                        setQuotationRequestData((prev) => ({
-                          ...prev,
-                          specialRequirements: e.target.value,
-                        }))
+                  <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                    <button
+                      type="submit"
+                      disabled={
+                        loading ||
+                        !quotationRequestData.productName.trim() ||
+                        !quotationRequestData.description.trim() ||
+                        !quotationRequestData.needsExplanation.trim()
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cargo-500 focus:border-cargo-500"
-                      placeholder={t("e_g_custom_packaging_certifications")}
-                    />
+                      className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-8 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors duration-200"
+                    >
+                      {loading ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      ) : (
+                        <>
+                          <PlusIcon className="h-5 w-5" />
+                          {t("request_quotation")}
+                        </>
+                      )}
+                    </button>
                   </div>
-                </div>
+                </form>
               </div>
-
-              <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                <button
-                  type="submit"
-                  disabled={
-                    loading ||
-                    !quotationRequestData.productName.trim() ||
-                    !quotationRequestData.description.trim() ||
-                    !quotationRequestData.needsExplanation.trim()
-                  }
-                  className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-8 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors duration-200"
-                >
-                  {loading ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  ) : (
-                    <>
-                      <PlusIcon className="h-5 w-5" />
-                      {t("request_quotation")}
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-      </div>
-    </div>
-  )}
-
+            </div>
+          )}
         </div>
       )}
 
       {mainTab === "history" && (
         <section className="mt-10 rounded-2xl border border-white/10 bg-white/60 backdrop-blur-sm p-6 shadow-xl">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">
-            {t("user_orders_history")}
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">
-            {t("user_orders_history_description")}
-          </p>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">
+              {t("user_orders_history")}
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              {t("user_orders_history_description")}
+            </p>
 
-          {historyLoading ? (
-            <div className="mt-6 space-y-4">
-              {[0, 1].map((index) => (
-                <div
-                  key={index}
-                  className="overflow-hidden rounded-2xl border border-white/10 bg-white/60 p-6 shadow-sm"
-                >
-                  <div className="h-4 w-2/3 animate-pulse rounded bg-gray-200" />
-                  <div className="mt-3 h-3 w-1/2 animate-pulse rounded bg-gray-200" />
-                  <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    {Array.from({ length: 4 }).map((_, metaIndex) => (
-                      <div key={metaIndex} className="space-y-2">
-                        <div className="h-2 w-16 animate-pulse rounded bg-gray-200" />
-                        <div className="h-3 w-24 animate-pulse rounded bg-gray-200" />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-6 h-24 animate-pulse rounded-xl bg-gray-100" />
-                </div>
-              ))}
-            </div>
-          ) : userOrders.length === 0 ? (
-            <div className="mt-6 flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-indigo-200 bg-indigo-50/70 px-6 py-12 text-center text-indigo-700">
-              <DocumentPlusIcon className="h-10 w-10" />
-              <p className="text-sm font-semibold">{t("user_orders_history_empty")}</p>
-              <p className="text-xs text-indigo-600">{t("user_orders_history_empty_hint")}</p>
-            </div>
-          ) : (
-            <div className="mt-6 space-y-6">
-              {userOrders.map((order) => {
-                const responses = responsesByOrder.get(order.order_number ?? "") || [];
-                const [latestResponse, ...olderResponses] = responses;
-                const statusLabel = formatOrderStatus(order.status) || t("order_status_pending");
-                const totalValue = formatPrice(order.total_value, order.currency);
-
-                return (
-                  <article
-                    key={order.order_number || order.id}
-                    className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg"
+            {historyLoading ? (
+              <div className="mt-6 space-y-4">
+                {[0, 1].map((index) => (
+                  <div
+                    key={index}
+                    className="overflow-hidden rounded-2xl border border-white/10 bg-white/60 p-6 shadow-sm"
                   >
-                    <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500/0 via-indigo-500 to-indigo-500/0" />
-                    <div className="p-5 sm:p-6">
-                      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                        <div>
-                          <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-gray-400">
-                            <ClockIcon className="h-4 w-4 text-indigo-500" />
-                            {t("user_orders_last_update")}: {formatDate(order.updated_at || order.created_at)}
-                          </div>
-                          <h3 className="mt-1 text-lg font-semibold text-gray-900">
-                            {order.order_number || t("user_orders_unknown_number")}
-                          </h3>
-                          <dl className="mt-3 grid grid-cols-1 gap-3 text-sm text-gray-700 sm:grid-cols-2 lg:grid-cols-3">
-                            <div>
-                              <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                                {t("order_value")}
-                              </dt>
-                              <dd className="mt-1">{totalValue || "-"}</dd>
-                            </div>
-                            <div>
-                              <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                                {t("origin_country")}
-                              </dt>
-                              <dd className="mt-1">{order.origin_country || "-"}</dd>
-                            </div>
-                            <div>
-                              <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                                {t("destination_country")}
-                              </dt>
-                              <dd className="mt-1">{order.destination_country || "-"}</dd>
-                            </div>
-                          </dl>
+                    <div className="h-4 w-2/3 animate-pulse rounded bg-gray-200" />
+                    <div className="mt-3 h-3 w-1/2 animate-pulse rounded bg-gray-200" />
+                    <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                      {Array.from({ length: 4 }).map((_, metaIndex) => (
+                        <div key={metaIndex} className="space-y-2">
+                          <div className="h-2 w-16 animate-pulse rounded bg-gray-200" />
+                          <div className="h-3 w-24 animate-pulse rounded bg-gray-200" />
                         </div>
-                        <span className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">
-                          <span className="h-2.5 w-2.5 rounded-full bg-indigo-500" />
-                          {statusLabel}
-                        </span>
-                      </div>
+                      ))}
+                    </div>
+                    <div className="mt-6 h-24 animate-pulse rounded-xl bg-gray-100" />
+                  </div>
+                ))}
+              </div>
+            ) : userOrders.length === 0 ? (
+              <div className="mt-6 flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-indigo-200 bg-indigo-50/70 px-6 py-12 text-center text-indigo-700">
+                <DocumentPlusIcon className="h-10 w-10" />
+                <p className="text-sm font-semibold">
+                  {t("user_orders_history_empty")}
+                </p>
+                <p className="text-xs text-indigo-600">
+                  {t("user_orders_history_empty_hint")}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-6 space-y-6">
+                {userOrders.map((order) => {
+                  const responses =
+                    responsesByOrder.get(order.order_number ?? "") || [];
+                  const [latestResponse, ...olderResponses] = responses;
+                  const statusLabel =
+                    formatOrderStatus(order.status) ||
+                    t("order_status_pending");
+                  const totalValue = formatPrice(
+                    order.total_value,
+                    order.currency
+                  );
+                  const agentId =
+                    latestResponse?.agent_id ??
+                    olderResponses.find((response) => response.agent_id)
+                      ?.agent_id ??
+                    null;
+                  const orderIdentifier = order.order_number || order.id;
 
-                      <div className="mt-6 rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-white p-5">
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                          <div className="flex items-center gap-3">
-                            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
-                              <ChatBubbleLeftRightIcon className="h-5 w-5" />
-                            </span>
-                            <div>
-                              <p className="text-sm font-semibold text-gray-900">
-                                {t("user_orders_latest_response")}
-                              </p>
-                              {latestResponse?.created_at && (
-                                <p className="text-xs text-gray-500">
-                                  {t("user_orders_response_at", {
-                                    date: formatDate(latestResponse.created_at),
-                                  })}
-                                </p>
-                              )}
+                  return (
+                    <article
+                      key={orderIdentifier}
+                      className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg"
+                    >
+                      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500/0 via-indigo-500 to-indigo-500/0" />
+                      <div className="p-5 sm:p-6">
+                        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                          <div>
+                            <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-gray-400">
+                              <ClockIcon className="h-4 w-4 text-indigo-500" />
+                              {t("user_orders_last_update")}:{" "}
+                              {formatDate(order.updated_at || order.created_at)}
                             </div>
+                            <h3 className="mt-1 text-lg font-semibold text-gray-900">
+                              {order.order_number ||
+                                t("user_orders_unknown_number")}
+                            </h3>
+                            <dl className="mt-3 grid grid-cols-1 gap-3 text-sm text-gray-700 sm:grid-cols-2 lg:grid-cols-3">
+                              <div>
+                                <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                                  {t("order_value")}
+                                </dt>
+                                <dd className="mt-1">{totalValue || "-"}</dd>
+                              </div>
+                              <div>
+                                <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                                  {t("origin_country")}
+                                </dt>
+                                <dd className="mt-1">
+                                  {order.origin_country || "-"}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                                  {t("destination_country")}
+                                </dt>
+                                <dd className="mt-1">
+                                  {order.destination_country || "-"}
+                                </dd>
+                              </div>
+                            </dl>
                           </div>
-                          {latestResponse && (
-                            <div className="flex flex-wrap gap-2 text-xs text-indigo-700">
-                              {typeof latestResponse.price === "number" && (
-                                <span className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 font-medium">
-                                  {t("user_orders_response_price", {
-                                    price: formatPrice(latestResponse.price, order.currency) ?? "",
-                                  })}
-                                </span>
-                              )}
-                              {latestResponse.delivery_date && (
-                                <span className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 font-medium">
-                                  {t("user_orders_response_delivery", {
-                                    deliveryDate: formatDate(latestResponse.delivery_date),
-                                  })}
-                                </span>
-                              )}
+                          <div className="flex flex-wrap items-center justify-end gap-3">
+                            <span className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">
+                              <span className="h-2.5 w-2.5 rounded-full bg-indigo-500" />
+                              {statusLabel}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleMessageAgent(orderIdentifier, agentId, order.order_number)
+                              }
+                              disabled={!agentId}
+                              title={
+                                !agentId
+                                  ? t("user_orders_message_agent_unavailable")
+                                  : undefined
+                              }
+                              className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold transition ${
+                                !agentId
+                                  ? "cursor-not-allowed bg-gray-200 text-gray-500"
+                                  : "bg-indigo-600 text-white hover:bg-indigo-700"
+                              }`}
+                            >
+                              <PaperAirplaneIcon className="h-4 w-4" />
+                              {t("user_orders_message_agent")}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="mt-6 rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-white p-5">
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="flex items-center gap-3">
+                              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+                                <ChatBubbleLeftRightIcon className="h-5 w-5" />
+                              </span>
+                              <div>
+                                <p className="text-sm font-semibold text-gray-900">
+                                  {t("user_orders_latest_response")}
+                                </p>
+                                {latestResponse?.created_at && (
+                                  <p className="text-xs text-gray-500">
+                                    {t("user_orders_response_at", {
+                                      date: formatDate(
+                                        latestResponse.created_at
+                                      ),
+                                    })}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            {latestResponse && (
+                              <div className="flex flex-wrap gap-2 text-xs text-indigo-700">
+                                {typeof latestResponse.price === "number" && (
+                                  <span className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 font-medium">
+                                    {t("user_orders_response_price", {
+                                      price:
+                                        formatPrice(
+                                          latestResponse.price,
+                                          order.currency
+                                        ) ?? "",
+                                    })}
+                                  </span>
+                                )}
+                                {latestResponse.delivery_date && (
+                                  <span className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 font-medium">
+                                    {t("user_orders_response_delivery", {
+                                      deliveryDate: formatDate(
+                                        latestResponse.delivery_date
+                                      ),
+                                    })}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          {latestResponse ? (
+                            <p className="mt-4 whitespace-pre-line text-sm text-gray-700">
+                              {latestResponse.response}
+                            </p>
+                          ) : (
+                            <div className="mt-4 rounded-lg border border-dashed border-indigo-200 bg-indigo-50/60 px-4 py-3 text-sm text-indigo-700">
+                              {t("user_orders_no_response")}
                             </div>
                           )}
                         </div>
-                        {latestResponse ? (
-                          <p className="mt-4 whitespace-pre-line text-sm text-gray-700">
-                            {latestResponse.response}
-                          </p>
-                        ) : (
-                          <div className="mt-4 rounded-lg border border-dashed border-indigo-200 bg-indigo-50/60 px-4 py-3 text-sm text-indigo-700">
-                            {t("user_orders_no_response")}
+
+                        {olderResponses.length > 0 && (
+                          <div className="mt-6">
+                            <p className="flex items-center gap-2 text-sm font-medium text-gray-900">
+                              <ClockIcon className="h-4 w-4 text-indigo-500" />
+                              {t("user_orders_responses_timeline")}
+                            </p>
+                            <div className="relative mt-4 pl-5">
+                              <div className="absolute left-1.5 top-2 bottom-2 w-px bg-indigo-100" />
+                              <div className="space-y-4">
+                                {olderResponses.map((response) => {
+                                  const priceText = formatPrice(
+                                    response.price,
+                                    order.currency
+                                  );
+                                  const deliveryText = response.delivery_date
+                                    ? formatDate(response.delivery_date)
+                                    : null;
+                                  return (
+                                    <div
+                                      key={response.id}
+                                      className="relative pl-4"
+                                    >
+                                      <span className="absolute left-[-14px] top-3 h-3 w-3 rounded-full border-2 border-indigo-400 bg-white" />
+                                      <div className="rounded-xl border border-indigo-100 bg-white p-4 shadow-sm">
+                                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                          <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">
+                                            {formatDate(response.created_at)}
+                                          </p>
+                                          <div className="flex flex-wrap gap-2 text-xs text-indigo-600">
+                                            {priceText && (
+                                              <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 font-medium">
+                                                {t(
+                                                  "user_orders_response_price",
+                                                  { price: priceText }
+                                                )}
+                                              </span>
+                                            )}
+                                            {deliveryText && (
+                                              <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 font-medium">
+                                                {t(
+                                                  "user_orders_response_delivery",
+                                                  { deliveryDate: deliveryText }
+                                                )}
+                                              </span>
+                                            )}
+                                          </div>
+                                        </div>
+                                        {response.response && (
+                                          <p className="mt-3 whitespace-pre-line text-sm text-gray-600">
+                                            {response.response}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>
-
-                      {olderResponses.length > 0 && (
-                        <div className="mt-6">
-                          <p className="flex items-center gap-2 text-sm font-medium text-gray-900">
-                            <ClockIcon className="h-4 w-4 text-indigo-500" />
-                            {t("user_orders_responses_timeline")}
-                          </p>
-                          <div className="relative mt-4 pl-5">
-                            <div className="absolute left-1.5 top-2 bottom-2 w-px bg-indigo-100" />
-                            <div className="space-y-4">
-                              {olderResponses.map((response) => {
-                                const priceText = formatPrice(response.price, order.currency);
-                                const deliveryText = response.delivery_date
-                                  ? formatDate(response.delivery_date)
-                                  : null;
-                                return (
-                                  <div key={response.id} className="relative pl-4">
-                                    <span className="absolute left-[-14px] top-3 h-3 w-3 rounded-full border-2 border-indigo-400 bg-white" />
-                                    <div className="rounded-xl border border-indigo-100 bg-white p-4 shadow-sm">
-                                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                        <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">
-                                          {formatDate(response.created_at)}
-                                        </p>
-                                        <div className="flex flex-wrap gap-2 text-xs text-indigo-600">
-                                          {priceText && (
-                                            <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 font-medium">
-                                              {t("user_orders_response_price", { price: priceText })}
-                                            </span>
-                                          )}
-                                          {deliveryText && (
-                                            <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 font-medium">
-                                              {t("user_orders_response_delivery", { deliveryDate: deliveryText })}
-                                            </span>
-                                          )}
-                                        </div>
-                                      </div>
-                                      {response.response && (
-                                        <p className="mt-3 whitespace-pre-line text-sm text-gray-600">
-                                          {response.response}
-                                        </p>
-                                      )}
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </section>
+      )}
+      {messageTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          onClick={closeMessageModal}
+        >
+          <div
+            className="w-full max-w-lg rounded-2xl bg-white shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between border-b border-gray-100 px-6 py-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {t("user_orders_message_agent_title")}
+                </h3>
+                {messageTarget.orderNumber && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    {t("user_orders_message_agent_about_order", {
+                      orderNumber: messageTarget.orderNumber,
+                    })}
+                  </p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={closeMessageModal}
+                disabled={messageSending}
+                className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed"
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
+            <form onSubmit={handleSendAgentMessage} className="space-y-4 px-6 py-5">
+              <p className="text-sm text-gray-600">
+                {t("user_orders_message_agent_instruction")}
+              </p>
+              <textarea
+                value={messageDraft}
+                onChange={(event) => setMessageDraft(event.target.value)}
+                rows={6}
+                className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-gray-100"
+                placeholder={t("user_orders_message_agent_placeholder")}
+                disabled={messageSending}
+              />
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={closeMessageModal}
+                  disabled={messageSending}
+                  className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed"
+                >
+                  {t("user_orders_message_agent_cancel")}
+                </button>
+                <button
+                  type="submit"
+                  disabled={messageSending}
+                  className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-400"
+                >
+                  {messageSending ? (
+                    <span className="inline-flex items-center gap-2">
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-b-transparent" />
+                      {t("user_orders_message_agent_send")}
+                    </span>
+                  ) : (
+                    <>
+                      <PaperAirplaneIcon className="h-4 w-4" />
+                      {t("user_orders_message_agent_send")}
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

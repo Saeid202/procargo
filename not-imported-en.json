@@ -47,5 +47,17 @@
   "notifications_case_response_price": "Offer {{price}}",
   "notifications_case_response_delivery": "Delivery {{deliveryDate}}",
   "user_orders_tab_create": "Create new order",
-  "user_orders_tab_history": "Your orders"
+  "user_orders_tab_history": "Your orders",
+  "user_orders_message_agent": "Message agent",
+  "user_orders_message_agent_unavailable": "No agent is assigned yet.",
+  "user_orders_message_agent_error": "We could not start the conversation. Please try again.",
+  "user_orders_message_agent_title": "Message agent",
+  "user_orders_message_agent_instruction": "Write your message for our agent and we will notify them immediately.",
+  "user_orders_message_agent_about_order": "Regarding order {{orderNumber}}",
+  "user_orders_message_agent_placeholder": "Write your message here...",
+  "user_orders_message_agent_default": "Hello, I have a question about order {{orderNumber}}.",
+  "user_orders_message_agent_send": "Send message",
+  "user_orders_message_agent_cancel": "Cancel",
+  "user_orders_message_agent_empty": "Please enter a message before sending.",
+  "user_orders_message_agent_success": "Your message has been sent."
 }

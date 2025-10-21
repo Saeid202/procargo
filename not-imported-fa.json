@@ -48,5 +48,17 @@
   "notifications_case_response_delivery": "زمان تحویل {{deliveryDate}}",
 
   "user_orders_tab_create": "ایجاد سفارش جدید",
-  "user_orders_tab_history": "سفارشات شما"
+  "user_orders_tab_history": "سفارشات شما",
+  "user_orders_message_agent": "ارسال پیام به کارشناس",
+  "user_orders_message_agent_unavailable": "هنوز کارشناسی برای این سفارش پاسخ نداده است.",
+  "user_orders_message_agent_error": "متاسفیم، شروع گفت‌وگو ممکن نشد. لطفاً دوباره تلاش کنید.",
+  "user_orders_message_agent_title": "ارسال پیام به کارشناس",
+  "user_orders_message_agent_instruction": "پیام خود را برای کارشناس بنویسید؛ بلافاصله به او اطلاع داده می‌شود.",
+  "user_orders_message_agent_about_order": "مربوط به سفارش {{orderNumber}}",
+  "user_orders_message_agent_placeholder": "پیام خود را اینجا بنویسید...",
+  "user_orders_message_agent_default": "سلام، درباره سفارش {{orderNumber}} سوالی دارم.",
+  "user_orders_message_agent_send": "ارسال پیام",
+  "user_orders_message_agent_cancel": "انصراف",
+  "user_orders_message_agent_empty": "لطفاً پیش از ارسال، متن پیام را وارد کنید.",
+  "user_orders_message_agent_success": "پیام شما ارسال شد."
 }
