@@ -14,6 +14,7 @@ import {
 } from "../../services/exportService";
 import {
   CurrencyTransferRequest,
+  CurrencyTransferResponse,
   CurrencyTransferService,
 } from "../../services/currencyTransferService";
 import {
@@ -75,6 +76,24 @@ const AgentOrdersPage: React.FC = () => {
   >({});
   const [transferAdminNotesUpdate, setTransferAdminNotesUpdate] = useState<
     Record<string, string>
+  >({});
+  const [transferResponsesMap, setTransferResponsesMap] = useState<
+    Record<string, CurrencyTransferResponse[]>
+  >({});
+  const [transferResponseDraft, setTransferResponseDraft] = useState<
+    Record<string, string>
+  >({});
+  const [transferResponseRate, setTransferResponseRate] = useState<
+    Record<string, string>
+  >({});
+  const [transferResponseFee, setTransferResponseFee] = useState<
+    Record<string, string>
+  >({});
+  const [transferResponseDelivery, setTransferResponseDelivery] = useState<
+    Record<string, string>
+  >({});
+  const [transferResponseSending, setTransferResponseSending] = useState<
+    Record<string, boolean>
   >({});
 
   const { t } = useTranslation();
@@ -353,15 +372,48 @@ const AgentOrdersPage: React.FC = () => {
   const loadCurrencyTransfers = async () => {
     try {
       setCurrencyLoading(true);
+      setTransferResponsesMap({});
       const { transfers, error } =
         await CurrencyTransferService.getAllTransfers();
       if (error) {
         console.error("Error loading currency transfers:", error);
+        setCurrencyTransfers([]);
         return;
       }
-      setCurrencyTransfers(transfers || []);
+      const list = transfers || [];
+      setCurrencyTransfers(list);
+
+      const transferIds = list
+        .map((tr) => tr.id)
+        .filter((value): value is string => Boolean(value));
+
+      if (transferIds.length > 0) {
+        const { responses, error: responsesError } =
+          await CurrencyTransferService.getResponsesForTransfers(transferIds);
+        if (responsesError) {
+          console.error(
+            "Error loading currency transfer responses:",
+            responsesError
+          );
+        }
+        const grouped = (responses || []).reduce(
+          (acc, response) => {
+            if (!response.transfer_id) {
+              return acc;
+            }
+            if (!acc[response.transfer_id]) {
+              acc[response.transfer_id] = [];
+            }
+            acc[response.transfer_id].push(response);
+            return acc;
+          },
+          {} as Record<string, CurrencyTransferResponse[]>
+        );
+        setTransferResponsesMap(grouped);
+      }
     } catch (e) {
       console.error("Error loading currency transfers:", e);
+      setCurrencyTransfers([]);
     } finally {
       setCurrencyLoading(false);
     }
@@ -430,6 +482,116 @@ const AgentOrdersPage: React.FC = () => {
     } catch (e) {
       console.error("Exception updating currency transfer:", e);
       toast.error("Exception updating currency transfer");
+    }
+  };
+
+  const sendCurrencyResponse = async (tr: CurrencyTransferRequest) => {
+    if (!user?.id) {
+      toast.error(
+        t("please_login_to_continue") || "Please log in to continue."
+      );
+      return;
+    }
+
+    const responseBody = (transferResponseDraft[tr.id] || "").trim();
+    if (!responseBody) {
+      toast.error(
+        t("currency_transfer_response_required") ||
+          "Please enter a response before sending"
+      );
+      return;
+    }
+
+    const rateInput = transferResponseRate[tr.id];
+    const feeInput = transferResponseFee[tr.id];
+    const deliveryInput = transferResponseDelivery[tr.id];
+
+    const parsedRate =
+      rateInput !== undefined && rateInput.trim() !== ""
+        ? Number(rateInput)
+        : undefined;
+    if (parsedRate !== undefined && Number.isNaN(parsedRate)) {
+      toast.error(
+        t("currency_transfer_rate_invalid") || "Please enter a valid rate"
+      );
+      return;
+    }
+
+    const parsedFee =
+      feeInput !== undefined && feeInput.trim() !== ""
+        ? Number(feeInput)
+        : undefined;
+    if (parsedFee !== undefined && Number.isNaN(parsedFee)) {
+      toast.error(
+        t("currency_transfer_fee_invalid") || "Please enter a valid fee"
+      );
+      return;
+    }
+
+    setTransferResponseSending((prev) => ({ ...prev, [tr.id]: true }));
+    try {
+      const { response, error } =
+        await CurrencyTransferService.createTransferResponse(
+          tr.id,
+          user.id,
+          {
+            response: responseBody,
+            offered_rate: parsedRate,
+            fee: parsedFee,
+            delivery_date: deliveryInput
+              ? new Date(deliveryInput).toISOString()
+              : undefined,
+          }
+        );
+
+      if (error || !response) {
+        throw new Error(error || "Failed to send response");
+      }
+
+      toast.success(
+        t("currency_transfer_response_success") ||
+          "Currency transfer response sent"
+      );
+
+      setTransferResponsesMap((prev) => {
+        const existing = prev[tr.id] || [];
+        return {
+          ...prev,
+          [tr.id]: [response, ...existing],
+        };
+      });
+
+      setTransferResponseDraft((prev) => {
+        const next = { ...prev };
+        delete next[tr.id];
+        return next;
+      });
+      setTransferResponseRate((prev) => {
+        const next = { ...prev };
+        delete next[tr.id];
+        return next;
+      });
+      setTransferResponseFee((prev) => {
+        const next = { ...prev };
+        delete next[tr.id];
+        return next;
+      });
+      setTransferResponseDelivery((prev) => {
+        const next = { ...prev };
+        delete next[tr.id];
+        return next;
+      });
+    } catch (error) {
+      console.error("Failed to send currency transfer response:", error);
+      toast.error(
+        t("currency_transfer_response_error") ||
+          "Failed to send currency transfer response"
+      );
+    } finally {
+      setTransferResponseSending((prev) => ({
+        ...prev,
+        [tr.id]: false,
+      }));
     }
   };
 
@@ -1654,6 +1816,198 @@ const AgentOrdersPage: React.FC = () => {
                                   </h4>
                                   <div className="text-gray-900 whitespace-pre-wrap">
                                     {tr.customer_request}
+                                  </div>
+                                </div>
+
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                  <h4 className="font-semibold text-gray-800 mb-3">
+                                    {t("currency_transfer_responses")}
+                                  </h4>
+                                  <div className="space-y-4">
+                                    {(transferResponsesMap[tr.id] || []).length === 0 ? (
+                                      <div className="text-sm text-gray-500">
+                                        {t("currency_transfer_no_responses")}
+                                      </div>
+                                    ) : (
+                                      (transferResponsesMap[tr.id] || []).map(
+                                        (response) => {
+                                          const agentName = response.agent
+                                            ? [
+                                                response.agent.first_name,
+                                                response.agent.last_name,
+                                              ]
+                                                .filter(Boolean)
+                                                .join(" ")
+                                            : "";
+                                          return (
+                                            <div
+                                              key={response.id}
+                                              className="border border-gray-200 rounded-lg p-3 bg-gray-50"
+                                            >
+                                              <div className="flex items-center justify-between text-xs text-gray-500">
+                                                <span className="font-medium text-gray-700">
+                                                  {agentName || t("agent")}
+                                                </span>
+                                                <span>
+                                                  {response.created_at
+                                                    ? new Date(
+                                                        response.created_at
+                                                      ).toLocaleString()
+                                                    : "-"}
+                                                </span>
+                                              </div>
+                                              <p className="text-sm text-gray-700 mt-2 whitespace-pre-wrap">
+                                                {response.response}
+                                              </p>
+                                              <dl className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-gray-600">
+                                                {response.offered_rate !==
+                                                  null &&
+                                                  response.offered_rate !==
+                                                    undefined && (
+                                                    <div>
+                                                      <dt className="font-medium text-gray-700">
+                                                        {t(
+                                                          "currency_transfer_rate_label"
+                                                        ) || "Offered rate"}
+                                                      </dt>
+                                                      <dd>
+                                                        {response.offered_rate}
+                                                      </dd>
+                                                    </div>
+                                                  )}
+                                                {response.fee !== null &&
+                                                  response.fee !== undefined && (
+                                                    <div>
+                                                      <dt className="font-medium text-gray-700">
+                                                        {t(
+                                                          "currency_transfer_fee_label"
+                                                        ) || "Service fee"}
+                                                      </dt>
+                                                      <dd>{response.fee}</dd>
+                                                    </div>
+                                                  )}
+                                                {response.delivery_date && (
+                                                  <div>
+                                                    <dt className="font-medium text-gray-700">
+                                                      {t(
+                                                        "currency_transfer_delivery_label"
+                                                      ) || "Expected delivery"}
+                                                    </dt>
+                                                    <dd>
+                                                      {new Date(
+                                                        response.delivery_date
+                                                      ).toLocaleDateString()}
+                                                    </dd>
+                                                  </div>
+                                                )}
+                                              </dl>
+                                            </div>
+                                          );
+                                        }
+                                      )
+                                    )}
+                                    <div className="border-t border-gray-200 pt-4">
+                                      <h5 className="text-sm font-semibold text-gray-800 mb-2">
+                                        {t("send_reply")}
+                                      </h5>
+                                      <textarea
+                                        value={transferResponseDraft[tr.id] ?? ""}
+                                        onChange={(e) =>
+                                          setTransferResponseDraft((prev) => ({
+                                            ...prev,
+                                            [tr.id]: e.target.value,
+                                          }))
+                                        }
+                                        rows={3}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder={
+                                          t(
+                                            "currency_transfer_response_placeholder"
+                                          ) || "Share details for the customer"
+                                        }
+                                      />
+                                      <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <input
+                                          type="number"
+                                          step="any"
+                                          value={
+                                            transferResponseRate[tr.id] ?? ""
+                                          }
+                                          onChange={(e) =>
+                                            setTransferResponseRate((prev) => ({
+                                              ...prev,
+                                              [tr.id]: e.target.value,
+                                            }))
+                                          }
+                                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                          placeholder={
+                                            t(
+                                              "currency_transfer_rate_placeholder"
+                                            ) || "Offered rate"
+                                          }
+                                        />
+                                        <input
+                                          type="number"
+                                          step="any"
+                                          value={
+                                            transferResponseFee[tr.id] ?? ""
+                                          }
+                                          onChange={(e) =>
+                                            setTransferResponseFee((prev) => ({
+                                              ...prev,
+                                              [tr.id]: e.target.value,
+                                            }))
+                                          }
+                                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                          placeholder={
+                                            t(
+                                              "currency_transfer_fee_placeholder"
+                                            ) || "Service fee"
+                                          }
+                                        />
+                                        <input
+                                          type="date"
+                                          value={
+                                            transferResponseDelivery[tr.id] ??
+                                            ""
+                                          }
+                                          onChange={(e) =>
+                                            setTransferResponseDelivery(
+                                              (prev) => ({
+                                                ...prev,
+                                                [tr.id]: e.target.value,
+                                              })
+                                            )
+                                          }
+                                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                          placeholder={
+                                            t(
+                                              "currency_transfer_delivery_placeholder"
+                                            ) || "Expected completion"
+                                          }
+                                        />
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => sendCurrencyResponse(tr)}
+                                        disabled={
+                                          !!transferResponseSending[tr.id]
+                                        }
+                                        className="mt-3 inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                                      >
+                                        {transferResponseSending[tr.id] ? (
+                                          <>
+                                            <span className="h-4 w-4 rounded-full border-2 border-white border-b-transparent animate-spin" />
+                                            {t("sending") || "Sending"}
+                                          </>
+                                        ) : (
+                                          <>
+                                            <PaperAirplaneIcon className="h-4 w-4" />
+                                            {t("send_reply")}
+                                          </>
+                                        )}
+                                      </button>
+                                    </div>
                                   </div>
                                 </div>
                               </div>

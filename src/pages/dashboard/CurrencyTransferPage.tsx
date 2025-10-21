@@ -1,17 +1,23 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
-import { CurrencyTransferService } from '../../services/currencyTransferService';
+import { CurrencyTransferService, CurrencyTransferRequest, CurrencyTransferResponse } from '../../services/currencyTransferService';
+import { MessagingService } from '../../services/messagingService';
+import { supabase } from '../../lib/supabase';
 import {
   CurrencyDollarIcon,
   DocumentTextIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
-  ClockIcon
+  ClockIcon,
+  ChatBubbleLeftRightIcon,
+  PaperAirplaneIcon,
+  ArrowPathIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 
 const CurrencyTransferPage: React.FC = () => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const currentLanguage = i18n.language;
   const isPersian = currentLanguage === 'fa' || currentLanguage === 'fa-IR';
   const { user } = useAuth();
@@ -30,6 +36,130 @@ const CurrencyTransferPage: React.FC = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeView, setActiveView] = useState<'create' | 'history'>('create');
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [userTransfers, setUserTransfers] = useState<CurrencyTransferRequest[]>([]);
+  const [transferResponses, setTransferResponses] = useState<CurrencyTransferResponse[]>([]);
+  const [messageTarget, setMessageTarget] = useState<{
+    transferId: string;
+    agentId: string;
+    agentName?: string | null;
+  } | null>(null);
+  const [messageDraft, setMessageDraft] = useState('');
+  const [messageSending, setMessageSending] = useState(false);
+
+  const parseDate = useCallback((value?: string | null) => {
+    if (!value) return 0;
+    const timestamp = new Date(value).getTime();
+    return Number.isNaN(timestamp) ? 0 : timestamp;
+  }, []);
+
+  const formatDate = useCallback(
+    (value?: string | null) => {
+      if (!value) return '-';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        return '-';
+      }
+      return date.toLocaleDateString(i18n.language, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    },
+    [i18n.language]
+  );
+
+  const formatStatus = useCallback(
+    (status?: CurrencyTransferRequest['status']) => {
+      if (!status) {
+        return '-';
+      }
+      const key = `currency_transfer_status_${status}`;
+      const translated = t(key as any);
+      if (translated && translated !== key) {
+        return translated;
+      }
+      return status.replace(/_/g, ' ');
+    },
+    [t]
+  );
+
+  const statusBadgeClass = useCallback(
+    (status?: CurrencyTransferRequest['status']) => {
+      switch (status) {
+        case 'pending':
+          return 'bg-yellow-100 text-yellow-800';
+        case 'in_review':
+          return 'bg-blue-100 text-blue-800';
+        case 'processed':
+          return 'bg-emerald-100 text-emerald-700';
+        case 'rejected':
+          return 'bg-red-100 text-red-700';
+        default:
+          return 'bg-gray-100 text-gray-700';
+      }
+    },
+    []
+  );
+
+  const fetchUserTransferHistory = useCallback(async () => {
+    if (!user) return;
+    try {
+      setHistoryLoading(true);
+      const { transfers, error } = await CurrencyTransferService.getTransfersByUser(user.id);
+      if (error) {
+        console.error('Failed to load currency transfers', error);
+        setUserTransfers([]);
+        setTransferResponses([]);
+        return;
+      }
+
+      const sortedTransfers = (transfers || []).sort(
+        (a, b) =>
+          parseDate(b.updated_at || b.created_at) - parseDate(a.updated_at || a.created_at)
+      );
+      setUserTransfers(sortedTransfers);
+
+      const transferIds = sortedTransfers
+        .map((transfer) => transfer.id)
+        .filter((value): value is string => Boolean(value));
+
+      if (transferIds.length > 0) {
+        const { responses, error: responsesError } =
+          await CurrencyTransferService.getResponsesForTransfers(transferIds);
+        if (responsesError) {
+          console.error('Failed to load transfer responses', responsesError);
+          setTransferResponses([]);
+        } else {
+          setTransferResponses(responses || []);
+        }
+      } else {
+        setTransferResponses([]);
+      }
+    } catch (err) {
+      console.error('Unexpected error loading currency transfer history', err);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [user, parseDate]);
+
+  const responsesByTransfer = useMemo(() => {
+    return transferResponses.reduce((acc, response) => {
+      if (!response.transfer_id) {
+        return acc;
+      }
+      if (!acc[response.transfer_id]) {
+        acc[response.transfer_id] = [];
+      }
+      acc[response.transfer_id].push(response);
+      return acc;
+    }, {} as Record<string, CurrencyTransferResponse[]>);
+  }, [transferResponses]);
+
+  const handleRefreshHistory = useCallback(() => {
+    fetchUserTransferHistory();
+  }, [fetchUserTransferHistory]);
 
   // Only show for Persian language
   if (!isPersian) {
@@ -43,6 +173,109 @@ const CurrencyTransferPage: React.FC = () => {
       [name]: value
     }));
   };
+
+  const handleMessageAgent = useCallback(
+    (transferId: string, agentId?: string | null, agentName?: string | null) => {
+      if (!agentId) {
+        alert(t('currency_transfer_message_agent_unavailable'));
+        return;
+      }
+
+      const defaultMessage = t('currency_transfer_message_agent_default', {
+        transferId
+      });
+      setMessageDraft(defaultMessage);
+      setMessageTarget({
+        transferId,
+        agentId,
+        agentName
+      });
+    },
+    [t]
+  );
+
+  const closeMessageModal = useCallback(() => {
+    if (messageSending) {
+      return;
+    }
+    setMessageTarget(null);
+    setMessageDraft('');
+  }, [messageSending]);
+
+  const handleSendAgentMessage = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!messageTarget) {
+      return;
+    }
+
+    const body = messageDraft.trim();
+    if (!body) {
+      alert(t('currency_transfer_message_agent_empty'));
+      return;
+    }
+
+    try {
+      setMessageSending(true);
+      const { data: thread, error: threadError } =
+        await MessagingService.createOrGetDirectThread(messageTarget.agentId);
+      if (threadError || !thread) {
+        throw threadError || new Error('Thread creation failed');
+      }
+
+      const { error: sendError } = await MessagingService.sendMessage(thread.id, body);
+      if (sendError) {
+        throw sendError;
+      }
+
+      alert(t('currency_transfer_message_agent_success'));
+      setMessageDraft('');
+      setMessageTarget(null);
+    } catch (error) {
+      console.error('Failed to send message to agent', error);
+      alert(t('currency_transfer_message_agent_error'));
+    } finally {
+      setMessageSending(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user && activeView === 'history') {
+      fetchUserTransferHistory();
+    }
+  }, [user, activeView, fetchUserTransferHistory]);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    const channel = supabase
+      .channel(`currency-transfers-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'currency_transfer_requests',
+          filter: `user_id=eq.${user.id}`
+        },
+        () => fetchUserTransferHistory()
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'currency_transfer_responses'
+        },
+        () => fetchUserTransferHistory()
+      );
+
+    channel.subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, fetchUserTransferHistory]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,6 +327,7 @@ const CurrencyTransferPage: React.FC = () => {
         additionalInfo: '',
         customerRequest: ''
       });
+      fetchUserTransferHistory();
     } catch (err) {
       console.error('Unexpected error creating currency transfer:', err);
       alert('خطای غیرمنتظره رخ داد. لطفاً دوباره تلاش کنید.');
@@ -122,7 +356,31 @@ const CurrencyTransferPage: React.FC = () => {
   return (
     <div className="p-6">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="mb-6 flex justify-center">
+          <div className="inline-flex rounded-full border border-gray-200 bg-white p-1 shadow-sm">
+            <button
+              type="button"
+              onClick={() => setActiveView('create')}
+              className={`px-4 py-2 text-sm font-medium rounded-full transition ${
+                activeView === 'create' ? 'bg-amber-500 text-white shadow' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              {t('currency_transfer_create_tab')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveView('history')}
+              className={`px-4 py-2 text-sm font-medium rounded-full transition ${
+                activeView === 'history' ? 'bg-amber-500 text-white shadow' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              {t('currency_transfer_history_tab')}
+            </button>
+          </div>
+        </div>
+
+        {activeView === 'create' ? (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
               نقل و انتقال ارز
@@ -452,8 +710,303 @@ const CurrencyTransferPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">
+                {t('currency_transfer_history_heading')}
+              </h2>
+              <p className="text-sm text-gray-600">
+                {t('currency_transfer_history_subheading')}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleRefreshHistory}
+              disabled={historyLoading}
+              className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {historyLoading ? (
+                <>
+                  <span className="h-4 w-4 rounded-full border-2 border-gray-400 border-b-transparent animate-spin" />
+                  {t('loading')}
+                </>
+              ) : (
+                <>
+                  <ArrowPathIcon className="h-4 w-4" />
+                  {t('refresh')}
+                </>
+              )}
+            </button>
+          </div>
+          <div className="p-6">
+            {historyLoading ? (
+              <div className="flex flex-col items-center justify-center gap-3 text-gray-500">
+                <ArrowPathIcon className="h-6 w-6 animate-spin" />
+                <span>{t('loading')}</span>
+              </div>
+            ) : userTransfers.length === 0 ? (
+              <div className="text-center text-gray-600">
+                <CurrencyDollarIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-3 text-lg font-semibold text-gray-900">
+                  {t('currency_transfer_no_history')}
+                </h3>
+                <p className="mt-2 text-sm text-gray-600">
+                  {t('currency_transfer_no_history_description')}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {userTransfers.map((transfer) => {
+                  const responses = responsesByTransfer[transfer.id] || [];
+                  const agentNames = Array.from(
+                    new Set(
+                      responses
+                        .map((response) => {
+                          if (!response.agent) return null;
+                          const fullName = [response.agent.first_name, response.agent.last_name]
+                            .filter(Boolean)
+                            .join(' ');
+                          return fullName || response.agent.email || null;
+                        })
+                        .filter((value): value is string => Boolean(value))
+                    )
+                  );
+                  return (
+                    <article
+                      key={transfer.id}
+                      className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
+                    >
+                      <div className="flex flex-col gap-2 border-b border-gray-100 bg-gray-50 px-6 py-4 md:flex-row md:items-center md:justify-between">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {transfer.purpose || t('currency_transfer')}
+                          </h3>
+                          <p className="text-xs text-gray-500">
+                            {t('currency_transfer_created_at', {
+                              date: formatDate(transfer.created_at)
+                            })}
+                          </p>
+                          {agentNames.length > 0 && (
+                            <p className="mt-1 text-xs text-gray-500">
+                              {t('currency_transfer_responses_from', {
+                                agents: agentNames.join(', ')
+                              })}
+                            </p>
+                          )}
+                        </div>
+                        <span
+                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${statusBadgeClass(
+                            transfer.status
+                          )}`}
+                        >
+                          {formatStatus(transfer.status)}
+                        </span>
+                      </div>
+                      <div className="space-y-4 px-6 py-4">
+                        <div className="grid grid-cols-1 gap-3 text-sm text-gray-700 md:grid-cols-2">
+                          <div>
+                            <span className="font-medium">{t('type')}:</span> {transfer.transfer_type || '-'}
+                          </div>
+                          <div>
+                            <span className="font-medium">{t('amount')}:</span>{' '}
+                            {transfer.amount?.toLocaleString()} {transfer.to_currency}
+                          </div>
+                          <div>
+                            <span className="font-medium">{t('currencies')}:</span>{' '}
+                            {transfer.from_currency} → {transfer.to_currency}
+                          </div>
+                          <div>
+                            <span className="font-medium">{t('beneficiary')}:</span>{' '}
+                            {transfer.beneficiary_name}
+                          </div>
+                          <div>
+                            <span className="font-medium">{t('bank')}:</span>{' '}
+                            {transfer.beneficiary_bank}
+                          </div>
+                          {transfer.admin_notes && (
+                            <div className="md:col-span-2">
+                              <span className="font-medium">{t('admin_notes')}:</span>{' '}
+                              {transfer.admin_notes}
+                            </div>
+                          )}
+                        </div>
+                        <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
+                          <h4 className="flex items-center gap-2 text-base font-semibold text-gray-900">
+                            <DocumentTextIcon className="h-5 w-5 text-blue-500" />
+                            {t('customer_request')}
+                          </h4>
+                          <p className="mt-2 text-sm text-gray-700 whitespace-pre-wrap">
+                            {transfer.customer_request}
+                          </p>
+                        </div>
+                        <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
+                          <h4 className="flex items-center gap-2 text-base font-semibold text-gray-900">
+                            <ChatBubbleLeftRightIcon className="h-5 w-5 text-blue-500" />
+                            {t('currency_transfer_responses')}
+                          </h4>
+                          {responses.length === 0 ? (
+                            <p className="mt-2 text-sm text-gray-600">
+                              {t('currency_transfer_no_responses')}
+                            </p>
+                          ) : (
+                            <div className="mt-4 space-y-4">
+                              {responses.map((response) => {
+                                const agentName = response.agent
+                                  ? [response.agent.first_name, response.agent.last_name]
+                                      .filter(Boolean)
+                                      .join(' ') || response.agent.email
+                                  : null;
+                                return (
+                                  <div
+                                    key={response.id}
+                                    className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+                                  >
+                                    <div className="flex flex-col items-start justify-between gap-2 text-xs text-gray-500 sm:flex-row sm:items-center">
+                                      <span className="font-medium text-gray-700">
+                                        {agentName || t('agent')}
+                                      </span>
+                                      <span>
+                                        {response.created_at
+                                          ? new Date(response.created_at).toLocaleString(i18n.language)
+                                          : '-'}
+                                      </span>
+                                    </div>
+                                    <p className="mt-2 text-sm text-gray-700 whitespace-pre-wrap">
+                                      {response.response}
+                                    </p>
+                                    <dl className="mt-3 grid grid-cols-1 gap-3 text-xs text-gray-600 sm:grid-cols-3">
+                                      {response.offered_rate !== null &&
+                                        response.offered_rate !== undefined && (
+                                          <div>
+                                            <dt className="font-medium text-gray-700">
+                                              {t('currency_transfer_rate_label') || 'Offered rate'}
+                                            </dt>
+                                            <dd>{response.offered_rate}</dd>
+                                          </div>
+                                        )}
+                                      {response.fee !== null && response.fee !== undefined && (
+                                        <div>
+                                          <dt className="font-medium text-gray-700">
+                                            {t('currency_transfer_fee_label') || 'Service fee'}
+                                          </dt>
+                                          <dd>{response.fee}</dd>
+                                        </div>
+                                      )}
+                                      {response.delivery_date && (
+                                        <div>
+                                          <dt className="font-medium text-gray-700">
+                                            {t('currency_transfer_delivery_label') || 'Expected delivery'}
+                                          </dt>
+                                          <dd>{formatDate(response.delivery_date)}</dd>
+                                        </div>
+                                      )}
+                                    </dl>
+                                    {response.agent_id && (
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          handleMessageAgent(transfer.id, response.agent_id, agentName)
+                                        }
+                                        className="mt-4 inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                                      >
+                                        <ChatBubbleLeftRightIcon className="h-4 w-4" />
+                                        {t('currency_transfer_message_agent_button')}
+                                      </button>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
+
+    {messageTarget && (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+        onClick={closeMessageModal}
+      >
+        <div
+          className="w-full max-w-lg rounded-2xl bg-white shadow-2xl"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <div className="flex items-start justify-between border-b border-gray-100 px-6 py-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {t('currency_transfer_message_agent_title')}
+              </h3>
+              {messageTarget.agentName && (
+                <p className="mt-1 text-xs text-gray-500">
+                  {t('currency_transfer_message_agent_with', { agent: messageTarget.agentName })}
+                </p>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={closeMessageModal}
+              disabled={messageSending}
+              className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed"
+            >
+              <XMarkIcon className="h-5 w-5" />
+            </button>
+          </div>
+          <form onSubmit={handleSendAgentMessage} className="space-y-4 px-6 py-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {t('message')}
+              </label>
+              <textarea
+                value={messageDraft}
+                onChange={(event) => setMessageDraft(event.target.value)}
+                rows={4}
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder={t('currency_transfer_message_agent_placeholder')}
+                disabled={messageSending}
+              />
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={closeMessageModal}
+                disabled={messageSending}
+                className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed"
+              >
+                {t('cancel')}
+              </button>
+              <button
+                type="submit"
+                disabled={messageSending}
+                className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed"
+              >
+                {messageSending ? (
+                  <>
+                    <span className="h-4 w-4 rounded-full border-2 border-white border-b-transparent animate-spin" />
+                    {t('sending')}
+                  </>
+                ) : (
+                  <>
+                    <PaperAirplaneIcon className="h-4 w-4" />
+                    {t('send')}
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    )}
+  </div>
   );
 };
 

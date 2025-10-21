@@ -32,6 +32,31 @@ export interface CreateCurrencyTransferData {
   customer_request: string;
 }
 
+export interface CurrencyTransferResponse {
+  id: string;
+  transfer_id: string;
+  agent_id: string | null;
+  response: string;
+  offered_rate?: number | null;
+  fee?: number | null;
+  delivery_date?: string | null;
+  created_at?: string;
+  agent?: {
+    id: string;
+    first_name: string | null;
+    last_name: string | null;
+    email: string | null;
+    role: string | null;
+  } | null;
+}
+
+export interface CreateCurrencyTransferResponseData {
+  response: string;
+  offered_rate?: number;
+  fee?: number;
+  delivery_date?: string;
+}
+
 export class CurrencyTransferService {
   static async createTransfer(
     userId: string,
@@ -66,6 +91,34 @@ export class CurrencyTransferService {
     } catch (err) {
       console.error("Unexpected error creating currency transfer:", err);
       return { transfer: null, error: err instanceof Error ? err.message : "Unknown error" };
+    }
+  }
+
+  static async getTransfersByUser(
+    userId: string
+  ): Promise<{ transfers: CurrencyTransferRequest[]; error?: string }> {
+    try {
+      const { data: transfers, error } = await supabase
+        .from("currency_transfer_requests")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching user currency transfers:", error);
+        return {
+          transfers: [],
+          error: `Failed to fetch transfers: ${error.message}`,
+        };
+      }
+
+      return { transfers: transfers || [] };
+    } catch (error) {
+      console.error("Error fetching user currency transfers:", error);
+      return {
+        transfers: [],
+        error: `Failed to fetch transfers: ${error instanceof Error ? error.message : "Unknown error"}`,
+      };
     }
   }
 
@@ -131,6 +184,113 @@ export class CurrencyTransferService {
       };
     }
   }
-}
 
+  static async createTransferResponse(
+    transferId: string,
+    agentId: string,
+    data: CreateCurrencyTransferResponseData
+  ): Promise<{ response: CurrencyTransferResponse | null; error?: string }> {
+    try {
+      const { data: response, error } = await supabase
+        .from("currency_transfer_responses")
+        .insert({
+          transfer_id: transferId,
+          agent_id: agentId,
+          response: data.response,
+          offered_rate:
+            typeof data.offered_rate === "number" ? data.offered_rate : null,
+          fee: typeof data.fee === "number" ? data.fee : null,
+          delivery_date: data.delivery_date || null,
+        })
+        .select(
+          `
+          id,
+          transfer_id,
+          agent_id,
+          response,
+          offered_rate,
+          fee,
+          delivery_date,
+          created_at,
+          agent:profiles!currency_transfer_responses_agent_id_fkey (
+            id,
+            first_name,
+            last_name,
+            email,
+            role
+          )
+        `
+        )
+        .single();
+
+      if (error) {
+        console.error("Error creating currency transfer response:", error);
+        return { response: null, error: error.message };
+      }
+
+      return {
+        response: (response as unknown as CurrencyTransferResponse) || null,
+      };
+    } catch (err) {
+      console.error("Unexpected error creating currency transfer response:", err);
+      return {
+        response: null,
+        error: err instanceof Error ? err.message : "Unknown error",
+      };
+    }
+  }
+
+  static async getResponsesForTransfers(
+    transferIds: string[]
+  ): Promise<{ responses: CurrencyTransferResponse[]; error?: string }> {
+    if (!transferIds.length) {
+      return { responses: [] };
+    }
+
+    try {
+      const uniqueIds = Array.from(new Set(transferIds));
+      const { data: responses, error } = await supabase
+        .from("currency_transfer_responses")
+        .select(
+          `
+          id,
+          transfer_id,
+          agent_id,
+          response,
+          offered_rate,
+          fee,
+          delivery_date,
+          created_at,
+          agent:profiles!currency_transfer_responses_agent_id_fkey (
+            id,
+            first_name,
+            last_name,
+            email,
+            role
+          )
+        `
+        )
+        .in("transfer_id", uniqueIds)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching currency transfer responses:", error);
+        return {
+          responses: [],
+          error: `Failed to fetch responses: ${error.message}`,
+        };
+      }
+
+      return {
+        responses: ((responses || []) as unknown as CurrencyTransferResponse[]) || [],
+      };
+    } catch (error) {
+      console.error("Error fetching currency transfer responses:", error);
+      return {
+        responses: [],
+        error: `Failed to fetch responses: ${error instanceof Error ? error.message : "Unknown error"}`,
+      };
+    }
+  }
+}
 
