@@ -45,5 +45,7 @@
   "notifications_case_response_title": "New lawyer proposal for {{subject}}",
   "notifications_case_response_generic": "A lawyer response is now available",
   "notifications_case_response_price": "Offer {{price}}",
-  "notifications_case_response_delivery": "Delivery {{deliveryDate}}"
+  "notifications_case_response_delivery": "Delivery {{deliveryDate}}",
+  "user_orders_tab_create": "Create new order",
+  "user_orders_tab_history": "Your orders"
 }

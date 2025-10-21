@@ -134,8 +134,17 @@ const NotificationBell: React.FC = () => {
     }
 
     if (type === "order") {
-      dispatchDashboardEvent("agent-orders");
-      dispatchAgentOrdersEvent("orders");
+      if (user?.role === RolesEnum.AGENT) {
+        dispatchDashboardEvent("agent-orders");
+        dispatchAgentOrdersEvent("orders");
+      } else {
+        dispatchDashboardEvent("orders");
+        window.dispatchEvent(
+          new CustomEvent("procargo:user-orders-view", {
+            detail: { tab: "history" },
+          })
+        );
+      }
       return;
     }
 

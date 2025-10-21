@@ -17,7 +17,12 @@ import {
 } from "../services/currencyTransferService";
 import { RolesEnum } from "../abstractions/enums/roles.enum";
 import { useTranslation } from "react-i18next";
-import { CaseData, CaseResponse, SupabaseService } from "../services/supabaseService";
+import {
+  CaseData,
+  CaseResponse,
+  OrderResponseRecord,
+  SupabaseService,
+} from "../services/supabaseService";
 
 export type NotificationType = "message" | "export" | "currency" | "order" | "case";
 
@@ -35,6 +40,20 @@ type AgentOrder = {
   id: string;
   order_number: string;
   created_at: string | null;
+  status?: string | null;
+  priority?: string | null;
+  origin_country?: string | null;
+  destination_country?: string | null;
+  total_value?: number | null;
+  currency?: string | null;
+};
+
+type UserOrder = {
+  id: string;
+  order_number: string;
+  user_id: string;
+  created_at: string | null;
+  updated_at?: string | null;
   status?: string | null;
   priority?: string | null;
   origin_country?: string | null;
@@ -141,6 +160,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   const [cases, setCases] = useState<CaseData[]>([]);
   const [caseResponses, setCaseResponses] = useState<CaseResponse[]>([]);
   const [orders, setOrders] = useState<AgentOrder[]>([]);
+  const [userOrders, setUserOrders] = useState<UserOrder[]>([]);
+  const [orderResponses, setOrderResponses] = useState<OrderResponseRecord[]>([]);
   const [exportRequests, setExportRequests] = useState<ExportRequest[]>([]);
   const [currencyTransfers, setCurrencyTransfers] = useState<
     CurrencyTransferRequest[]
@@ -151,6 +172,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   const isLawyer = user?.role === RolesEnum.LAWYER;
   const isUser = user?.role === RolesEnum.USER;
   const caseIdsRef = useRef<Set<string>>(new Set());
+  const orderNumbersRef = useRef<Set<string>>(new Set());
 
   const syncPersistedReadState = useCallback(
     (items: AppNotification[]) => {
@@ -282,6 +304,25 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         return "";
       }
       const key = `case_status_${status.toLowerCase()}`;
+      const translated = t(key as any);
+      if (translated && translated !== key) {
+        return translated;
+      }
+      return status
+        .toLowerCase()
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    },
+    [t]
+  );
+
+  const formatOrderStatus = useCallback(
+    (status?: string | null) => {
+      if (!status) {
+        return "";
+      }
+      const key = `order_status_${status.toLowerCase()}`;
       const translated = t(key as any);
       if (translated && translated !== key) {
         return translated;
@@ -436,6 +477,96 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     return [...statusNotifications, ...responseNotifications];
   }, [caseResponses, cases, formatCaseStatus, i18n.language, isUser, stateRef, t]);
 
+  const computeUserOrderNotifications = useCallback(() => {
+    if (!isUser) {
+      return [] as AppNotification[];
+    }
+
+    const statusLastSeen = parseDate(stateRef.current.lastSeen["order:status"]);
+    const responseLastSeen = parseDate(stateRef.current.lastSeen["order:response"]);
+
+    const orderMap = new Map(
+      userOrders
+        .filter((item): item is UserOrder & { order_number: string } => Boolean(item.order_number))
+        .map((item) => [item.order_number, item])
+    );
+
+    const statusNotifications = userOrders
+      .filter((order): order is UserOrder & { order_number: string } => Boolean(order.order_number))
+      .filter((order) => {
+        const updatedTime = parseDate(order.updated_at || order.created_at);
+        return updatedTime > statusLastSeen && updatedTime > parseDate(order.created_at);
+      })
+      .map((order) => {
+        const statusLabel = formatOrderStatus(order.status);
+        const title = order.order_number
+          ? t("notifications_order_status_title", { orderNumber: order.order_number })
+          : t("notifications_order_status_title_generic");
+
+        return {
+          id: `order-status-${order.order_number}-${order.status}`,
+          type: "order" as const,
+          title,
+          description: statusLabel
+            ? t("notifications_order_status_update", { status: statusLabel })
+            : t("notifications_order_status_update_generic"),
+          createdAt: order.updated_at || new Date().toISOString(),
+          read: false,
+          metadata: {
+            orderNumber: order.order_number,
+            status: order.status,
+            notificationCategory: "order:status",
+          },
+        };
+      });
+
+    const responseNotifications = orderResponses
+      .filter((response) => {
+        const createdTime = parseDate(response.created_at);
+        return createdTime > responseLastSeen && orderMap.has(response.order_number);
+      })
+      .map((response) => {
+        const order = orderMap.get(response.order_number);
+        const title = response.order_number
+          ? t("notifications_order_response_title", { orderNumber: response.order_number })
+          : t("notifications_order_response_title_generic");
+        const price =
+          typeof response.price === "number"
+            ? t("notifications_order_response_price", {
+                price: new Intl.NumberFormat(i18n.language, {
+                  maximumFractionDigits: 2,
+                }).format(response.price || 0),
+              })
+            : null;
+        const delivery = response.delivery_date
+          ? t("notifications_order_response_delivery", {
+              deliveryDate: new Date(response.delivery_date).toLocaleDateString(i18n.language),
+            })
+          : null;
+
+        const detailParts = [price, delivery].filter((part): part is string => Boolean(part));
+        const preview = response.response
+          ? response.response.slice(0, 140)
+          : t("notifications_order_response_generic");
+
+        return {
+          id: `order-response-${response.id}`,
+          type: "order" as const,
+          title,
+          description: [...detailParts, preview].filter(Boolean).join(" • "),
+          createdAt: response.created_at || new Date().toISOString(),
+          read: false,
+          metadata: {
+            orderNumber: response.order_number,
+            status: order?.status,
+            notificationCategory: "order:response",
+          },
+        };
+      });
+
+    return [...statusNotifications, ...responseNotifications];
+  }, [formatOrderStatus, i18n.language, isUser, orderResponses, stateRef, t, userOrders]);
+
   const computeExportNotifications = useCallback(() => {
     if (!isAgent) {
       return [] as AppNotification[];
@@ -496,6 +627,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
       ...computeOrderNotifications(),
       ...computeLawyerCaseNotifications(),
       ...computeUserCaseNotifications(),
+      ...computeUserOrderNotifications(),
       ...computeExportNotifications(),
       ...computeCurrencyNotifications(),
     ];
@@ -514,6 +646,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     computeExportNotifications,
     computeLawyerCaseNotifications,
     computeUserCaseNotifications,
+    computeUserOrderNotifications,
     computeOrderNotifications,
     computeMessageNotifications,
     syncPersistedReadState,
@@ -525,6 +658,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
       setCases([]);
       setCaseResponses([]);
       setOrders([]);
+      setUserOrders([]);
+      setOrderResponses([]);
       setExportRequests([]);
       setCurrencyTransfers([]);
       return;
@@ -533,7 +668,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(true);
     try {
       let persistChanged = false;
-      const [threadRes, exportRes, currencyRes, ordersRes, casesRes] = await Promise.all([
+      const [threadRes, exportRes, currencyRes, ordersRes, casesRes, userOrdersRes] = await Promise.all([
         MessagingService.fetchThreads(),
         isAgent ? ExportService.getAllExportRequests() : Promise.resolve({ exports: [] }),
         isAgent
@@ -547,6 +682,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
           : isUser
           ? SupabaseService.getCasesByUser(userId)
           : Promise.resolve({ cases: [] as CaseData[], error: null }),
+        isUser
+          ? SupabaseService.getOrdersByUser(userId)
+          : Promise.resolve({ orders: [] as UserOrder[], error: null }),
       ]);
 
       if (threadRes.data) {
@@ -657,6 +795,52 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       }
 
+      if ("error" in userOrdersRes && userOrdersRes.error) {
+        console.error("Failed to load user orders", userOrdersRes.error);
+      }
+      if ("orders" in userOrdersRes) {
+        const userOrderList = ((userOrdersRes.orders as UserOrder[]) || []).sort(
+          (a, b) =>
+            parseDate(b.updated_at || b.created_at) - parseDate(a.updated_at || a.created_at)
+        );
+        setUserOrders(userOrderList);
+
+        if (isUser && !stateRef.current.lastSeen["order:status"] && userOrderList.length > 0) {
+          const latestUpdate = userOrderList
+            .map((item) => parseDate(item.updated_at || item.created_at))
+            .reduce((max, value) => (value > max ? value : max), 0);
+          stateRef.current.lastSeen["order:status"] =
+            latestUpdate > 0 ? new Date(latestUpdate).toISOString() : new Date().toISOString();
+          persistChanged = true;
+        }
+
+        const orderNumbers = userOrderList
+          .map((item) => item.order_number)
+          .filter((value): value is string => Boolean(value));
+        if (orderNumbers.length > 0) {
+          const userOrderResponsesRes = await SupabaseService.getOrderResponsesByNumbers(orderNumbers);
+          if (userOrderResponsesRes.error) {
+            console.error("Failed to load order responses", userOrderResponsesRes.error);
+          }
+          if (userOrderResponsesRes.responses) {
+            setOrderResponses(userOrderResponsesRes.responses);
+            if (!stateRef.current.lastSeen["order:response"] && userOrderResponsesRes.responses.length > 0) {
+              const latestResponse = userOrderResponsesRes.responses
+                .map((item) => parseDate(item.created_at))
+                .reduce((max, value) => (value > max ? value : max), 0);
+              stateRef.current.lastSeen["order:response"] =
+                latestResponse > 0 ? new Date(latestResponse).toISOString() : new Date().toISOString();
+              persistChanged = true;
+            }
+          }
+        } else {
+          setOrderResponses([]);
+        }
+      } else {
+        setUserOrders([]);
+        setOrderResponses([]);
+      }
+
       if (persistChanged) {
         savePersisted();
       }
@@ -686,11 +870,19 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [cases]);
 
   useEffect(() => {
+    orderNumbersRef.current = new Set(
+      userOrders
+        .map((item) => item.order_number)
+        .filter((value): value is string => Boolean(value))
+    );
+  }, [userOrders]);
+
+  useEffect(() => {
     if (!userId) {
       return;
     }
     rebuildNotifications();
-  }, [caseResponses, cases, currencyTransfers, exportRequests, orders, rebuildNotifications, threads, userId]);
+  }, [caseResponses, cases, currencyTransfers, exportRequests, orderResponses, orders, rebuildNotifications, threads, userId, userOrders]);
 
   useEffect(() => {
     if (!userId) {
@@ -811,6 +1003,48 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       );
     }
+    if (isUser) {
+      channel.on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "orders",
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          const orderRecord = payload.new as UserOrder | null;
+          const oldRecord = payload.old as UserOrder | null;
+          if (payload.eventType === "DELETE" && oldRecord?.order_number) {
+            setUserOrders((prev) => prev.filter((item) => item.order_number !== oldRecord.order_number));
+            return;
+          }
+          if (!orderRecord || orderRecord.user_id !== userId) {
+            return;
+          }
+          const enrichedOrder: UserOrder = {
+            ...orderRecord,
+            updated_at: orderRecord.updated_at || payload.commit_timestamp || orderRecord.updated_at,
+          };
+          setUserOrders((prev) => {
+            const exists = prev.find((item) => item.order_number === enrichedOrder.order_number);
+            if (exists) {
+              return prev
+                .map((item) =>
+                  item.order_number === enrichedOrder.order_number ? { ...item, ...enrichedOrder } : item
+                )
+                .sort(
+                  (a, b) =>
+                    parseDate(b.updated_at || b.created_at) - parseDate(a.updated_at || a.created_at)
+                );
+            }
+            return [enrichedOrder, ...prev].sort(
+              (a, b) => parseDate(b.updated_at || b.created_at) - parseDate(a.updated_at || a.created_at)
+            );
+          });
+        }
+      );
+    }
     if (isLawyer || isUser) {
       channel.on(
         "postgres_changes",
@@ -859,6 +1093,48 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
       );
     }
     if (isUser) {
+      channel.on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "order_response",
+        },
+        (payload) => {
+          if (payload.eventType === "DELETE") {
+            const oldResponse = payload.old as OrderResponseRecord | null;
+            if (!oldResponse?.id) {
+              return;
+            }
+            setOrderResponses((prev) => prev.filter((item) => item.id !== oldResponse.id));
+            return;
+          }
+
+          const response = payload.new as OrderResponseRecord | null;
+          if (!response || !response.order_number) {
+            return;
+          }
+          if (!orderNumbersRef.current.has(response.order_number)) {
+            return;
+          }
+          const enrichedResponse: OrderResponseRecord = {
+            ...response,
+            created_at: response.created_at || payload.commit_timestamp || response.created_at,
+          };
+          setOrderResponses((prev) => {
+            const exists = prev.find((item) => item.id === enrichedResponse.id);
+            if (exists) {
+              return prev
+                .map((item) => (item.id === enrichedResponse.id ? { ...item, ...enrichedResponse } : item))
+                .sort((a, b) => parseDate(b.created_at) - parseDate(a.created_at));
+            }
+            return [enrichedResponse, ...prev].sort(
+              (a, b) => parseDate(b.created_at) - parseDate(a.created_at)
+            );
+          });
+        }
+      );
+
       channel.on(
         "postgres_changes",
         {
@@ -952,7 +1228,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         notification.type === "case"
       ) {
         if (
-          notification.type === "case" &&
+          (notification.type === "case" || notification.type === "order") &&
           typeof notification.metadata?.notificationCategory === "string"
         ) {
           stateRef.current.lastSeen[notification.metadata.notificationCategory] = nowIso;

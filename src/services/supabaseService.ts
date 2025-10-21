@@ -59,6 +59,16 @@ export interface CaseResponse {
   delivery_date: string | null;
   created_at: string | null;
 }
+
+export interface OrderResponseRecord {
+  id: string;
+  order_number: string;
+  agent_id: string;
+  response: string;
+  price: number | null;
+  delivery_date: string | null;
+  created_at: string | null;
+}
 export class SupabaseService {
   // Sign up with email and password, send verification link with redirect
   static async signUp(
@@ -701,6 +711,48 @@ export class SupabaseService {
       };
     }
   }
+
+  static async getOrdersByUser(userId: string) {
+    try {
+      const { data, error } = await supabase
+        .from("orders")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+      if (error) {
+        return { orders: null, error: error.message };
+      }
+      return { orders: data, error: null };
+    } catch (error: any) {
+      return {
+        orders: null,
+        error: error.message || "Failed to get user orders",
+      };
+    }
+  }
+
+  static async getOrderResponsesByNumbers(orderNumbers: string[]) {
+    if (!orderNumbers.length) {
+      return { responses: [] as OrderResponseRecord[], error: null };
+    }
+    const uniqueNumbers = Array.from(new Set(orderNumbers));
+    try {
+      const { data, error } = await supabase
+        .from("order_response")
+        .select("*")
+        .in("order_number", uniqueNumbers)
+        .order("created_at", { ascending: false });
+      if (error) {
+        return { responses: null, error: error.message };
+      }
+      return { responses: data as OrderResponseRecord[], error: null };
+    } catch (error: any) {
+      return {
+        responses: null,
+        error: error.message || "Failed to get order responses",
+      };
+    }
+  }
   static async updateCaseStatus(
     caseId: string,
     status: NonNullable<CaseData["status"]>
@@ -717,7 +769,7 @@ export class SupabaseService {
         return { case: null, error: error.message };
       }
 
-      return { case: (data as unknown) as CaseData, error: null };
+      return { case: data as unknown as CaseData, error: null };
     } catch (err: any) {
       return {
         case: null,

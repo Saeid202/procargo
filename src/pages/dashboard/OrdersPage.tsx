@@ -1,11 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 
-import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { SupabaseService } from "../../services/supabaseService";
+import {
+  PlusIcon,
+  XMarkIcon,
+  ChatBubbleLeftRightIcon,
+  ClockIcon,
+  DocumentPlusIcon,
+} from "@heroicons/react/24/outline";
+import {
+  OrderResponseRecord,
+  SupabaseService,
+} from "../../services/supabaseService";
 import { QuotationService } from "../../services/quotationService";
 import { OtherRequestService } from "../../services/otherRequestService";
 import { useTranslation } from "react-i18next";
+import { supabase } from "../../lib/supabase";
 
 export interface Order {
   id: string;
@@ -17,6 +27,7 @@ export interface Order {
   total_value: number;
   currency: string;
   created_at: string;
+  updated_at?: string;
   estimated_delivery?: string;
   suppliers?: Supplier[];
 }
@@ -111,8 +122,12 @@ const OrdersPage: React.FC = () => {
     ],
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [userOrders, setUserOrders] = useState<Order[]>([]);
+  const [orderResponses, setOrderResponses] = useState<OrderResponseRecord[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [mainTab, setMainTab] = useState<"create" | "history">("create");
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const loadOrders = async () => {
     try {
@@ -144,11 +159,153 @@ const OrdersPage: React.FC = () => {
     }
   };
 
+  const parseDate = (value?: string | null) => (value ? new Date(value).getTime() : 0);
+
+  const formatOrderStatus = (status?: string | null) => {
+    if (!status) {
+      return "";
+    }
+    const key = `order_status_${status.toLowerCase()}`;
+    const translated = t(key as any);
+    if (translated && translated !== key) {
+      return translated;
+    }
+    return status
+      .toLowerCase()
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  const formatDate = (value?: string | null) => {
+    if (!value) return "-";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return "-";
+    }
+    return date.toLocaleDateString(i18n.language);
+  };
+
+  const formatPrice = (value?: number | null, currency?: string | null) => {
+    if (typeof value !== "number") return null;
+    return `${new Intl.NumberFormat(i18n.language, {
+      maximumFractionDigits: 2,
+    }).format(value)}${currency ? ` ${currency}` : ""}`;
+  };
+
+  const fetchUserOrderHistory = useCallback(async () => {
+    if (!user) return;
+    try {
+      setHistoryLoading(true);
+      const { orders, error: ordersError } = await SupabaseService.getOrdersByUser(user.id);
+      if (ordersError) {
+        console.error("Failed to load user orders", ordersError);
+      }
+      const orderList = ((orders || []) as Order[]).sort(
+        (a, b) => parseDate(b.updated_at || b.created_at) - parseDate(a.updated_at || a.created_at)
+      );
+      setUserOrders(orderList);
+
+      const orderNumbers = orderList
+        .map((order) => order.order_number)
+        .filter((value): value is string => Boolean(value));
+
+      if (orderNumbers.length > 0) {
+        const { responses, error: responsesError } = await SupabaseService.getOrderResponsesByNumbers(
+          orderNumbers
+        );
+        if (responsesError) {
+          console.error("Failed to load order responses", responsesError);
+          setOrderResponses([]);
+        } else {
+          setOrderResponses(responses || []);
+        }
+      } else {
+        setOrderResponses([]);
+      }
+    } catch (error) {
+      console.error("Unexpected error loading order history", error);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (user) {
       loadOrders();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (user && mainTab === "history") {
+      fetchUserOrderHistory();
+    }
+  }, [fetchUserOrderHistory, mainTab, user]);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    const channel = supabase
+      .channel(`user-orders-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "orders",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => fetchUserOrderHistory()
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "order_response",
+        },
+        () => fetchUserOrderHistory()
+      );
+
+    channel.subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchUserOrderHistory, user]);
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const customEvent = event as CustomEvent<{ tab?: "create" | "history" }>;
+      if (customEvent.detail?.tab === "create" || customEvent.detail?.tab === "history") {
+        setMainTab(customEvent.detail.tab);
+      } else {
+        setMainTab("history");
+      }
+    };
+
+    window.addEventListener("procargo:user-orders-view", handler as EventListener);
+    return () => {
+      window.removeEventListener("procargo:user-orders-view", handler as EventListener);
+    };
+  }, []);
+
+  const responsesByOrder = useMemo(() => {
+    const map = new Map<string, OrderResponseRecord[]>();
+    orderResponses.forEach((response) => {
+      if (!response.order_number) return;
+      if (!map.has(response.order_number)) {
+        map.set(response.order_number, []);
+      }
+      map.get(response.order_number)!.push(response);
+    });
+    map.forEach((list) => {
+      list.sort((a, b) => parseDate(b.created_at) - parseDate(a.created_at));
+    });
+    return map;
+  }, [orderResponses]);
   const generateOrderNumber = () => {
     const date = new Date();
     const dateStr = date.toISOString().slice(0, 10).replace(/-/g, "");
@@ -588,28 +745,62 @@ const OrdersPage: React.FC = () => {
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        {/* <div>
-          <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
-          <p className="text-gray-600">Manage your cargo orders and track their status</p>
-        </div> */}
-        <div></div>
+    <div className="space-y-6">
+      <div
+        role="tablist"
+        className="flex flex-wrap gap-3 rounded-2xl border border-white/10 bg-white/60 p-3 shadow-sm backdrop-blur-sm"
+      >
         <button
-          onClick={() => setActiveSegment("I have a Supplier")}
-          className="bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-md flex items-center gap-2"
+          type="button"
+          role="tab"
+          aria-selected={mainTab === "create"}
+          onClick={() => setMainTab("create")}
+          className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all ${
+            mainTab === "create"
+              ? "bg-gradient-to-r from-cargo-500 to-cargo-700 text-white shadow-lg"
+              : "bg-white text-gray-600 border border-white/40 hover:border-cargo-200"
+          }`}
         >
-          <PlusIcon className="h-5 w-5" />
-          {t("new_order")}
+          {t("user_orders_tab_create" as any)}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mainTab === "history"}
+          onClick={() => setMainTab("history")}
+          className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all ${
+            mainTab === "history"
+              ? "bg-gradient-to-r from-cargo-500 to-cargo-700 text-white shadow-lg"
+              : "bg-white text-gray-600 border border-white/40 hover:border-cargo-200"
+          }`}
+        >
+          {t("user_orders_tab_history" as any)}
         </button>
       </div>
 
-      {/* Instructions */}
-      <div className="mb-6">
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">
-            {t("choose_the_appropriate_option_based_on_your_needs")}
-          </h3>
+      {mainTab === "create" && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            {/* <div>
+              <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
+              <p className="text-gray-600">Manage your cargo orders and track their status</p>
+            </div> */}
+            <div></div>
+            <button
+              onClick={() => setActiveSegment("I have a Supplier")}
+              className="bg-cargo-600 hover:bg-cargo-700 text-white px-4 py-2 rounded-md flex items-center gap-2"
+            >
+              <PlusIcon className="h-5 w-5" />
+              {t("new_order")}
+            </button>
+          </div>
+
+          {/* Instructions */}
+          <div className="mb-6">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                {t("choose_the_appropriate_option_based_on_your_needs")}
+              </h3>
           <div className="space-y-3 text-sm text-gray-700">
             <div className="flex items-start gap-3">
               <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-600 text-white text-xs font-bold rounded-full flex-shrink-0 mt-0.5">
@@ -1543,8 +1734,206 @@ const OrdersPage: React.FC = () => {
                 </button>
               </div>
             </form>
-          </div>
+      </div>
+    </div>
+  )}
+
         </div>
+      )}
+
+      {mainTab === "history" && (
+        <section className="mt-10 rounded-2xl border border-white/10 bg-white/60 backdrop-blur-sm p-6 shadow-xl">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">
+            {t("user_orders_history")}
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            {t("user_orders_history_description")}
+          </p>
+
+          {historyLoading ? (
+            <div className="mt-6 space-y-4">
+              {[0, 1].map((index) => (
+                <div
+                  key={index}
+                  className="overflow-hidden rounded-2xl border border-white/10 bg-white/60 p-6 shadow-sm"
+                >
+                  <div className="h-4 w-2/3 animate-pulse rounded bg-gray-200" />
+                  <div className="mt-3 h-3 w-1/2 animate-pulse rounded bg-gray-200" />
+                  <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {Array.from({ length: 4 }).map((_, metaIndex) => (
+                      <div key={metaIndex} className="space-y-2">
+                        <div className="h-2 w-16 animate-pulse rounded bg-gray-200" />
+                        <div className="h-3 w-24 animate-pulse rounded bg-gray-200" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-6 h-24 animate-pulse rounded-xl bg-gray-100" />
+                </div>
+              ))}
+            </div>
+          ) : userOrders.length === 0 ? (
+            <div className="mt-6 flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-indigo-200 bg-indigo-50/70 px-6 py-12 text-center text-indigo-700">
+              <DocumentPlusIcon className="h-10 w-10" />
+              <p className="text-sm font-semibold">{t("user_orders_history_empty")}</p>
+              <p className="text-xs text-indigo-600">{t("user_orders_history_empty_hint")}</p>
+            </div>
+          ) : (
+            <div className="mt-6 space-y-6">
+              {userOrders.map((order) => {
+                const responses = responsesByOrder.get(order.order_number ?? "") || [];
+                const [latestResponse, ...olderResponses] = responses;
+                const statusLabel = formatOrderStatus(order.status) || t("order_status_pending");
+                const totalValue = formatPrice(order.total_value, order.currency);
+
+                return (
+                  <article
+                    key={order.order_number || order.id}
+                    className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg"
+                  >
+                    <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500/0 via-indigo-500 to-indigo-500/0" />
+                    <div className="p-5 sm:p-6">
+                      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                        <div>
+                          <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-gray-400">
+                            <ClockIcon className="h-4 w-4 text-indigo-500" />
+                            {t("user_orders_last_update")}: {formatDate(order.updated_at || order.created_at)}
+                          </div>
+                          <h3 className="mt-1 text-lg font-semibold text-gray-900">
+                            {order.order_number || t("user_orders_unknown_number")}
+                          </h3>
+                          <dl className="mt-3 grid grid-cols-1 gap-3 text-sm text-gray-700 sm:grid-cols-2 lg:grid-cols-3">
+                            <div>
+                              <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                                {t("order_value")}
+                              </dt>
+                              <dd className="mt-1">{totalValue || "-"}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                                {t("origin_country")}
+                              </dt>
+                              <dd className="mt-1">{order.origin_country || "-"}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                                {t("destination_country")}
+                              </dt>
+                              <dd className="mt-1">{order.destination_country || "-"}</dd>
+                            </div>
+                          </dl>
+                        </div>
+                        <span className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">
+                          <span className="h-2.5 w-2.5 rounded-full bg-indigo-500" />
+                          {statusLabel}
+                        </span>
+                      </div>
+
+                      <div className="mt-6 rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-white p-5">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+                              <ChatBubbleLeftRightIcon className="h-5 w-5" />
+                            </span>
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900">
+                                {t("user_orders_latest_response")}
+                              </p>
+                              {latestResponse?.created_at && (
+                                <p className="text-xs text-gray-500">
+                                  {t("user_orders_response_at", {
+                                    date: formatDate(latestResponse.created_at),
+                                  })}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          {latestResponse && (
+                            <div className="flex flex-wrap gap-2 text-xs text-indigo-700">
+                              {typeof latestResponse.price === "number" && (
+                                <span className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 font-medium">
+                                  {t("user_orders_response_price", {
+                                    price: formatPrice(latestResponse.price, order.currency) ?? "",
+                                  })}
+                                </span>
+                              )}
+                              {latestResponse.delivery_date && (
+                                <span className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 font-medium">
+                                  {t("user_orders_response_delivery", {
+                                    deliveryDate: formatDate(latestResponse.delivery_date),
+                                  })}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        {latestResponse ? (
+                          <p className="mt-4 whitespace-pre-line text-sm text-gray-700">
+                            {latestResponse.response}
+                          </p>
+                        ) : (
+                          <div className="mt-4 rounded-lg border border-dashed border-indigo-200 bg-indigo-50/60 px-4 py-3 text-sm text-indigo-700">
+                            {t("user_orders_no_response")}
+                          </div>
+                        )}
+                      </div>
+
+                      {olderResponses.length > 0 && (
+                        <div className="mt-6">
+                          <p className="flex items-center gap-2 text-sm font-medium text-gray-900">
+                            <ClockIcon className="h-4 w-4 text-indigo-500" />
+                            {t("user_orders_responses_timeline")}
+                          </p>
+                          <div className="relative mt-4 pl-5">
+                            <div className="absolute left-1.5 top-2 bottom-2 w-px bg-indigo-100" />
+                            <div className="space-y-4">
+                              {olderResponses.map((response) => {
+                                const priceText = formatPrice(response.price, order.currency);
+                                const deliveryText = response.delivery_date
+                                  ? formatDate(response.delivery_date)
+                                  : null;
+                                return (
+                                  <div key={response.id} className="relative pl-4">
+                                    <span className="absolute left-[-14px] top-3 h-3 w-3 rounded-full border-2 border-indigo-400 bg-white" />
+                                    <div className="rounded-xl border border-indigo-100 bg-white p-4 shadow-sm">
+                                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                        <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">
+                                          {formatDate(response.created_at)}
+                                        </p>
+                                        <div className="flex flex-wrap gap-2 text-xs text-indigo-600">
+                                          {priceText && (
+                                            <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 font-medium">
+                                              {t("user_orders_response_price", { price: priceText })}
+                                            </span>
+                                          )}
+                                          {deliveryText && (
+                                            <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 font-medium">
+                                              {t("user_orders_response_delivery", { deliveryDate: deliveryText })}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                      {response.response && (
+                                        <p className="mt-3 whitespace-pre-line text-sm text-gray-600">
+                                          {response.response}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </div>
+        </section>
       )}
     </div>
   );
