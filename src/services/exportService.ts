@@ -26,6 +26,16 @@ export interface ExportRequestFile {
   uploaded_at: string;
 }
 
+export interface ExportResponseRecord {
+  id: string;
+  export_request_id: string;
+  agent_id: string;
+  response: string;
+  price: number | null;
+  delivery_date: string | null;
+  created_at: string | null;
+}
+
 export interface CreateExportRequestData {
   company_name: string;
   company_type: string;
@@ -181,6 +191,104 @@ export class ExportService {
     } catch (error) {
       console.error("Error getting public URL:", error);
       return null;
+    }
+  }
+
+  static async getExportRequestsByUser(
+    userId: string
+  ): Promise<{ exports: ExportRequest[]; error?: string }> {
+    try {
+      const { data, error } = await supabase
+        .from("export_requests")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching export requests for user:", error);
+        return { exports: [], error: error.message };
+      }
+
+      return { exports: data || [] };
+    } catch (error) {
+      console.error("Error fetching export requests for user:", error);
+      return {
+        exports: [],
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
+
+  static async createExportResponse(
+    exportRequestId: string,
+    agentId: string,
+    payload: {
+      response: string;
+      price?: number | null;
+      delivery_date?: string | null;
+    }
+  ): Promise<{ response: ExportResponseRecord | null; error?: string }> {
+    try {
+      const { data, error } = await supabase
+        .from("export_response")
+        .insert({
+          export_request_id: exportRequestId,
+          agent_id: agentId,
+          response: payload.response,
+          price:
+            typeof payload.price === "number"
+              ? payload.price
+              : payload.price ?? null,
+          delivery_date: payload.delivery_date ?? null,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating export response:", error);
+        return { response: null, error: error.message };
+      }
+
+      return { response: data as ExportResponseRecord };
+    } catch (error) {
+      console.error("Error creating export response:", error);
+      return {
+        response: null,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
+
+  static async getExportResponsesByRequestIds(
+    exportRequestIds: string[]
+  ): Promise<{ responses: ExportResponseRecord[]; error?: string }> {
+    if (!exportRequestIds.length) {
+      return { responses: [] };
+    }
+
+    const uniqueIds = Array.from(new Set(exportRequestIds));
+
+    try {
+      const { data, error } = await supabase
+        .from("export_response")
+        .select("*")
+        .in("export_request_id", uniqueIds)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching export responses:", error);
+        return { responses: [], error: error.message };
+      }
+
+      return {
+        responses: (data as ExportResponseRecord[]) || [],
+      };
+    } catch (error) {
+      console.error("Error fetching export responses:", error);
+      return {
+        responses: [],
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
     }
   }
 

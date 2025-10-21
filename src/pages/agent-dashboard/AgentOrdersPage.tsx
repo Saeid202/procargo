@@ -23,6 +23,7 @@ import {
   DocumentTextIcon,
   LinkIcon,
   CurrencyDollarIcon,
+  PaperAirplaneIcon,
 } from "@heroicons/react/24/outline";
 
 const AgentOrdersPage: React.FC = () => {
@@ -47,6 +48,18 @@ const AgentOrdersPage: React.FC = () => {
   >({});
   const [exportAdminNotesUpdate, setExportAdminNotesUpdate] = useState<
     Record<string, string>
+  >({});
+  const [exportResponseDraft, setExportResponseDraft] = useState<
+    Record<string, string>
+  >({});
+  const [exportResponsePrice, setExportResponsePrice] = useState<
+    Record<string, string>
+  >({});
+  const [exportResponseDelivery, setExportResponseDelivery] = useState<
+    Record<string, string>
+  >({});
+  const [exportResponseSending, setExportResponseSending] = useState<
+    Record<string, boolean>
   >({});
 
   // Currency transfers state
@@ -261,6 +274,79 @@ const AgentOrdersPage: React.FC = () => {
     } catch (e) {
       console.error("Exception updating export status:", e);
       toast.error("Exception updating export status");
+    }
+  };
+
+  const handleExportResponseSend = async (req: ExportRequest) => {
+    if (!user?.id) {
+      toast.error("User not authenticated");
+      return;
+    }
+
+    const draft = (exportResponseDraft[req.id] || "").trim();
+    if (!draft) {
+      toast.error(t("export_response_empty") || "Response message is required");
+      return;
+    }
+
+    const priceRaw = (exportResponsePrice[req.id] || "").trim();
+    let priceValue: number | null = null;
+    if (priceRaw) {
+      const parsed = Number(priceRaw);
+      if (Number.isNaN(parsed)) {
+        toast.error(
+          t("export_response_price_invalid") || "Please enter a valid price"
+        );
+        return;
+      }
+      priceValue = parsed;
+    }
+
+    const deliveryValue = (exportResponseDelivery[req.id] || "").trim();
+
+    setExportResponseSending((prev) => ({ ...prev, [req.id]: true }));
+    try {
+      const { error } = await ExportService.createExportResponse(req.id, user.id, {
+        response: draft,
+        price: priceValue,
+        delivery_date: deliveryValue || null,
+      });
+      if (error) {
+        toast.error(
+          t("export_response_error") || "Failed to send export response"
+        );
+      } else {
+        toast.success(
+          t("export_response_success") || "Response sent successfully"
+        );
+        setExportResponseDraft((prev) => {
+          const next = { ...prev };
+          delete next[req.id];
+          return next;
+        });
+        setExportResponsePrice((prev) => {
+          const next = { ...prev };
+          delete next[req.id];
+          return next;
+        });
+        setExportResponseDelivery((prev) => {
+          const next = { ...prev };
+          delete next[req.id];
+          return next;
+        });
+        await loadExportRequests();
+      }
+    } catch (error) {
+      console.error("Failed to send export response:", error);
+      toast.error(
+        t("export_response_error") || "Failed to send export response"
+      );
+    } finally {
+      setExportResponseSending((prev) => {
+        const next = { ...prev };
+        delete next[req.id];
+        return next;
+      });
     }
   };
 
@@ -1208,6 +1294,99 @@ const AgentOrdersPage: React.FC = () => {
                                         {t("save")}
                                       </button>
                                     </div>
+                                  </div>
+                                </div>
+
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                  <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                                    <PaperAirplaneIcon className="h-5 w-5 text-purple-600" />
+                                    {t("export_response_quick_title")}
+                                  </h4>
+                                  <div className="space-y-3">
+                                    <textarea
+                                      value={exportResponseDraft[r.id] ?? ""}
+                                      onChange={(e) =>
+                                        setExportResponseDraft((prev) => ({
+                                          ...prev,
+                                          [r.id]: e.target.value,
+                                        }))
+                                      }
+                                      rows={3}
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm resize-none"
+                                      placeholder={
+                                        t("export_response_placeholder") ||
+                                        "Write your response"
+                                      }
+                                      disabled={!!exportResponseSending[r.id]}
+                                    />
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <input
+                                        type="number"
+                                        value={exportResponsePrice[r.id] ?? ""}
+                                        onChange={(e) =>
+                                          setExportResponsePrice((prev) => ({
+                                            ...prev,
+                                            [r.id]: e.target.value,
+                                          }))
+                                        }
+                                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                                    placeholder={
+                                      t("export_response_price_label") ||
+                                      "Price"
+                                    }
+                                    aria-label={
+                                      t("export_response_price_label") || "Price"
+                                    }
+                                    title={
+                                      t("export_response_price_label") || "Price"
+                                    }
+                                    disabled={
+                                      !!exportResponseSending[r.id]
+                                    }
+                                  />
+                                  <input
+                                        type="date"
+                                        value={exportResponseDelivery[r.id] ?? ""}
+                                        onChange={(e) =>
+                                          setExportResponseDelivery((prev) => ({
+                                            ...prev,
+                                            [r.id]: e.target.value,
+                                          }))
+                                        }
+                                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                                    aria-label={
+                                      t("export_response_delivery_label") ||
+                                      "Delivery date"
+                                    }
+                                    title={
+                                      t("export_response_delivery_label") ||
+                                      "Delivery date"
+                                    }
+                                    disabled={
+                                      !!exportResponseSending[r.id]
+                                    }
+                                  />
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleExportResponseSend(r)}
+                                      disabled={!!exportResponseSending[r.id]}
+                                      className="flex items-center justify-center gap-2 bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-700 text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+                                    >
+                                      {exportResponseSending[r.id] ? (
+                                        <>
+                                          <span className="h-4 w-4 rounded-full border-2 border-white border-b-transparent animate-spin" />
+                                          {t("export_response_send") ||
+                                            "Send response"}
+                                        </>
+                                      ) : (
+                                        <>
+                                          <PaperAirplaneIcon className="h-4 w-4" />
+                                          {t("export_response_send") ||
+                                            "Send response"}
+                                        </>
+                                      )}
+                                    </button>
                                   </div>
                                 </div>
                               </div>
