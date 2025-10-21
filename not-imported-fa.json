@@ -60,5 +60,18 @@
   "user_orders_message_agent_send": "ارسال پیام",
   "user_orders_message_agent_cancel": "انصراف",
   "user_orders_message_agent_empty": "لطفاً پیش از ارسال، متن پیام را وارد کنید.",
-  "user_orders_message_agent_success": "پیام شما ارسال شد."
+  "user_orders_message_agent_success": "پیام شما ارسال شد.",
+
+  "legal_case_message_lawyer": "پیام به وکیل",
+  "legal_case_message_lawyer_unavailable": "هنوز وکیلی برای این پرونده پاسخ نداده است.",
+  "legal_case_message_lawyer_title": "ارسال پیام به وکیل",
+  "legal_case_message_lawyer_instruction": "سوال‌ها یا به‌روزرسانی‌های خود را با وکیل پرونده در میان بگذارید.",
+  "legal_case_message_lawyer_about_case": "درباره پرونده: {{subject}}",
+  "legal_case_message_lawyer_placeholder": "پیام خود را اینجا بنویسید...",
+  "legal_case_message_lawyer_default": "سلام، درباره پرونده «{{subject}}» سوالی دارم.",
+  "legal_case_message_lawyer_send": "ارسال پیام",
+  "legal_case_message_lawyer_cancel": "انصراف",
+  "legal_case_message_lawyer_empty": "لطفاً پیش از ارسال، متن پیام را وارد کنید.",
+  "legal_case_message_lawyer_success": "پیام شما برای وکیل ارسال شد.",
+  "legal_case_message_lawyer_error": "ارسال پیام انجام نشد. لطفاً دوباره تلاش کنید."
 }

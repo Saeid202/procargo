@@ -6,6 +6,8 @@ import {
   ChatBubbleLeftRightIcon,
   ClockIcon,
   DocumentPlusIcon,
+  PaperAirplaneIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Loading from "../../components/ui/Loading";
 import {
@@ -13,6 +15,7 @@ import {
   CaseResponse,
   SupabaseService,
 } from "../../services/supabaseService";
+import { MessagingService } from "../../services/messagingService";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
@@ -56,6 +59,13 @@ const LegalIssuePage = () => {
   const [casesLoading, setCasesLoading] = useState(false);
   const [mainTab, setMainTab] = useState<"create" | "history">("create");
   const caseIdsRef = useRef<Set<string>>(new Set());
+  const [messageTarget, setMessageTarget] = useState<{
+    caseIdentifier: string;
+    lawyerId: string;
+    subject?: string;
+  } | null>(null);
+  const [messageDraft, setMessageDraft] = useState("");
+  const [messageSending, setMessageSending] = useState(false);
 
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
@@ -258,6 +268,72 @@ const LegalIssuePage = () => {
     });
     return map;
   }, [userCaseResponses]);
+
+  const handleMessageLawyer = useCallback(
+    (caseIdentifier: string, lawyerId?: string | null, subject?: string | null) => {
+      if (!lawyerId) {
+        toast.error(t("legal_case_message_lawyer_unavailable"));
+        return;
+      }
+
+      const prefill =
+        subject && subject.trim().length > 0
+          ? t("legal_case_message_lawyer_default", { subject })
+          : "";
+      setMessageDraft(prefill);
+      setMessageTarget({
+        caseIdentifier,
+        lawyerId,
+        subject: subject || undefined,
+      });
+    },
+    [t]
+  );
+
+  const closeMessageModal = useCallback(() => {
+    if (messageSending) {
+      return;
+    }
+    setMessageTarget(null);
+    setMessageDraft("");
+  }, [messageSending]);
+
+  const handleSendLawyerMessage = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!messageTarget) {
+      return;
+    }
+
+    const body = messageDraft.trim();
+    if (!body) {
+      toast.error(t("legal_case_message_lawyer_empty"));
+      return;
+    }
+
+    try {
+      setMessageSending(true);
+      const { data: thread, error: threadError } = await MessagingService.createOrGetDirectThread(
+        messageTarget.lawyerId
+      );
+      if (threadError || !thread) {
+        throw threadError || new Error("Failed to create conversation");
+      }
+
+      const { error: sendError } = await MessagingService.sendMessage(thread.id, body);
+      if (sendError) {
+        throw sendError;
+      }
+
+      toast.success(t("legal_case_message_lawyer_success"));
+      setMessageDraft("");
+      setMessageTarget(null);
+    } catch (error) {
+      console.error("Failed to send message to lawyer", error);
+      toast.error(t("legal_case_message_lawyer_error"));
+    } finally {
+      setMessageSending(false);
+    }
+  };
 
   useEffect(() => {
     caseIdsRef.current = new Set(
@@ -896,6 +972,12 @@ const LegalIssuePage = () => {
                   caseItem.plaintiff_type === "company"
                     ? t("legal_case_plaintiff_company")
                     : t("legal_case_plaintiff_individual");
+                const lawyerId =
+                  caseItem.assigned_to ??
+                  latestResponse?.lawyer_id ??
+                  olderResponses.find((response) => response.lawyer_id)?.lawyer_id ??
+                  null;
+                const caseIdentifier = caseItem.id || caseKey;
 
                 return (
                   <article
@@ -920,20 +1002,41 @@ const LegalIssuePage = () => {
                             </p>
                           )}
                         </div>
-                        <span
-                          className={cn(
-                            "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold",
-                            statusBadgeClass(caseItem.status)
-                          )}
-                        >
+                        <div className="flex flex-wrap items-center justify-end gap-3">
                           <span
                             className={cn(
-                              "h-2.5 w-2.5 rounded-full",
-                              statusAccentDot(caseItem.status)
+                              "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold",
+                              statusBadgeClass(caseItem.status)
                             )}
-                          />
-                          {statusLabel}
-                        </span>
+                          >
+                            <span
+                              className={cn(
+                                "h-2.5 w-2.5 rounded-full",
+                                statusAccentDot(caseItem.status)
+                              )}
+                            />
+                            {statusLabel}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleMessageLawyer(caseIdentifier, lawyerId, subject)}
+                            disabled={!lawyerId}
+                            title={
+                              !lawyerId
+                                ? t("legal_case_message_lawyer_unavailable")
+                                : undefined
+                            }
+                            className={cn(
+                              "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold transition",
+                              lawyerId
+                                ? "bg-purple-600 text-white hover:bg-purple-700"
+                                : "cursor-not-allowed bg-gray-200 text-gray-500"
+                            )}
+                          >
+                            <PaperAirplaneIcon className="h-4 w-4" />
+                            {t("legal_case_message_lawyer")}
+                          </button>
+                        </div>
                       </div>
 
                       <dl className="mt-6 grid grid-cols-1 gap-4 text-sm text-gray-700 sm:grid-cols-2 lg:grid-cols-4">
@@ -1075,6 +1178,80 @@ const LegalIssuePage = () => {
           )}
         </div>
       </section>
+      {messageTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          onClick={closeMessageModal}
+        >
+          <div
+            className="w-full max-w-lg rounded-2xl bg-white shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between border-b border-gray-100 px-6 py-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {t("legal_case_message_lawyer_title")}
+                </h3>
+                {messageTarget.subject && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    {t("legal_case_message_lawyer_about_case", {
+                      subject: messageTarget.subject,
+                    })}
+                  </p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={closeMessageModal}
+                disabled={messageSending}
+                className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed"
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
+            <form onSubmit={handleSendLawyerMessage} className="space-y-4 px-6 py-5">
+              <p className="text-sm text-gray-600">
+                {t("legal_case_message_lawyer_instruction")}
+              </p>
+              <textarea
+                value={messageDraft}
+                onChange={(event) => setMessageDraft(event.target.value)}
+                rows={6}
+                className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:cursor-not-allowed disabled:bg-gray-100"
+                placeholder={t("legal_case_message_lawyer_placeholder")}
+                disabled={messageSending}
+              />
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={closeMessageModal}
+                  disabled={messageSending}
+                  className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed"
+                >
+                  {t("legal_case_message_lawyer_cancel")}
+                </button>
+                <button
+                  type="submit"
+                  disabled={messageSending}
+                  className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:bg-purple-400"
+                >
+                  {messageSending ? (
+                    <span className="inline-flex items-center gap-2">
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-b-transparent" />
+                      {t("legal_case_message_lawyer_send")}
+                    </span>
+                  ) : (
+                    <>
+                      <PaperAirplaneIcon className="h-4 w-4" />
+                      {t("legal_case_message_lawyer_send")}
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
