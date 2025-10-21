@@ -17,7 +17,7 @@ import {
 } from "../services/currencyTransferService";
 import { RolesEnum } from "../abstractions/enums/roles.enum";
 import { useTranslation } from "react-i18next";
-import { CaseData, SupabaseService } from "../services/supabaseService";
+import { CaseData, CaseResponse, SupabaseService } from "../services/supabaseService";
 
 export type NotificationType = "message" | "export" | "currency" | "order" | "case";
 
@@ -62,7 +62,7 @@ const getStorageKey = (userId: string) => `${STORAGE_PREFIX}:${userId}`;
 
 interface PersistedState {
   readMap: Record<string, string>;
-  lastSeen: Partial<Record<NotificationType, string>>;
+  lastSeen: Partial<Record<string, string>>;
 }
 
 const defaultPersistedState: PersistedState = {
@@ -139,6 +139,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [threads, setThreads] = useState<DirectMessageThread[]>([]);
   const [cases, setCases] = useState<CaseData[]>([]);
+  const [caseResponses, setCaseResponses] = useState<CaseResponse[]>([]);
   const [orders, setOrders] = useState<AgentOrder[]>([]);
   const [exportRequests, setExportRequests] = useState<ExportRequest[]>([]);
   const [currencyTransfers, setCurrencyTransfers] = useState<
@@ -148,6 +149,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const isAgent = user?.role === RolesEnum.AGENT;
   const isLawyer = user?.role === RolesEnum.LAWYER;
+  const isUser = user?.role === RolesEnum.USER;
+  const caseIdsRef = useRef<Set<string>>(new Set());
 
   const syncPersistedReadState = useCallback(
     (items: AppNotification[]) => {
@@ -273,11 +276,30 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
       });
   }, [i18n.language, isAgent, orders, stateRef, t]);
 
-  const computeCaseNotifications = useCallback(() => {
+  const formatCaseStatus = useCallback(
+    (status?: string | null) => {
+      if (!status) {
+        return "";
+      }
+      const key = `case_status_${status.toLowerCase()}`;
+      const translated = t(key as any);
+      if (translated && translated !== key) {
+        return translated;
+      }
+      return status
+        .toLowerCase()
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    },
+    [t]
+  );
+
+  const computeLawyerCaseNotifications = useCallback(() => {
     if (!isLawyer) {
       return [] as AppNotification[];
     }
-    const lastSeen = parseDate(stateRef.current.lastSeen["case"]);
+    const lastSeen = parseDate(stateRef.current.lastSeen["case:lawyer"]);
 
     return cases
       .filter((caseItem) => parseDate(caseItem.created_at) > lastSeen)
@@ -316,10 +338,103 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
           metadata: {
             caseId: caseItem.id,
             status: caseItem.status,
+            notificationCategory: "case:lawyer",
           },
         };
       });
   }, [cases, isLawyer, stateRef, t]);
+
+  const computeUserCaseNotifications = useCallback(() => {
+    if (!isUser) {
+      return [] as AppNotification[];
+    }
+
+    const statusLastSeen = parseDate(stateRef.current.lastSeen["case:status"]);
+    const responseLastSeen = parseDate(stateRef.current.lastSeen["case:response"]);
+
+    const caseMap = new Map(
+      cases
+        .filter((item): item is CaseData & { id: string } => Boolean(item.id))
+        .map((item) => [item.id as string, item])
+    );
+
+    const statusNotifications = cases
+      .filter((caseItem): caseItem is CaseData & { id: string } => Boolean(caseItem.id))
+      .filter((caseItem) => {
+        const updatedTime = parseDate(caseItem.updated_at || caseItem.created_at);
+        return updatedTime > statusLastSeen && updatedTime > parseDate(caseItem.created_at);
+      })
+      .map((caseItem) => {
+        const statusLabel = formatCaseStatus(caseItem.status);
+        const subject = caseItem.subject?.trim()
+          ? caseItem.subject
+          : t("notifications_case_unknown_subject");
+
+        return {
+          id: `case-status-${caseItem.id}-${caseItem.status}`,
+          type: "case" as const,
+          title: t("notifications_case_status_title", { subject }),
+          description: statusLabel
+            ? t("notifications_case_status_update", { status: statusLabel })
+            : t("notifications_case_status_update_generic"),
+          createdAt: caseItem.updated_at || new Date().toISOString(),
+          read: false,
+          metadata: {
+            caseId: caseItem.id,
+            status: caseItem.status,
+            notificationCategory: "case:status",
+          },
+        };
+      });
+
+    const responseNotifications = caseResponses
+      .filter((response) => {
+        const createdTime = parseDate(response.created_at);
+        return createdTime > responseLastSeen && caseMap.has(response.case_id);
+      })
+      .map((response) => {
+        const caseItem = caseMap.get(response.case_id);
+        const subject = caseItem?.subject?.trim()
+          ? caseItem.subject
+          : t("notifications_case_unknown_subject");
+        const title = t("notifications_case_response_title", { subject });
+        const price =
+          typeof response.price === "number"
+            ? t("notifications_case_response_price", {
+                price: new Intl.NumberFormat(i18n.language, {
+                  maximumFractionDigits: 2,
+                }).format(response.price || 0),
+              })
+            : null;
+        const delivery = response.delivery_date
+          ? t("notifications_case_response_delivery", {
+              deliveryDate: new Date(response.delivery_date).toLocaleDateString(i18n.language),
+            })
+          : null;
+
+        const detailParts = [price, delivery].filter(
+          (part): part is string => Boolean(part)
+        );
+        const preview = response.response
+          ? response.response.slice(0, 140)
+          : t("notifications_case_response_generic");
+
+        return {
+          id: `case-response-${response.id}`,
+          type: "case" as const,
+          title,
+          description: [...detailParts, preview].filter(Boolean).join(" • "),
+          createdAt: response.created_at || new Date().toISOString(),
+          read: false,
+          metadata: {
+            caseId: response.case_id,
+            notificationCategory: "case:response",
+          },
+        };
+      });
+
+    return [...statusNotifications, ...responseNotifications];
+  }, [caseResponses, cases, formatCaseStatus, i18n.language, isUser, stateRef, t]);
 
   const computeExportNotifications = useCallback(() => {
     if (!isAgent) {
@@ -379,7 +494,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     const next = [
       ...computeMessageNotifications(),
       ...computeOrderNotifications(),
-      ...computeCaseNotifications(),
+      ...computeLawyerCaseNotifications(),
+      ...computeUserCaseNotifications(),
       ...computeExportNotifications(),
       ...computeCurrencyNotifications(),
     ];
@@ -396,7 +512,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [
     computeCurrencyNotifications,
     computeExportNotifications,
-    computeCaseNotifications,
+    computeLawyerCaseNotifications,
+    computeUserCaseNotifications,
     computeOrderNotifications,
     computeMessageNotifications,
     syncPersistedReadState,
@@ -406,6 +523,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!userId) {
       setNotifications([]);
       setCases([]);
+      setCaseResponses([]);
       setOrders([]);
       setExportRequests([]);
       setCurrencyTransfers([]);
@@ -426,6 +544,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
           : Promise.resolve({ orders: [] as AgentOrder[], error: null }),
         isLawyer
           ? SupabaseService.getCases()
+          : isUser
+          ? SupabaseService.getCasesByUser(userId)
           : Promise.resolve({ cases: [] as CaseData[], error: null }),
       ]);
 
@@ -481,19 +601,62 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         console.error("Failed to load case notifications", casesRes.error);
       }
       if ("cases" in casesRes) {
-        setCases((casesRes.cases as CaseData[]) || []);
-        if (isLawyer && !stateRef.current.lastSeen["case"] && casesRes.cases) {
-          const latest = (casesRes.cases as CaseData[])
+        const caseList = ((casesRes.cases as CaseData[]) || []).sort(
+          (a, b) => parseDate(b.updated_at || b.created_at) - parseDate(a.updated_at || a.created_at)
+        );
+        setCases(caseList);
+
+        if (isLawyer && !stateRef.current.lastSeen["case:lawyer"] && caseList.length > 0) {
+          const latest = caseList
             .map((item) => parseDate(item.created_at))
             .reduce((max, value) => (value > max ? value : max), 0);
           if (latest > 0) {
-            stateRef.current.lastSeen["case"] = new Date(latest).toISOString();
+            stateRef.current.lastSeen["case:lawyer"] = new Date(latest).toISOString();
           } else {
-            stateRef.current.lastSeen["case"] = new Date().toISOString();
+            stateRef.current.lastSeen["case:lawyer"] = new Date().toISOString();
           }
           persistChanged = true;
         }
+
+        if (isUser) {
+          if (!stateRef.current.lastSeen["case:status"] && caseList.length > 0) {
+            const latestUpdate = caseList
+              .map((item) => parseDate(item.updated_at || item.created_at))
+              .reduce((max, value) => (value > max ? value : max), 0);
+            stateRef.current.lastSeen["case:status"] =
+              latestUpdate > 0 ? new Date(latestUpdate).toISOString() : new Date().toISOString();
+            persistChanged = true;
+          }
+
+          const caseIds = caseList
+            .map((item) => item.id)
+            .filter((id): id is string => Boolean(id));
+          if (caseIds.length > 0) {
+            const responsesRes = await SupabaseService.getCaseResponsesByCaseIds(caseIds);
+            if (responsesRes.error) {
+              console.error("Failed to load case responses", responsesRes.error);
+            }
+            if (responsesRes.responses) {
+              setCaseResponses(responsesRes.responses);
+              if (!stateRef.current.lastSeen["case:response"] && responsesRes.responses.length > 0) {
+                const latestResponse = responsesRes.responses
+                  .map((item) => parseDate(item.created_at))
+                  .reduce((max, value) => (value > max ? value : max), 0);
+                stateRef.current.lastSeen["case:response"] =
+                  latestResponse > 0
+                    ? new Date(latestResponse).toISOString()
+                    : new Date().toISOString();
+                persistChanged = true;
+              }
+            }
+          } else {
+            setCaseResponses([]);
+          }
+        } else {
+          setCaseResponses([]);
+        }
       }
+
       if (persistChanged) {
         savePersisted();
       }
@@ -502,7 +665,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [isAgent, savePersisted, stateRef, userId]);
+  }, [isAgent, isLawyer, isUser, savePersisted, stateRef, userId]);
 
   useEffect(() => {
     loadPersisted();
@@ -515,11 +678,19 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [loadPersisted, refresh, userId]);
 
   useEffect(() => {
+    caseIdsRef.current = new Set(
+      cases
+        .map((item) => item.id)
+        .filter((id): id is string => Boolean(id))
+    );
+  }, [cases]);
+
+  useEffect(() => {
     if (!userId) {
       return;
     }
     rebuildNotifications();
-  }, [cases, currencyTransfers, exportRequests, orders, rebuildNotifications, threads, userId]);
+  }, [caseResponses, cases, currencyTransfers, exportRequests, orders, rebuildNotifications, threads, userId]);
 
   useEffect(() => {
     if (!userId) {
@@ -640,7 +811,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       );
     }
-    if (isLawyer) {
+    if (isLawyer || isUser) {
       channel.on(
         "postgres_changes",
         {
@@ -650,17 +821,84 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         },
         (payload) => {
           const caseRecord = payload.new as CaseData | null;
+          const oldRecord = payload.old as CaseData | null;
+          if (payload.eventType === "DELETE" && oldRecord?.id) {
+            setCases((prev) => prev.filter((item) => item.id !== oldRecord.id));
+            return;
+          }
           if (!caseRecord) {
             return;
           }
+          if (isUser && caseRecord.user_id !== userId) {
+            return;
+          }
+          const enrichedRecord: CaseData = {
+            ...caseRecord,
+            updated_at: caseRecord.updated_at || payload.commit_timestamp || caseRecord.updated_at,
+          };
           setCases((prev) => {
-            const exists = prev.find((item) => item.id === caseRecord.id);
+            const exists = prev.find((item) => item.id === enrichedRecord.id);
             if (exists) {
               return prev
-                .map((item) => (item.id === caseRecord.id ? { ...item, ...caseRecord } : item))
+                .map((item) =>
+                  item.id === enrichedRecord.id ? { ...item, ...enrichedRecord } : item
+                )
+                .sort(
+                  (a, b) =>
+                    parseDate(b.updated_at || b.created_at) -
+                    parseDate(a.updated_at || a.created_at)
+                );
+            }
+            return [enrichedRecord, ...prev].sort(
+              (a, b) =>
+                parseDate(b.updated_at || b.created_at) -
+                parseDate(a.updated_at || a.created_at)
+            );
+          });
+        }
+      );
+    }
+    if (isUser) {
+      channel.on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "case_response",
+        },
+        (payload) => {
+          if (payload.eventType === "DELETE") {
+            const oldResponse = payload.old as CaseResponse | null;
+            if (!oldResponse?.id) {
+              return;
+            }
+            setCaseResponses((prev) =>
+              prev.filter((item) => item.id !== oldResponse.id)
+            );
+            return;
+          }
+
+          const response = payload.new as CaseResponse | null;
+          if (!response) {
+            return;
+          }
+          if (!caseIdsRef.current.has(response.case_id)) {
+            return;
+          }
+          const enrichedResponse: CaseResponse = {
+            ...response,
+            created_at: response.created_at || payload.commit_timestamp || response.created_at,
+          };
+          setCaseResponses((prev) => {
+            const exists = prev.find((item) => item.id === enrichedResponse.id);
+            if (exists) {
+              return prev
+                .map((item) =>
+                  item.id === enrichedResponse.id ? { ...item, ...enrichedResponse } : item
+                )
                 .sort((a, b) => parseDate(b.created_at) - parseDate(a.created_at));
             }
-            return [caseRecord, ...prev].sort(
+            return [enrichedResponse, ...prev].sort(
               (a, b) => parseDate(b.created_at) - parseDate(a.created_at)
             );
           });
@@ -674,7 +912,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
       supabase.removeChannel(channel);
       unsubscribeThreads();
     };
-  }, [isAgent, userId]);
+  }, [isAgent, isLawyer, isUser, userId]);
 
   const markAsRead = useCallback(
     (id: string) => {
@@ -713,7 +951,14 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         notification.type === "order" ||
         notification.type === "case"
       ) {
-        stateRef.current.lastSeen[notification.type] = nowIso;
+        if (
+          notification.type === "case" &&
+          typeof notification.metadata?.notificationCategory === "string"
+        ) {
+          stateRef.current.lastSeen[notification.metadata.notificationCategory] = nowIso;
+        } else {
+          stateRef.current.lastSeen[notification.type] = nowIso;
+        }
       }
     });
 

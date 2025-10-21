@@ -37,5 +37,13 @@
   "notifications_case_against": "علیه {{name}}",
   "notifications_case_status": "وضعیت {{status}}",
   "notifications_case_unknown_defendant": "طرف مقابل نامشخص",
-  "notifications_case_fallback": "پرونده جدید برای بررسی شما آماده است"
+  "notifications_case_fallback": "پرونده جدید برای بررسی شما آماده است",
+  "notifications_case_unknown_subject": "پرونده حقوقی",
+  "notifications_case_status_title": "وضعیت پرونده {{subject}} به‌روزرسانی شد",
+  "notifications_case_status_update": "وضعیت جدید: {{status}}",
+  "notifications_case_status_update_generic": "وضعیت پرونده شما تغییر کرد",
+  "notifications_case_response_title": "پیشنهاد جدید وکیل برای {{subject}}",
+  "notifications_case_response_generic": "پاسخ وکیل آماده مشاهده است",
+  "notifications_case_response_price": "پیشنهاد {{price}}",
+  "notifications_case_response_delivery": "زمان تحویل {{deliveryDate}}"
 }

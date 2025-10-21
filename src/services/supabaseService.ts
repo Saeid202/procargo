@@ -21,7 +21,7 @@ export interface AuthResponse {
 }
 
 export interface CaseData {
-  id?:string
+  id?: string;
   user_id: string;
   assigned_to: string | null;
   plaintiff_type: string;
@@ -38,6 +38,7 @@ export interface CaseData {
     | "REJECTED"
     | "COMPLETED";
   created_at?: string;
+  updated_at?: string;
   case_documents?: CaseDocument[];
 }
 
@@ -47,6 +48,16 @@ export interface CaseDocument {
   file_url?: string;
   file_name?: string;
   file_type?: string;
+}
+
+export interface CaseResponse {
+  id: string;
+  case_id: string;
+  lawyer_id: string;
+  response: string;
+  price: number | null;
+  delivery_date: string | null;
+  created_at: string | null;
 }
 export class SupabaseService {
   // Sign up with email and password, send verification link with redirect
@@ -646,6 +657,48 @@ export class SupabaseService {
       return { cases: data, error: null };
     } catch (error: any) {
       return { cases: null, error: error.message || "Failed to get cases" };
+    }
+  }
+
+  static async getCasesByUser(userId: string) {
+    try {
+      const { data, error } = await supabase
+        .from("cases")
+        .select("*, case_documents(*)")
+        .eq("user_id", userId)
+        .order("updated_at", { ascending: false });
+      if (error) {
+        return { cases: null, error: error.message };
+      }
+      return { cases: data, error: null };
+    } catch (error: any) {
+      return {
+        cases: null,
+        error: error.message || "Failed to get user cases",
+      };
+    }
+  }
+
+  static async getCaseResponsesByCaseIds(caseIds: string[]) {
+    if (!caseIds.length) {
+      return { responses: [] as CaseResponse[], error: null };
+    }
+    try {
+      const { data, error } = await supabase
+        .from("case_response")
+        .select("*")
+        .in("case_id", caseIds)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        return { responses: null, error: error.message };
+      }
+      return { responses: data as CaseResponse[], error: null };
+    } catch (error: any) {
+      return {
+        responses: null,
+        error: error.message || "Failed to get case responses",
+      };
     }
   }
   static async updateCaseStatus(

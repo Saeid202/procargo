@@ -37,5 +37,13 @@
   "notifications_case_against": "Against {{name}}",
   "notifications_case_status": "Status {{status}}",
   "notifications_case_unknown_defendant": "Unknown defendant",
-  "notifications_case_fallback": "A new legal case needs your review"
+  "notifications_case_fallback": "A new legal case needs your review",
+  "notifications_case_unknown_subject": "Legal case",
+  "notifications_case_status_title": "Case {{subject}} status updated",
+  "notifications_case_status_update": "New status: {{status}}",
+  "notifications_case_status_update_generic": "Your case status changed",
+  "notifications_case_response_title": "New lawyer proposal for {{subject}}",
+  "notifications_case_response_generic": "A lawyer response is now available",
+  "notifications_case_response_price": "Offer {{price}}",
+  "notifications_case_response_delivery": "Delivery {{deliveryDate}}"
 }

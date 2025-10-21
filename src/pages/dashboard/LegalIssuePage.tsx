@@ -1,12 +1,22 @@
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { cn } from "../../utils/cn";
-import { MinusIcon } from "@heroicons/react/24/outline";
+import {
+  MinusIcon,
+  ChatBubbleLeftRightIcon,
+  ClockIcon,
+  DocumentPlusIcon,
+} from "@heroicons/react/24/outline";
 import Loading from "../../components/ui/Loading";
-import { SupabaseService } from "../../services/supabaseService";
+import {
+  CaseData,
+  CaseResponse,
+  SupabaseService,
+} from "../../services/supabaseService";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
+import { supabase } from "../../lib/supabase";
 
 export interface DocumentFiles {
   contract: File[];
@@ -41,9 +51,14 @@ const LegalIssuePage = () => {
     shipping: [new File([], "")],
     other: [new File([], "")],
   });
+  const [userCases, setUserCases] = useState<CaseData[]>([]);
+  const [userCaseResponses, setUserCaseResponses] = useState<CaseResponse[]>([]);
+  const [casesLoading, setCasesLoading] = useState(false);
+  const [mainTab, setMainTab] = useState<"create" | "history">("create");
+  const caseIdsRef = useRef<Set<string>>(new Set());
 
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [errors, setErrors] = useState<{
     headquarter?: string;
@@ -51,6 +66,97 @@ const LegalIssuePage = () => {
     subject?: string;
     description?: string;
   }>({});
+
+  const parseDate = (value?: string | null) => (value ? new Date(value).getTime() : 0);
+
+  const formatCaseStatus = useCallback(
+    (status?: string | null) => {
+      if (!status) {
+        return "";
+      }
+      const key = `case_status_${status.toLowerCase()}`;
+      const translated = t(key as any);
+      if (translated && translated !== key) {
+        return translated;
+      }
+      return status
+        .toLowerCase()
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    },
+    [t]
+  );
+
+  const formatDate = useCallback(
+    (value?: string | null) => {
+      if (!value) {
+        return "-";
+      }
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        return "-";
+      }
+      return date.toLocaleDateString(i18n.language, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    },
+    [i18n.language]
+  );
+
+  const formatPrice = useCallback(
+    (value: number | null | undefined) => {
+      if (typeof value !== "number") {
+        return "";
+      }
+      return new Intl.NumberFormat(i18n.language, {
+        maximumFractionDigits: 2,
+      }).format(value);
+    },
+    [i18n.language]
+  );
+
+  const statusBadgeClass = useCallback((status?: string | null) => {
+    switch (status) {
+      case "SUBMITTED":
+        return "bg-yellow-100 text-yellow-800";
+      case "IN_REVIEW":
+        return "bg-blue-100 text-blue-800";
+      case "NEED_MORE_INFO":
+        return "bg-orange-100 text-orange-800";
+      case "RESOLVED":
+      case "COMPLETED":
+        return "bg-emerald-100 text-emerald-700";
+      case "CLOSED":
+        return "bg-gray-200 text-gray-700";
+      case "REJECTED":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  }, []);
+
+  const statusAccentDot = useCallback((status?: string | null) => {
+    switch (status) {
+      case "SUBMITTED":
+        return "bg-yellow-500";
+      case "IN_REVIEW":
+        return "bg-blue-500";
+      case "NEED_MORE_INFO":
+        return "bg-orange-500";
+      case "RESOLVED":
+      case "COMPLETED":
+        return "bg-emerald-500";
+      case "CLOSED":
+        return "bg-gray-500";
+      case "REJECTED":
+        return "bg-red-500";
+      default:
+        return "bg-gray-400";
+    }
+  }, []);
 
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
   const allowedTypes = [
@@ -86,6 +192,130 @@ const LegalIssuePage = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  const loadUserCases = useCallback(async () => {
+    if (!user) {
+      return;
+    }
+    try {
+      setCasesLoading(true);
+      const { cases, error } = await SupabaseService.getCasesByUser(user.id);
+      if (error) {
+        console.error("Failed to load user cases", error);
+        setUserCases([]);
+        setUserCaseResponses([]);
+        return;
+      }
+
+      const caseList = (cases || []).sort(
+        (a, b) => parseDate(b.updated_at || b.created_at) - parseDate(a.updated_at || a.created_at)
+      );
+      setUserCases(caseList);
+
+      const caseIds = caseList
+        .map((item) => item.id)
+        .filter((id): id is string => Boolean(id));
+
+      if (caseIds.length > 0) {
+        const { responses, error: responsesError } =
+          await SupabaseService.getCaseResponsesByCaseIds(caseIds);
+        if (responsesError) {
+          console.error("Failed to load case responses", responsesError);
+          setUserCaseResponses([]);
+        } else {
+          setUserCaseResponses(responses || []);
+        }
+      } else {
+        setUserCaseResponses([]);
+      }
+    } catch (err) {
+      console.error("Unexpected error loading user cases", err);
+    } finally {
+      setCasesLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+    loadUserCases();
+  }, [loadUserCases, user]);
+
+  const responsesByCase = useMemo(() => {
+    const map = new Map<string, CaseResponse[]>();
+    userCaseResponses.forEach((response) => {
+      if (!response.case_id) {
+        return;
+      }
+      if (!map.has(response.case_id)) {
+        map.set(response.case_id, []);
+      }
+      map.get(response.case_id)!.push(response);
+    });
+    map.forEach((list) => {
+      list.sort((a, b) => parseDate(b.created_at) - parseDate(a.created_at));
+    });
+    return map;
+  }, [userCaseResponses]);
+
+  useEffect(() => {
+    caseIdsRef.current = new Set(
+      userCases
+        .map((item) => item.id)
+        .filter((id): id is string => Boolean(id))
+    );
+  }, [userCases]);
+
+  useEffect(() => {
+    if (mainTab === "history") {
+      loadUserCases();
+    }
+  }, [loadUserCases, mainTab]);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    const channel = supabase
+      .channel(`user-cases-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "cases",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          loadUserCases();
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "case_response",
+        },
+        (payload) => {
+          const candidateCaseId =
+            ((payload.new as { case_id?: string } | null)?.case_id) ||
+            ((payload.old as { case_id?: string } | null)?.case_id);
+
+          if (candidateCaseId && caseIdsRef.current.has(candidateCaseId)) {
+            loadUserCases();
+          }
+        }
+      );
+
+    channel.subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [loadUserCases, user]);
   const handlePlusDocument = (type: keyof DocumentFiles) => {
     setDocumnetFiles((prev) => ({
       ...prev,
@@ -203,6 +433,7 @@ const LegalIssuePage = () => {
 
       toast.dismiss(uploadToastId);
       toast.success(t("case_submitted_successfully"));
+      await loadUserCases();
     } catch (error) {
       console.log(error);
       toast.error(t("case_submission_failed"));
@@ -216,8 +447,47 @@ const LegalIssuePage = () => {
   }
 
   return (
-    <div className="-mt-4">
-      <form className="rounded-2xl shadow-xl overflow-hidden">
+    <div className="-mt-4 space-y-6">
+      <div
+        role="tablist"
+        className="flex flex-wrap gap-3 rounded-2xl border border-white/10 bg-white/60 p-3 shadow-sm backdrop-blur-sm"
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mainTab === "create"}
+          onClick={() => setMainTab("create")}
+          className={cn(
+            "px-4 py-2 text-sm font-semibold rounded-xl transition-all",
+            mainTab === "create"
+              ? "bg-gradient-to-r from-purple-600 to-purple-800 text-white shadow-lg"
+              : "bg-white text-gray-600 border border-white/40 hover:border-purple-200"
+          )}
+        >
+          {t("legal_case_tab_create")}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mainTab === "history"}
+          onClick={() => setMainTab("history")}
+          className={cn(
+            "px-4 py-2 text-sm font-semibold rounded-xl transition-all",
+            mainTab === "history"
+              ? "bg-gradient-to-r from-purple-600 to-purple-800 text-white shadow-lg"
+              : "bg-white text-gray-600 border border-white/40 hover:border-purple-200"
+          )}
+        >
+          {t("legal_case_tab_history")}
+        </button>
+      </div>
+
+      <form
+        className={cn(
+          "rounded-2xl shadow-xl overflow-hidden",
+          mainTab !== "create" && "hidden"
+        )}
+      >
         {/* Header */}
         <div className="p-6 border-b border-white/10">
           <h1 className="text-xl font-bold">{t("submit_your_legal_issue")}</h1>
@@ -567,6 +837,244 @@ const LegalIssuePage = () => {
           </div>
         </div>
       </form>
+      <section
+        className={cn(
+          "rounded-2xl border border-white/10 bg-white/60 backdrop-blur-sm p-6 shadow-xl",
+          mainTab !== "history" && "hidden"
+        )}
+      >
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">
+            {t("legal_cases_history")}
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            {t("legal_cases_history_description")}
+          </p>
+
+          {casesLoading ? (
+            <div className="mt-6 space-y-4">
+              {[0, 1].map((index) => (
+                <div
+                  key={index}
+                  className="overflow-hidden rounded-2xl border border-white/10 bg-white/60 p-6 shadow-sm"
+                >
+                  <div className="h-4 w-2/3 animate-pulse rounded bg-gray-200" />
+                  <div className="mt-3 h-3 w-1/2 animate-pulse rounded bg-gray-200" />
+                  <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {Array.from({ length: 4 }).map((_, metaIndex) => (
+                      <div key={metaIndex} className="space-y-2">
+                        <div className="h-2 w-16 animate-pulse rounded bg-gray-200" />
+                        <div className="h-3 w-24 animate-pulse rounded bg-gray-200" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-6 h-24 animate-pulse rounded-xl bg-gray-100" />
+                </div>
+              ))}
+            </div>
+          ) : userCases.length === 0 ? (
+            <div className="mt-6 flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-purple-200 bg-purple-50/70 px-6 py-12 text-center text-purple-700">
+              <DocumentPlusIcon className="h-10 w-10" />
+              <p className="text-sm font-semibold">{t("legal_case_no_cases")}</p>
+              <p className="text-xs text-purple-600">{t("legal_case_no_cases_hint")}</p>
+            </div>
+          ) : (
+            <div className="mt-6 space-y-6">
+              {userCases.map((caseItem, index) => {
+                const caseKey = caseItem.id ?? `case-${index}`;
+                const responses = responsesByCase.get(caseItem.id ?? "") || [];
+                const [latestResponse, ...olderResponses] = responses;
+                const subject = caseItem.subject?.trim()
+                  ? caseItem.subject
+                  : t("notifications_case_unknown_subject");
+                const statusLabel =
+                  formatCaseStatus(caseItem.status) || t("case_status_submitted");
+                const defendantLabel = caseItem.defendant_name?.trim()
+                  ? caseItem.defendant_name
+                  : t("notifications_case_unknown_defendant");
+                const plaintiffLabel =
+                  caseItem.plaintiff_type === "company"
+                    ? t("legal_case_plaintiff_company")
+                    : t("legal_case_plaintiff_individual");
+
+                return (
+                  <article
+                    key={caseKey}
+                    className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg"
+                  >
+                    <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-purple-500/0 via-purple-500 to-purple-500/0" />
+                    <div className="p-5 sm:p-6">
+                      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                        <div>
+                          <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-gray-400">
+                            <ClockIcon className="h-4 w-4 text-purple-500" />
+                            {t("legal_case_last_update")}:{" "}
+                            {formatDate(caseItem.updated_at || caseItem.created_at)}
+                          </div>
+                          <h3 className="mt-1 text-lg font-semibold text-gray-900">
+                            {subject}
+                          </h3>
+                          {caseItem.description && (
+                            <p className="mt-2 text-sm text-gray-600">
+                              {caseItem.description}
+                            </p>
+                          )}
+                        </div>
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold",
+                            statusBadgeClass(caseItem.status)
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "h-2.5 w-2.5 rounded-full",
+                              statusAccentDot(caseItem.status)
+                            )}
+                          />
+                          {statusLabel}
+                        </span>
+                      </div>
+
+                      <dl className="mt-6 grid grid-cols-1 gap-4 text-sm text-gray-700 sm:grid-cols-2 lg:grid-cols-4">
+                        <div>
+                          <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                            {t("created")}
+                          </dt>
+                          <dd className="mt-1">{formatDate(caseItem.created_at)}</dd>
+                        </div>
+                        <div>
+                          <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                            {t("legal_case_last_update")}
+                          </dt>
+                          <dd className="mt-1">
+                            {formatDate(caseItem.updated_at || caseItem.created_at)}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                            {t("defendant")}
+                          </dt>
+                          <dd className="mt-1">{defendantLabel}</dd>
+                        </div>
+                        <div>
+                          <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                            {t("plaintiff_type")}
+                          </dt>
+                          <dd className="mt-1">{plaintiffLabel}</dd>
+                        </div>
+                      </dl>
+
+                      <div className="mt-6 rounded-xl border border-purple-100 bg-gradient-to-br from-purple-50 via-white to-white p-5">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 text-purple-600">
+                              <ChatBubbleLeftRightIcon className="h-5 w-5" />
+                            </span>
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900">
+                                {t("legal_case_response")}
+                              </p>
+                              {latestResponse?.created_at && (
+                                <p className="text-xs text-gray-500">
+                                  {t("legal_case_response_at", {
+                                    date: formatDate(latestResponse.created_at),
+                                  })}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          {latestResponse && (
+                            <div className="flex flex-wrap gap-2 text-xs text-purple-700">
+                              {typeof latestResponse.price === "number" && (
+                                <span className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 font-medium">
+                                  {t("legal_case_price", {
+                                    price: formatPrice(latestResponse.price),
+                                  })}
+                                </span>
+                              )}
+                              {latestResponse.delivery_date && (
+                                <span className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 font-medium">
+                                  {t("legal_case_delivery_date", {
+                                    deliveryDate: formatDate(latestResponse.delivery_date),
+                                  })}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        {latestResponse ? (
+                          <p className="mt-4 whitespace-pre-line text-sm text-gray-700">
+                            {latestResponse.response}
+                          </p>
+                        ) : (
+                          <div className="mt-4 rounded-lg border border-dashed border-purple-200 bg-purple-50/60 px-4 py-3 text-sm text-purple-700">
+                            {t("legal_case_no_response")}
+                          </div>
+                        )}
+                      </div>
+
+                      {olderResponses.length > 0 && (
+                        <div className="mt-6">
+                          <p className="flex items-center gap-2 text-sm font-medium text-gray-900">
+                            <ClockIcon className="h-4 w-4 text-purple-500" />
+                            {t("legal_case_responses_timeline")}
+                          </p>
+                          <div className="relative mt-4 pl-5">
+                            <div className="absolute left-1.5 top-2 bottom-2 w-px bg-purple-100" />
+                            <div className="space-y-4">
+                              {olderResponses.map((response) => {
+                                const priceText =
+                                  typeof response.price === "number"
+                                    ? formatPrice(response.price)
+                                    : null;
+                                const deliveryText = response.delivery_date
+                                  ? formatDate(response.delivery_date)
+                                  : null;
+                                return (
+                                  <div key={response.id} className="relative pl-4">
+                                    <span className="absolute left-[-14px] top-3 h-3 w-3 rounded-full border-2 border-purple-400 bg-white" />
+                                    <div className="rounded-xl border border-purple-100 bg-white p-4 shadow-sm">
+                                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                        <p className="text-xs font-semibold uppercase tracking-wide text-purple-600">
+                                          {formatDate(response.created_at)}
+                                        </p>
+                                        <div className="flex flex-wrap gap-2 text-xs text-purple-600">
+                                          {priceText && (
+                                            <span className="inline-flex items-center rounded-full bg-purple-50 px-3 py-1 font-medium">
+                                              {t("legal_case_price", { price: priceText })}
+                                            </span>
+                                          )}
+                                          {deliveryText && (
+                                            <span className="inline-flex items-center rounded-full bg-purple-50 px-3 py-1 font-medium">
+                                              {t("legal_case_delivery_date", {
+                                                deliveryDate: deliveryText,
+                                              })}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                      {response.response && (
+                                        <p className="mt-3 whitespace-pre-line text-sm text-gray-600">
+                                          {response.response}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 };
