@@ -153,5 +153,11 @@
   "notifications_currency_response_preview": "کارشناس جزئیات بیشتری ارسال کرد",
   "company_information": "اطلاعات شرکت",
   "company_type": "نوع شرکت",
-  "company_introduction": "معرفی شرکت"
+  "company_introduction": "معرفی شرکت",
+  "no_conversations_found": "هیچ گفتگویی مطابق با جستجوی شما نبود.",
+  "search_conversations": "جستجوی گفتگوها...",
+  "messages_today": "امروز",
+  "messages_yesterday": "دیروز",
+  "unread": "جدید",
+  "messages_subtitle": "با آخرین گفتگوهای خود در جریان بمانید."
 }

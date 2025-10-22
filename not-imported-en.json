@@ -153,5 +153,11 @@
   "additional_info": "Additional Information",
   "company_information": "Company Information",
   "company_type": "Company Type",
-  "company_introduction": "Company Introduction"
+  "company_introduction": "Company Introduction",
+  "no_conversations_found": "No conversations match your search.",
+  "search_conversations": "Search conversations...",
+  "messages_today": "Today",
+  "messages_yesterday": "Yesterday",
+  "unread": "New",
+  "messages_subtitle": "Stay in sync with your latest conversations."
 }
