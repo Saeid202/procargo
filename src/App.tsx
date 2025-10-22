@@ -38,14 +38,6 @@ function App() {
               <Route path="/careers" element={<CareersPage />} />
               <Route path="/news" element={<NewsPage />} />
               <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
                 path="/dashboard/agent"
                 element={
                   <ProtectedRoute>
@@ -66,6 +58,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/*"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
                   </ProtectedRoute>
                 }
               />

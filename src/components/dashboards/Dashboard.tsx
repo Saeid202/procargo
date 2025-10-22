@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import DashboardLayout from "../layout/DashboardLayout";
 import OverviewPage from "../../pages/dashboard/OverviewPage";
 import OrdersPage from "../../pages/dashboard/OrdersPage";
@@ -25,14 +25,153 @@ import LegalServicesPage from "../../pages/dashboard/LegalServicesPage";
 import CurrencyTransferPage from "../../pages/dashboard/CurrencyTransferPage";
 import MessagesPage from "../../pages/dashboard/MessagesPage";
 import { useTranslation } from "react-i18next";
+import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+
+type DashboardRouteDefinition = {
+  id: string;
+  path: string;
+  fullPath: string;
+  element: React.ReactElement;
+};
+
+const DASHBOARD_BASE_PATH = "/dashboard";
+
+const DASHBOARD_ROUTES: DashboardRouteDefinition[] = [
+  {
+    id: "overview",
+    path: "overview",
+    fullPath: `${DASHBOARD_BASE_PATH}/overview`,
+    element: <OverviewPage />,
+  },
+  {
+    id: "orders",
+    path: "orders",
+    fullPath: `${DASHBOARD_BASE_PATH}/orders`,
+    element: <OrdersPage />,
+  },
+  {
+    id: "export",
+    path: "export",
+    fullPath: `${DASHBOARD_BASE_PATH}/export`,
+    element: <ExportPage />,
+  },
+  {
+    id: "shipments",
+    path: "shipments",
+    fullPath: `${DASHBOARD_BASE_PATH}/shipments`,
+    element: <ShipmentsPage />,
+  },
+  {
+    id: "compliance",
+    path: "compliance",
+    fullPath: `${DASHBOARD_BASE_PATH}/compliance`,
+    element: <CompliancePage />,
+  },
+  {
+    id: "legal",
+    path: "legal",
+    fullPath: `${DASHBOARD_BASE_PATH}/legal`,
+    element: <LegalAssistancePage />,
+  },
+  {
+    id: "legal-issue",
+    path: "legal-issue",
+    fullPath: `${DASHBOARD_BASE_PATH}/legal-issue`,
+    element: <LegalIssuePage />,
+  },
+  {
+    id: "legal-services",
+    path: "legal-services",
+    fullPath: `${DASHBOARD_BASE_PATH}/legal-services`,
+    element: <LegalServicesPage />,
+  },
+  {
+    id: "company-verification",
+    path: "company-verification",
+    fullPath: `${DASHBOARD_BASE_PATH}/company-verification`,
+    element: <CompanyVerificationPage />,
+  },
+  {
+    id: "currency-transfer",
+    path: "currency-transfer",
+    fullPath: `${DASHBOARD_BASE_PATH}/currency-transfer`,
+    element: <CurrencyTransferPage />,
+  },
+  {
+    id: "support",
+    path: "support",
+    fullPath: `${DASHBOARD_BASE_PATH}/support`,
+    element: <SupportPage />,
+  },
+  {
+    id: "messages",
+    path: "messages",
+    fullPath: `${DASHBOARD_BASE_PATH}/messages`,
+    element: <MessagesPage />,
+  },
+  {
+    id: "profile",
+    path: "profile",
+    fullPath: `${DASHBOARD_BASE_PATH}/profile`,
+    element: <SettingsPage />,
+  },
+  {
+    id: "settings",
+    path: "settings",
+    fullPath: `${DASHBOARD_BASE_PATH}/settings`,
+    element: <SettingsPage />,
+  },
+];
+
+const ROUTE_INDEX = DASHBOARD_ROUTES.reduce<Record<string, DashboardRouteDefinition>>(
+  (acc, route) => {
+    acc[route.id] = route;
+    return acc;
+  },
+  {}
+);
 
 const Dashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState("overview");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
   const { t, i18n } = useTranslation();
   const currentLanguage = i18n.language;
   const isPersian = currentLanguage === "fa" || currentLanguage === "fa-IR";
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const activeTab = useMemo(() => {
+    const normalizedPath =
+      location.pathname.replace(/\/+$/, "") || `${DASHBOARD_BASE_PATH}/overview`;
+
+    const matchedRoute = [...DASHBOARD_ROUTES]
+      .sort((a, b) => b.fullPath.length - a.fullPath.length)
+      .find((route) => {
+        if (route.fullPath === `${DASHBOARD_BASE_PATH}/overview`) {
+          return (
+            normalizedPath === route.fullPath ||
+            normalizedPath === DASHBOARD_BASE_PATH
+          );
+        }
+        return (
+          normalizedPath === route.fullPath ||
+          normalizedPath.startsWith(`${route.fullPath}/`)
+        );
+      });
+
+    return matchedRoute?.id ?? "overview";
+  }, [location.pathname]);
+
+  const handleTabChange = useCallback(
+    (tab: string) => {
+      const target = ROUTE_INDEX[tab];
+      if (!target) {
+        console.warn("No dashboard route registered for tab:", tab);
+        return;
+      }
+      navigate(target.fullPath, { replace: false });
+    },
+    [navigate]
+  );
 
   useEffect(() => {
     const handler = (event: Event) => {
@@ -41,7 +180,11 @@ const Dashboard: React.FC = () => {
       if (!tabId) {
         return;
       }
-      setActiveTab(tabId);
+      const target = ROUTE_INDEX[tabId];
+      if (!target) {
+        return;
+      }
+      navigate(target.fullPath, { replace: false });
     };
 
     window.addEventListener(
@@ -54,52 +197,11 @@ const Dashboard: React.FC = () => {
         handler as EventListener
       );
     };
-  }, []);
-
-  // Tab change handler
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-  };
+  }, [navigate]);
 
   // Sidebar collapse handler
   const handleToggleCollapse = () => {
     setSidebarCollapsed(!sidebarCollapsed);
-  };
-
-  // Render the appropriate page content based on active tab
-  const renderPageContent = () => {
-    switch (activeTab) {
-      case "overview":
-        return <OverviewPage />;
-      case "profile":
-        return <SettingsPage />;
-      case "orders":
-        return <OrdersPage />;
-      case "export":
-        return <ExportPage />;
-      case "shipments":
-        return <ShipmentsPage />;
-      case "compliance":
-        return <CompliancePage />;
-      case "legal":
-        return <LegalAssistancePage />;
-      case "legal-issue":
-        return <LegalIssuePage />;
-      case "company-verification":
-        return <CompanyVerificationPage />;
-      case "currency-transfer":
-        return <CurrencyTransferPage />;
-      case "legal-services":
-        return <LegalServicesPage />;
-      case "support":
-        return <SupportPage />;
-      case "messages":
-        return <MessagesPage />;
-      case "settings":
-        return <SettingsPage />;
-      default:
-        return <OverviewPage />;
-    }
   };
 
   // Base sidebar items for all languages
@@ -239,7 +341,17 @@ const Dashboard: React.FC = () => {
       onTabChange={handleTabChange}
       onToggleCollapse={handleToggleCollapse}
     >
-      {renderPageContent()}
+      <Routes>
+        <Route index element={<Navigate to="overview" replace />} />
+        {DASHBOARD_ROUTES.map((route) => (
+          <Route
+            key={route.id}
+            path={route.path}
+            element={route.element}
+          />
+        ))}
+        <Route path="*" element={<Navigate to="overview" replace />} />
+      </Routes>
     </DashboardLayout>
   );
 };
