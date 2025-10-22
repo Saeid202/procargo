@@ -150,5 +150,8 @@
   "notifications_currency_response_rate": "نرخ {{rate}}",
   "notifications_currency_response_fee": "کارمزد {{fee}}",
   "notifications_currency_response_delivery": "تسویه در {{date}}",
-  "notifications_currency_response_preview": "کارشناس جزئیات بیشتری ارسال کرد"
+  "notifications_currency_response_preview": "کارشناس جزئیات بیشتری ارسال کرد",
+  "company_information": "اطلاعات شرکت",
+  "company_type": "نوع شرکت",
+  "company_introduction": "معرفی شرکت"
 }

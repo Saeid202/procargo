@@ -69,14 +69,6 @@ const dispatchDashboardEvent = (tabId: string) => {
   );
 };
 
-const dispatchAgentOrdersEvent = (view: "orders" | "export" | "currency") => {
-  window.dispatchEvent(
-    new CustomEvent("procargo:agent-orders-view", {
-      detail: { view },
-    })
-  );
-};
-
 const NotificationBell: React.FC = () => {
   const {
     notifications,
@@ -122,21 +114,18 @@ const NotificationBell: React.FC = () => {
     }
 
     if (type === "export") {
-      dispatchDashboardEvent("agent-orders");
-      dispatchAgentOrdersEvent("export");
+      dispatchDashboardEvent("agent-exports");
       return;
     }
 
     if (type === "currency") {
-      dispatchDashboardEvent("agent-orders");
-      dispatchAgentOrdersEvent("currency");
+      dispatchDashboardEvent("agent-currency");
       return;
     }
 
     if (type === "order") {
       if (user?.role === RolesEnum.AGENT) {
         dispatchDashboardEvent("agent-orders");
-        dispatchAgentOrdersEvent("orders");
       } else {
         dispatchDashboardEvent("orders");
         window.dispatchEvent(

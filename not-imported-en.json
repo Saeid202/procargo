@@ -148,5 +148,10 @@
   "notifications_currency_response_rate": "Rate {{rate}}",
   "notifications_currency_response_fee": "Fee {{fee}}",
   "notifications_currency_response_delivery": "Settlement {{date}}",
-  "notifications_currency_response_preview": "An agent responded with more details"
+  "notifications_currency_response_preview": "An agent responded with more details",
+  "product_details": "Product Details",
+  "additional_info": "Additional Information",
+  "company_information": "Company Information",
+  "company_type": "Company Type",
+  "company_introduction": "Company Introduction"
 }

@@ -3,12 +3,16 @@ import DashboardLayout from '../layout/DashboardLayout';
 import {
   CalculatorIcon,
   ClipboardDocumentListIcon,
+  DocumentArrowUpIcon,
   HomeIcon,
   TruckIcon,
   ChatBubbleOvalLeftEllipsisIcon,
+  CurrencyDollarIcon,
 } from "@heroicons/react/24/outline";
 import AgentOverviewPage from '../../pages/agent-dashboard/AgentOverviewPage';
 import AgentOrdersPage from '../../pages/agent-dashboard/AgentOrdersPage';
+import AgentExportPage from '../../pages/agent-dashboard/AgentExportPage';
+import AgentCurrencyPage from '../../pages/agent-dashboard/AgentCurrencyPage';
 import AgentLogisticsPage from '../../pages/agent-dashboard/AgentLogisticsPage';
 import AgentSettingPage from '../../pages/agent-dashboard/AgentSettingPage';
 import MessagesPage from '../../pages/dashboard/MessagesPage';
@@ -56,6 +60,10 @@ const AgentDashboard: React.FC = () => {
         return <AgentOverviewPage />;
       case 'agent-orders':
         return <AgentOrdersPage />;
+      case 'agent-exports':
+        return <AgentExportPage />;
+      case 'agent-currency':
+        return <AgentCurrencyPage />;
       case 'agent-logistics':
         return <AgentLogisticsPage />;
       case 'agent-messages':
@@ -79,6 +87,18 @@ const AgentDashboard: React.FC = () => {
       name: t("orders"),
       icon: CalculatorIcon,
       color: "text-green-600",
+    },
+    {
+      id: "agent-exports",
+      name: t("export"),
+      icon: DocumentArrowUpIcon,
+      color: "text-blue-600",
+    },
+    {
+      id: "agent-currency",
+      name: t("currency_transfer"),
+      icon: CurrencyDollarIcon,
+      color: "text-amber-600",
     },
     {
       id: "agent-logistics",
