@@ -201,11 +201,12 @@ const LoginPage: React.FC = () => {
                 </label>
               </div>
               <div className="text-sm">
-                <a
+                <Link
+                  to={withLang("/forgot-password")}
                   className="text-cargo-600 hover:text-cargo-500 font-medium"
                 >
                   {t("login_forgot_password")}
-                </a>
+                </Link>
               </div>
             </div>
 

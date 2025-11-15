@@ -19,6 +19,7 @@ import "./lib/i18n";
 import NotFound from "./pages/not-found/NotFound";
 import { Toaster } from "react-hot-toast";
 import LawyerDashboard from "./components/dashboards/LawyerDashboard";
+import ForgotPasswordPage from "./components/authentication/ForgotPasswordPage";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
               <Route path="/" element={<LandingPage />} />
               <Route path="/signup" element={<SignUpPage />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />
