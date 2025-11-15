@@ -1,5 +1,12 @@
-import i18n from 'i18next';
+import i18n, { ResourceLanguage } from 'i18next';
 import { TranslationService } from '../../services/translationService';
+import enTranslations from '../../locales/en/translation.json';
+import faTranslations from '../../locales/fa/translation.json';
+
+const FALLBACK_TRANSLATIONS: Record<string, ResourceLanguage> = {
+  en: enTranslations as ResourceLanguage,
+  fa: faTranslations as ResourceLanguage
+};
 
 class DynamicTranslationLoader {
   private static instance: DynamicTranslationLoader;
@@ -48,20 +55,40 @@ class DynamicTranslationLoader {
       }
 
       if (translations && translations.length > 0) {
-        // Convert translations array to key-value object
-        const translationObject: Record<string, string> = {};
-        translations.forEach(translation => {
-          translationObject[translation.key] = translation.value;
-        });
-
-        // Add to i18n resources
-        i18n.addResourceBundle(language, 'translation', translationObject, true, true);
-        
+        this.addTranslationsToI18n(language, translations);
         console.log(`Loaded ${translations.length} translations for ${language}`);
+        return;
       }
+
+      this.loadFallbackTranslations(language);
     } catch (error) {
       console.error(`Error loading translations for ${language}:`, error);
+      this.loadFallbackTranslations(language);
     }
+  }
+
+  private addTranslationsToI18n(
+    language: string,
+    translations: Array<{ key: string; value: string }>
+  ): void {
+    const translationObject: ResourceLanguage = {};
+    translations.forEach(translation => {
+      translationObject[translation.key] = translation.value;
+    });
+
+    i18n.addResourceBundle(language, 'translation', translationObject, true, true);
+  }
+
+  private loadFallbackTranslations(language: string): void {
+    const fallback = FALLBACK_TRANSLATIONS[language];
+
+    if (!fallback) {
+      console.warn(`No translations available for ${language} and no fallback found.`);
+      return;
+    }
+
+    i18n.addResourceBundle(language, 'translation', fallback, true, true);
+    console.warn(`Loaded fallback translations for ${language}`);
   }
 
   async reloadLanguage(language: string): Promise<void> {

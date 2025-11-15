@@ -24,7 +24,7 @@ function App() {
   return (
     <AuthProvider>
       <NotificationProvider>
-        <Router basename="/dashboard">
+        <Router>
           <div className="App">
             <Navigation />
             <Routes>
